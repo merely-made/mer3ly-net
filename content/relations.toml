@@ -4,7 +4,7 @@ source = "genet"
 target = "netrender"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Genet Cargo manifests use git packages from mark-ik/netrender."
+evidence = "Genet Cargo manifests use git packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -13,7 +13,7 @@ source = "genet"
 target = "wgpu-scry"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Genet Cargo manifests use the scrying package from mark-ik/wgpu-scry."
+evidence = "Genet Cargo manifests use the scrying package from merely-made/wgpu-scry."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -40,7 +40,7 @@ source = "hocket"
 target = "netrender"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Hocket's root Cargo manifest uses rendering packages from mark-ik/netrender."
+evidence = "Hocket's root Cargo manifest uses rendering packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -85,7 +85,7 @@ source = "isometry"
 target = "netrender"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Isometry's root Cargo manifest uses rendering packages from mark-ik/netrender."
+evidence = "Isometry's root Cargo manifest uses rendering packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -103,7 +103,7 @@ source = "mere"
 target = "netrender"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Mere Cargo manifests use rendering packages from mark-ik/netrender."
+evidence = "Mere Cargo manifests use rendering packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -139,7 +139,7 @@ source = "turnstone"
 target = "netrender"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Turnstone's root Cargo manifest uses rendering packages from mark-ik/netrender."
+evidence = "Turnstone's root Cargo manifest uses rendering packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -175,7 +175,7 @@ source = "woodshed"
 target = "netrender"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Woodshed's root Cargo manifest uses rendering packages from mark-ik/netrender."
+evidence = "Woodshed's root Cargo manifest uses rendering packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -184,7 +184,7 @@ source = "wgpu-scry"
 target = "wgpu-graft"
 kind = "depends_on"
 provenance = "derived"
-evidence = "wgpu-scry's root Cargo manifest uses grafting from mark-ik/wgpu-graft."
+evidence = "wgpu-scry's root Cargo manifest uses grafting from merely-made/wgpu-graft."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -193,7 +193,7 @@ source = "wgpu-weld"
 target = "wgpu-graft"
 kind = "depends_on"
 provenance = "derived"
-evidence = "wgpu-weld's root Cargo manifest uses grafting from mark-ik/wgpu-graft."
+evidence = "wgpu-weld's root Cargo manifest uses grafting from merely-made/wgpu-graft."
 verified_on = "2026-07-29"
 
 [[relation]]

@@ -1,11 +1,11 @@
 {
   "schema": "mer3ly.repository-inventory/v1",
-  "generated_at_utc": "2026-07-29T20:05:24Z",
+  "generated_at_utc": "2026-07-29T21:42:48Z",
   "generated_by": "scripts/inventory-repositories.ps1",
   "authority_sha256": {
-    "content/repositories.toml": "1c406701ab004647a5a9a56b171553a9a88c869ddf11b046a0f5062dff574bb2",
-    "content/relations.toml": "00dc434566c8b5d407f11c9dd1f6d321e24525f2800660622a0987301de51ec1",
-    "ops/org-migration.toml": "f23da3e545b1d696be186d593bedaf565fcc1577e0839615369ddc8e39b0389d"
+    "content/repositories.toml": "81689aec7dbd691951d9c1aa177430427d6fac25bbbb0e06f45d1612b3b9e879",
+    "content/relations.toml": "5723d94e931336783b58cd3e38f38d5328a11b22531af95defab7cc48c111745",
+    "ops/org-migration.toml": "e52767ef41115d98605565fe05085edf46d46b8e5d42abde4035a80d287dee43"
   },
   "github_package_queries": {
     "owners": [
@@ -19,21 +19,10 @@
       "rubygems",
       "nuget"
     ],
-    "failures": [
-      "mark-ik/container",
-      "mark-ik/npm",
-      "mark-ik/maven",
-      "mark-ik/rubygems",
-      "mark-ik/nuget",
-      "merely-made/container",
-      "merely-made/npm",
-      "merely-made/maven",
-      "merely-made/rubygems",
-      "merely-made/nuget"
-    ],
+    "failures": [],
     "public_ui": {
-      "mark-ik": "none-publicly-listed",
-      "merely-made": "none-publicly-listed"
+      "merely-made": "none-publicly-listed",
+      "mark-ik": "none-publicly-listed"
     }
   },
   "repositories": [
@@ -55,7 +44,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -81,9 +70,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "92f6fd689193e4cb70add337f02d6bac4b86479a",
+      "default_branch_head": "f1e03d05ac4cf76b8fba08ea678886cd28ff4d8c",
       "license_detection": "none-detected",
-      "updated_at": "2026-07-29T06:39:03Z",
+      "updated_at": "2026-07-29T20:26:55Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": true,
@@ -94,7 +83,7 @@
         "https_enforced": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [
@@ -103,217 +92,229 @@
       "local": {
         "locator": "repos/mer3ly",
         "present": true,
-        "origin_slug": "merely-made/mer3ly.net",
+        "origin_slug": "merely-made/mer3ly-net",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "965fc2aa836e5b5b46b149170361b2758ecd1e12",
-        "dirty_entries": 5,
-        "old_owner_tracked_files": 6,
+        "head": "f1e03d05ac4cf76b8fba08ea678886cd28ff4d8c",
+        "dirty_entries": 12,
+        "old_owner_tracked_files": 13,
         "old_owner_cargo_manifests": 0
       }
     },
     {
       "id": "netrender",
-      "canonical_slug": "mark-ik/netrender",
+      "canonical_slug": "merely-made/netrender",
       "classification": "foundation",
       "batch": "foundation",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "4b403c47f703af7f114d4ed1e1468edf8b195cb7",
+      "default_branch_head": "f20c54627f2fe8bb059a006f83599badbce3ffd5",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-29T20:02:42Z",
+      "updated_at": "2026-07-29T20:49:11Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/netrender"
+      ],
       "local": {
         "locator": "repos/netrender",
         "present": true,
-        "origin_slug": "mark-ik/netrender",
+        "origin_slug": "merely-made/netrender",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "4b403c47f703af7f114d4ed1e1468edf8b195cb7",
+        "head": "f20c54627f2fe8bb059a006f83599badbce3ffd5",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 7,
-        "old_owner_cargo_manifests": 5
+        "old_owner_tracked_files": 2,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
       "id": "smolweb",
-      "canonical_slug": "mark-ik/smolweb",
+      "canonical_slug": "merely-made/smolweb",
       "classification": "foundation",
       "batch": "foundation",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "bcc70c75ca6a350240ebeb3b15c3ca6ec6dbc83c",
+      "default_branch_head": "95d110c3a76c6cd3f06c1c4c39f56ca3804d8273",
       "license_detection": "mit",
-      "updated_at": "2026-07-25T01:51:53Z",
+      "updated_at": "2026-07-29T20:48:52Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/smolweb"
+      ],
       "local": {
         "locator": "repos/smolweb",
         "present": true,
-        "origin_slug": "mark-ik/smolweb",
+        "origin_slug": "merely-made/smolweb",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "bcc70c75ca6a350240ebeb3b15c3ca6ec6dbc83c",
+        "head": "95d110c3a76c6cd3f06c1c4c39f56ca3804d8273",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 9,
-        "old_owner_cargo_manifests": 4
+        "old_owner_tracked_files": 5,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
       "id": "wavicle",
-      "canonical_slug": "mark-ik/wavicle",
+      "canonical_slug": "merely-made/wavicle",
       "classification": "foundation",
       "batch": "foundation",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "a5b5b7c12a9c75cc04c2c795c6ce627fa79450ce",
+      "default_branch_head": "37fea3cda8dbbe3830aafc80368775f633010e6b",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T20:03:23Z",
+      "updated_at": "2026-07-29T20:48:56Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/wavicle"
+      ],
       "local": {
         "locator": "repos/wavicle",
         "present": true,
-        "origin_slug": "mark-ik/wavicle",
+        "origin_slug": "merely-made/wavicle",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "a5b5b7c12a9c75cc04c2c795c6ce627fa79450ce",
+        "head": "37fea3cda8dbbe3830aafc80368775f633010e6b",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 1,
-        "old_owner_cargo_manifests": 1
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
       "id": "wgpu-graft",
-      "canonical_slug": "mark-ik/wgpu-graft",
+      "canonical_slug": "merely-made/wgpu-graft",
       "classification": "foundation",
       "batch": "foundation",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "941c921acfb5a6d05271414479fb072abc058ee3",
+      "default_branch_head": "020b800a269dcbd0dbe894c4b84542d44d207f28",
       "license_detection": "other",
-      "updated_at": "2026-07-25T14:51:34Z",
+      "updated_at": "2026-07-29T20:48:56Z",
       "actions_workflows": 4,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/wgpu-graft"
+      ],
       "local": {
         "locator": "repos/wgpu-graft",
         "present": true,
-        "origin_slug": "mark-ik/wgpu-graft",
+        "origin_slug": "merely-made/wgpu-graft",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "941c921acfb5a6d05271414479fb072abc058ee3",
+        "head": "020b800a269dcbd0dbe894c4b84542d44d207f28",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 4,
-        "old_owner_cargo_manifests": 3
+        "old_owner_tracked_files": 1,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
       "id": "wgpu-scry",
-      "canonical_slug": "mark-ik/wgpu-scry",
+      "canonical_slug": "merely-made/wgpu-scry",
       "classification": "foundation",
       "batch": "foundation",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "d8fc221a47e172ebbd1dcb0a87fd37d2e0acce06",
+      "default_branch_head": "0af3b54a0d3df3686a28ed99b49f654e4720522c",
       "license_detection": "other",
-      "updated_at": "2026-07-25T00:50:11Z",
+      "updated_at": "2026-07-29T20:51:39Z",
       "actions_workflows": 2,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/wgpu-scry"
+      ],
       "local": {
         "locator": "repos/wgpu-scry",
         "present": true,
-        "origin_slug": "mark-ik/wgpu-scry",
+        "origin_slug": "merely-made/wgpu-scry",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "d8fc221a47e172ebbd1dcb0a87fd37d2e0acce06",
+        "head": "0af3b54a0d3df3686a28ed99b49f654e4720522c",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 10,
-        "old_owner_cargo_manifests": 2
+        "old_owner_tracked_files": 4,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
       "id": "wgpu-weld",
-      "canonical_slug": "mark-ik/wgpu-weld",
+      "canonical_slug": "merely-made/wgpu-weld",
       "classification": "foundation",
       "batch": "foundation",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "5e46c0c8a3e3a1599e9e4e3a3725dd4f53b50f15",
+      "default_branch_head": "481911ed4000cdddcfe193d8ead412bb60fb71b2",
       "license_detection": "other",
-      "updated_at": "2026-07-25T00:50:11Z",
+      "updated_at": "2026-07-29T20:51:41Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/wgpu-weld"
+      ],
       "local": {
         "locator": "repos/wgpu-weld",
         "present": true,
-        "origin_slug": "mark-ik/wgpu-weld",
+        "origin_slug": "merely-made/wgpu-weld",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "5e46c0c8a3e3a1599e9e4e3a3725dd4f53b50f15",
+        "head": "481911ed4000cdddcfe193d8ead412bb60fb71b2",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 4,
-        "old_owner_cargo_manifests": 2
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
@@ -326,15 +327,15 @@
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "205cf6b3a13728cca689c58843cc070fbac24bbf",
+      "default_branch_head": "4ca5b45f0aa79b9ae6d1e2f4592cdea64a89f58e",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-29T20:02:54Z",
+      "updated_at": "2026-07-29T21:13:33Z",
       "actions_workflows": 3,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [
@@ -346,10 +347,10 @@
         "origin_slug": "mark-ik/genet",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "205cf6b3a13728cca689c58843cc070fbac24bbf",
+        "head": "4ca5b45f0aa79b9ae6d1e2f4592cdea64a89f58e",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 93,
-        "old_owner_cargo_manifests": 50
+        "old_owner_tracked_files": 84,
+        "old_owner_cargo_manifests": 47
       }
     },
     {
@@ -362,15 +363,15 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "b58f7fb4758bea1227248fa94273db51d8a74ae6",
+      "default_branch_head": "48e277d42ac90baf2f98281f6cbc879eba099bf4",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T20:02:35Z",
+      "updated_at": "2026-07-29T21:13:25Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -380,10 +381,10 @@
         "origin_slug": "mark-ik/mere",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "b58f7fb4758bea1227248fa94273db51d8a74ae6",
+        "head": "48e277d42ac90baf2f98281f6cbc879eba099bf4",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 73,
-        "old_owner_cargo_manifests": 23
+        "old_owner_tracked_files": 71,
+        "old_owner_cargo_manifests": 21
       }
     },
     {
@@ -404,7 +405,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -430,15 +431,15 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "ad0e95faac65adcc156f762ae41284b1f4a418e3",
+      "default_branch_head": "00600c4d798ef679c4422a35ed9ecff734c8cef0",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T20:02:41Z",
+      "updated_at": "2026-07-29T21:34:24Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -448,7 +449,7 @@
         "origin_slug": "mark-ik/turnstone",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "ad0e95faac65adcc156f762ae41284b1f4a418e3",
+        "head": "00600c4d798ef679c4422a35ed9ecff734c8cef0",
         "dirty_entries": 0,
         "old_owner_tracked_files": 2,
         "old_owner_cargo_manifests": 1
@@ -464,15 +465,15 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "72ff7372ca7827ed691b19dd56d179db5dc193b7",
+      "default_branch_head": "6769012068e9ced358d9d1f1c980d41aaf6c4bca",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T20:02:41Z",
+      "updated_at": "2026-07-29T21:34:14Z",
       "actions_workflows": 2,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -482,9 +483,9 @@
         "origin_slug": "mark-ik/woodshed",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "72ff7372ca7827ed691b19dd56d179db5dc193b7",
+        "head": "6769012068e9ced358d9d1f1c980d41aaf6c4bca",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 8,
+        "old_owner_tracked_files": 9,
         "old_owner_cargo_manifests": 3
       }
     },
@@ -498,15 +499,15 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "7beef7c6f026ad9aab23eba65bfeb9345f4002e2",
+      "default_branch_head": "4641fb30ab80997339e9bcbae297db23d26402d9",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T01:58:01Z",
+      "updated_at": "2026-07-29T21:34:16Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -516,7 +517,7 @@
         "origin_slug": "mark-ik/hocket",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "7beef7c6f026ad9aab23eba65bfeb9345f4002e2",
+        "head": "4641fb30ab80997339e9bcbae297db23d26402d9",
         "dirty_entries": 0,
         "old_owner_tracked_files": 6,
         "old_owner_cargo_manifests": 1
@@ -532,15 +533,15 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "e1e7d53728a32539e41d608c712b8bb2cd3ab2a8",
+      "default_branch_head": "0d220ebe828d172323bb045a137aa52ca0bcb559",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T16:32:22Z",
+      "updated_at": "2026-07-29T21:34:30Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -550,9 +551,9 @@
         "origin_slug": "mark-ik/isometry",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "e1e7d53728a32539e41d608c712b8bb2cd3ab2a8",
+        "head": "0d220ebe828d172323bb045a137aa52ca0bcb559",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 1,
+        "old_owner_tracked_files": 2,
         "old_owner_cargo_manifests": 1
       }
     },
@@ -574,7 +575,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -608,7 +609,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -642,7 +643,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -676,7 +677,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -710,7 +711,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -734,7 +735,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -768,7 +769,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -802,7 +803,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -836,7 +837,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],
@@ -860,7 +861,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [
@@ -896,7 +897,7 @@
         "enabled": false
       },
       "github_packages": {
-        "status": "none-publicly-listed-api-incomplete",
+        "status": "none-detected",
         "associated_count": 0
       },
       "declared_source_aliases": [],

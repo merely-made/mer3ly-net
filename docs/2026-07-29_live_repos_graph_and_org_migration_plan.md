@@ -1,6 +1,6 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M1 ready; M2 foundation batch authorized
+**Status:** M2 foundation batch complete; stopped before platform transfer
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -340,6 +340,35 @@ warns that doing so permanently removes the transfer redirect.
 
 **Stop rule:** do not begin the next batch while a consumer can resolve both
 old-owner and new-owner URLs for the same package family.
+
+#### M2 foundation receipt: 2026-07-29
+
+The foundation batch transferred `netrender`, `smolweb`, `wavicle`,
+`wgpu-graft`, `wgpu-scry`, and `wgpu-weld` to `merely-made`.
+
+- All six local origins use the canonical organization URL. Their former web,
+  API, and Git URLs redirect to the transferred repositories and resolve the
+  same `main` head.
+- Package metadata, documentation links, Git dependencies, and tracked locks
+  use `merely-made` for every transferred foundation source.
+- Genet and Mere were not transferred in this batch, but their foundation
+  dependency references were canonicalized and pushed before product locks
+  were regenerated.
+- Turnstone's ignored local lock and ignored Cargo patch files were updated
+  locally but remain outside Git. Woodshed, Hocket, and Isometry received
+  clean-checkout lock regeneration with zero old foundation sources.
+- The source-identity stop rule found a temporary old/new Netrender split
+  while Woodshed still resolved the previous Genet commit. Pushing Genet and
+  Mere first and regenerating the product locks removed the split.
+- Wgpu-graft's stale CI package name was corrected to `grafting`; its minimal
+  feature check now explicitly enables `wgpu-29`.
+- Focused verification passed for all foundation repositories and affected
+  consumers. This includes Turnstone's 154 library tests and Isometry's
+  workspace-wide all-features/all-targets check.
+
+The six repository receipts under `docs/receipts/org-transfer/` record heads,
+settings, redirects, commits, and verification. Stop before the platform
+ownership batch so this boundary remains reviewable.
 
 ### M3: Replace the generated site bundle with a static Cambium build
 
