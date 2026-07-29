@@ -42,11 +42,46 @@ function Invoke-GhJson {
     $output | ConvertFrom-Json
 }
 
-function Test-GhEndpoint {
+function Get-GhEndpointStatus {
     param([Parameter(Mandatory)][string]$Endpoint)
 
-    & gh api $Endpoint --silent 2>$null
-    $LASTEXITCODE -eq 0
+    $output = & gh api $Endpoint 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        return "available"
+    }
+    if (($output | Out-String) -match "Upgrade to GitHub Team") {
+        return "unavailable-on-current-plan"
+    }
+    "query-unavailable"
+}
+
+function Get-GhPackageInventory {
+    param([Parameter(Mandatory)][string[]]$PackageTypes)
+
+    $packages = [System.Collections.Generic.List[object]]::new()
+    foreach ($packageType in $PackageTypes) {
+        $output = @(
+            & gh api --paginate `
+                "user/packages?package_type=$packageType&per_page=100" `
+                --jq '.[] | {id, package_type, repository: (.repository.full_name // null)}' `
+                2>$null
+        )
+        if ($LASTEXITCODE -ne 0) {
+            return [pscustomobject]@{
+                available = $false
+                packages = @()
+            }
+        }
+        foreach ($line in $output) {
+            if ($line) {
+                $packages.Add(($line | ConvertFrom-Json))
+            }
+        }
+    }
+    [pscustomobject]@{
+        available = $true
+        packages = @($packages)
+    }
 }
 
 function Get-Count {
@@ -235,10 +270,25 @@ $candidates = @($basis.targets | Where-Object disposition -eq "candidate")
 
 $org = Invoke-GhJson -Endpoint "orgs/merely-made"
 $membership = Invoke-GhJson -Endpoint "user/memberships/orgs/merely-made"
-$orgRulesetsAvailable =
-    Test-GhEndpoint -Endpoint "orgs/merely-made/rulesets?per_page=100"
-$packagesAvailable =
-    Test-GhEndpoint -Endpoint "user/packages?package_type=container&per_page=1"
+$orgRulesetsStatus =
+    Get-GhEndpointStatus -Endpoint "orgs/merely-made/rulesets?per_page=100"
+$orgRulesetsAvailable = $orgRulesetsStatus -eq "available"
+$orgRulesets = if ($orgRulesetsAvailable) {
+    @(
+        Invoke-GhJson -Endpoint "orgs/merely-made/rulesets?per_page=100"
+    )
+}
+else {
+    @()
+}
+$packageInventory = Get-GhPackageInventory -PackageTypes @(
+    "container",
+    "npm",
+    "maven",
+    "rubygems",
+    "nuget"
+)
+$packagesAvailable = $packageInventory.available
 $orgRepositories = @(
     Invoke-GhJson -Endpoint "orgs/merely-made/repos?per_page=100&type=all"
 )
@@ -410,13 +460,21 @@ foreach ($target in $candidates) {
     )
     $actionMetadata = $rootTree -contains "action.yml" -or
         $rootTree -contains "action.yaml"
+    $associatedPackages = @(
+        $packageInventory.packages | Where-Object {
+            $_.repository -eq $target.current_slug
+        }
+    )
 
     $blockers = [System.Collections.Generic.List[string]]::new()
     if (-not $packagesAvailable) {
         $blockers.Add("authenticated-package-audit-unavailable")
     }
-    if (-not $orgRulesetsAvailable) {
+    if ($orgRulesetsStatus -eq "query-unavailable") {
         $blockers.Add("target-org-rulesets-api-unavailable")
+    }
+    if ($associatedPackages.Count -ne 0) {
+        $blockers.Add("package-migration-decision-required")
     }
     if ($targetCollision) {
         $blockers.Add("target-name-collision")
@@ -550,10 +608,22 @@ foreach ($target in $candidates) {
                 [ordered]@{ enabled = $false }
             }
             packages = if ($packagesAvailable) {
-                "authenticated-query-available"
+                [ordered]@{
+                    status = "authenticated-inventory-complete"
+                    associated_count = $associatedPackages.Count
+                    types = @(
+                        $associatedPackages |
+                            ForEach-Object package_type |
+                            Sort-Object -Unique
+                    )
+                }
             }
             else {
-                "authenticated-query-unavailable"
+                [ordered]@{
+                    status = "authenticated-query-unavailable"
+                    associated_count = $null
+                    types = @()
+                }
             }
             root_action_metadata = $actionMetadata
         }
@@ -563,7 +633,7 @@ foreach ($target in $candidates) {
 }
 
 $receipt = [ordered]@{
-    schema = "mer3ly.publication-gate/v1"
+    schema = "mer3ly.publication-gate/v2"
     generated_at_utc = [DateTime]::UtcNow.ToString("o")
     generated_by = "scripts/audit-publication-gate.ps1"
     authority_sha256 = [ordered]@{
@@ -609,8 +679,31 @@ $receipt = [ordered]@{
         else {
             $null
         }
+        rulesets_status = $orgRulesetsStatus
         rulesets_query_available = $orgRulesetsAvailable
+        rulesets = Get-Count -Value $orgRulesets
         package_query_available = $packagesAvailable
+        packages = if ($packagesAvailable) {
+            [ordered]@{
+                total = $packageInventory.packages.Count
+                associated = @(
+                    $packageInventory.packages |
+                        Where-Object repository
+                ).Count
+                unassociated = @(
+                    $packageInventory.packages |
+                        Where-Object { -not $_.repository }
+                ).Count
+                types = @(
+                    $packageInventory.packages |
+                        ForEach-Object package_type |
+                        Sort-Object -Unique
+                )
+            }
+        }
+        else {
+            $null
+        }
     }
     repositories = @($repositories)
     summary = [ordered]@{

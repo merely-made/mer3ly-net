@@ -1,6 +1,6 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M1 audited; external permission gate active
+**Status:** M1 ready; M2 foundation batch authorized
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -286,14 +286,16 @@ default-branch heads.
   variables, deploy keys, webhooks, Pages sites, releases, branch protection,
   repository rulesets, or Marketplace action metadata. Genet has one empty,
   unprotected Actions environment.
-- Package state cannot be authenticated with the current token, which lacks
-  `read:packages`. Target-organization rulesets cannot be inspected with the
-  current token, which lacks `admin:org`.
+- The authenticated package inventory covers container, npm, Maven, RubyGems,
+  and NuGet packages. It found no packages associated with the transfer
+  candidates.
+- The target organization does not have organization rulesets because that
+  feature is unavailable on its current GitHub plan. Repository-level
+  rulesets are also absent.
 
-All 13 candidates remain blocked on those two token-scope checks. Refresh the
-GitHub CLI authorization with `read:packages` and `admin:org`, rerun
-`scripts/audit-publication-gate.ps1`, and require 13 ready results before M2.
-No repository transfer is authorized while this gate is active.
+All 13 candidates are ready with no publication-gate blockers. M2 begins with
+the foundation batch and must preserve one canonical Cargo source identity
+before the platform batch starts.
 
 ### M2: Transfer repositories in dependency-aware batches
 
@@ -498,12 +500,11 @@ These do not block M0:
 5. Whether repository metadata refreshes on a schedule alone or later receives
    narrow cross-repository dispatch events.
 
-## First authorized slice
+## Authorization history
 
-M0 is the first implementation slice. It changes no GitHub ownership and
-deploys nothing. It creates the authority files, migration ledger, validation,
-inventory script, and an evidence receipt. Stop after M0 for review before any
-repository transfer or site rewrite.
+M0 was the first implementation slice. It changed no GitHub ownership and
+deployed nothing. It created the authority files, migration ledger, validation,
+inventory script, and an evidence receipt.
 
 ### M0 receipt: 2026-07-29
 
@@ -514,9 +515,13 @@ repository transfer or site rewrite.
   -D warnings` and `authority validate` pass.
 - The sanitized inventory receipt covers all 26 migration records, identifies
   2 extra local donor/tooling repositories, and reports 0 drift findings.
-- Public GitHub package pages list no packages. The authenticated package API
-  was unavailable to the current token, so M1 still requires an authenticated
-  package audit before any transfer.
+- Public GitHub package pages listed no packages. M1 later confirmed that result
+  through the authenticated package API across all supported registries.
 
 M0 was reviewed and accepted on 2026-07-29, then committed as `965fc2a`. No
 GitHub ownership, Pages deployment, or site implementation changed in M0.
+
+M1 was reviewed and accepted on 2026-07-29. The refreshed authenticated audit
+reported 13 ready candidates and 0 blockers. M2 is authorized through the
+dependency-aware batches and their stop rules; maintained forks remain a
+separate decision.
