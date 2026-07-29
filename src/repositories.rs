@@ -88,6 +88,8 @@ pub enum RelationProvenance {
 pub struct MigrationManifest {
     pub inventory_receipt: String,
     #[serde(default)]
+    pub publication_gate_receipt: Option<String>,
+    #[serde(default)]
     pub migration: Vec<MigrationRecord>,
     #[serde(default)]
     pub unresolved_product: Vec<UnresolvedProduct>,
@@ -108,6 +110,12 @@ pub struct MigrationRecord {
     pub license_status: String,
     pub provenance_status: String,
     pub sensitive_information_status: String,
+    #[serde(default)]
+    pub public_scope: Option<String>,
+    #[serde(default)]
+    pub publication_gate_status: Option<PublicationGateStatus>,
+    #[serde(default)]
+    pub history_remediation: Option<String>,
     pub pages_status: String,
     pub packages_status: String,
     pub actions_workflows: u32,
@@ -150,6 +158,14 @@ pub enum MigrationDisposition {
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum PublicationGateStatus {
+    Ready,
+    Blocked,
+    NotApplicable,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Visibility {
     Public,
@@ -173,6 +189,7 @@ pub struct Authority {
 pub struct InventoryTarget {
     pub id: String,
     pub current_slug: String,
+    pub target_slug: Option<String>,
     pub classification: MigrationClass,
     pub batch: MigrationBatch,
     pub disposition: MigrationDisposition,
@@ -183,6 +200,12 @@ pub struct InventoryTarget {
     pub expected_actions_workflows: u32,
     pub expected_old_owner_files: Option<u32>,
     pub expected_old_owner_manifests: Option<u32>,
+    pub license_status: String,
+    pub provenance_status: String,
+    pub sensitive_information_status: String,
+    pub public_scope: Option<String>,
+    pub publication_gate_status: Option<PublicationGateStatus>,
+    pub history_remediation: Option<String>,
     pub local_locator: Option<String>,
     pub source_aliases: Vec<String>,
 }
@@ -379,6 +402,20 @@ impl Authority {
                 &migration.sensitive_information_status,
                 &mut errors,
             );
+            if let Some(public_scope) = &migration.public_scope {
+                check_nonempty(
+                    &format!("migration {} public_scope", migration.id),
+                    public_scope,
+                    &mut errors,
+                );
+            }
+            if let Some(history_remediation) = &migration.history_remediation {
+                check_nonempty(
+                    &format!("migration {} history_remediation", migration.id),
+                    history_remediation,
+                    &mut errors,
+                );
+            }
             check_nonempty(
                 &format!("migration {} pages_status", migration.id),
                 &migration.pages_status,
@@ -422,6 +459,28 @@ impl Authority {
                             migration.id
                         ));
                     }
+                    if migration.public_scope.as_deref().is_none_or(str::is_empty) {
+                        errors.push(format!(
+                            "migration {} candidate has no public_scope",
+                            migration.id
+                        ));
+                    }
+                    if migration.publication_gate_status.is_none() {
+                        errors.push(format!(
+                            "migration {} candidate has no publication_gate_status",
+                            migration.id
+                        ));
+                    }
+                    if migration
+                        .history_remediation
+                        .as_deref()
+                        .is_none_or(str::is_empty)
+                    {
+                        errors.push(format!(
+                            "migration {} candidate has no history_remediation",
+                            migration.id
+                        ));
+                    }
                 }
                 MigrationDisposition::Hold => {
                     if migration.target_slug.is_some() {
@@ -451,6 +510,9 @@ impl Authority {
         }
 
         check_receipt_path(&self.migration.inventory_receipt, &mut errors);
+        if let Some(receipt) = &self.migration.publication_gate_receipt {
+            check_receipt_path(receipt, &mut errors);
+        }
 
         let mut unresolved_names = BTreeSet::new();
         for unresolved in &self.migration.unresolved_product {
@@ -485,6 +547,7 @@ impl Authority {
             .map(|migration| InventoryTarget {
                 id: migration.id.clone(),
                 current_slug: migration.current_slug.clone(),
+                target_slug: migration.target_slug.clone(),
                 classification: migration.classification,
                 batch: migration.batch,
                 disposition: migration.disposition,
@@ -495,6 +558,12 @@ impl Authority {
                 expected_actions_workflows: migration.actions_workflows,
                 expected_old_owner_files: migration.old_owner_files,
                 expected_old_owner_manifests: migration.old_owner_manifests,
+                license_status: migration.license_status.clone(),
+                provenance_status: migration.provenance_status.clone(),
+                sensitive_information_status: migration.sensitive_information_status.clone(),
+                public_scope: migration.public_scope.clone(),
+                publication_gate_status: migration.publication_gate_status,
+                history_remediation: migration.history_remediation.clone(),
                 local_locator: migration.local_locator.clone(),
                 source_aliases: migration.source_aliases.clone(),
             })

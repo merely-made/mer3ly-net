@@ -1,11 +1,11 @@
 {
   "schema": "mer3ly.repository-inventory/v1",
-  "generated_at_utc": "2026-07-29T18:56:25Z",
+  "generated_at_utc": "2026-07-29T20:05:24Z",
   "generated_by": "scripts/inventory-repositories.ps1",
   "authority_sha256": {
     "content/repositories.toml": "1c406701ab004647a5a9a56b171553a9a88c869ddf11b046a0f5062dff574bb2",
     "content/relations.toml": "00dc434566c8b5d407f11c9dd1f6d321e24525f2800660622a0987301de51ec1",
-    "ops/org-migration.toml": "ecc7385fd0702e3ee4e6056e8c456075eb35d142d62f8f7dd67dc03d0f134a7b"
+    "ops/org-migration.toml": "f23da3e545b1d696be186d593bedaf565fcc1577e0839615369ddc8e39b0389d"
   },
   "github_package_queries": {
     "owners": [
@@ -106,9 +106,9 @@
         "origin_slug": "merely-made/mer3ly.net",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "92f6fd689193e4cb70add337f02d6bac4b86479a",
-        "dirty_entries": 9,
-        "old_owner_tracked_files": 0,
+        "head": "965fc2aa836e5b5b46b149170361b2758ecd1e12",
+        "dirty_entries": 5,
+        "old_owner_tracked_files": 6,
         "old_owner_cargo_manifests": 0
       }
     },
@@ -122,9 +122,9 @@
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "b5d56b8ef876bfa213875ac95c2ccfa9bf53d083",
+      "default_branch_head": "4b403c47f703af7f114d4ed1e1468edf8b195cb7",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-25T00:48:38Z",
+      "updated_at": "2026-07-29T20:02:42Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
@@ -140,7 +140,7 @@
         "origin_slug": "mark-ik/netrender",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "b5d56b8ef876bfa213875ac95c2ccfa9bf53d083",
+        "head": "4b403c47f703af7f114d4ed1e1468edf8b195cb7",
         "dirty_entries": 0,
         "old_owner_tracked_files": 7,
         "old_owner_cargo_manifests": 5
@@ -190,9 +190,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "2929adff3846287b91cdf342a1f343a51c002137",
+      "default_branch_head": "a5b5b7c12a9c75cc04c2c795c6ce627fa79450ce",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-25T00:48:52Z",
+      "updated_at": "2026-07-29T20:03:23Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
@@ -208,7 +208,7 @@
         "origin_slug": "mark-ik/wavicle",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "2929adff3846287b91cdf342a1f343a51c002137",
+        "head": "a5b5b7c12a9c75cc04c2c795c6ce627fa79450ce",
         "dirty_entries": 0,
         "old_owner_tracked_files": 1,
         "old_owner_cargo_manifests": 1
@@ -326,9 +326,9 @@
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "acba7c842684af8674c344ccc66b01b9d27fd1bd",
+      "default_branch_head": "205cf6b3a13728cca689c58843cc070fbac24bbf",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-29T16:32:34Z",
+      "updated_at": "2026-07-29T20:02:54Z",
       "actions_workflows": 3,
       "pages": {
         "enabled": false
@@ -346,7 +346,7 @@
         "origin_slug": "mark-ik/genet",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "acba7c842684af8674c344ccc66b01b9d27fd1bd",
+        "head": "205cf6b3a13728cca689c58843cc070fbac24bbf",
         "dirty_entries": 0,
         "old_owner_tracked_files": 93,
         "old_owner_cargo_manifests": 50
@@ -362,9 +362,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "471d39d82e3a88781c6532d3655a177361787f74",
+      "default_branch_head": "b58f7fb4758bea1227248fa94273db51d8a74ae6",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T18:31:42Z",
+      "updated_at": "2026-07-29T20:02:35Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
@@ -380,7 +380,7 @@
         "origin_slug": "mark-ik/mere",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "471d39d82e3a88781c6532d3655a177361787f74",
+        "head": "b58f7fb4758bea1227248fa94273db51d8a74ae6",
         "dirty_entries": 0,
         "old_owner_tracked_files": 73,
         "old_owner_cargo_manifests": 23
@@ -430,9 +430,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "6f2fa6206245c93bf11e63377ee7266b2bc6324e",
+      "default_branch_head": "ad0e95faac65adcc156f762ae41284b1f4a418e3",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T16:40:52Z",
+      "updated_at": "2026-07-29T20:02:41Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
@@ -448,7 +448,7 @@
         "origin_slug": "mark-ik/turnstone",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "6f2fa6206245c93bf11e63377ee7266b2bc6324e",
+        "head": "ad0e95faac65adcc156f762ae41284b1f4a418e3",
         "dirty_entries": 0,
         "old_owner_tracked_files": 2,
         "old_owner_cargo_manifests": 1
@@ -464,9 +464,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "df17acf65fe741996f90694de07d34d183b7e1bc",
+      "default_branch_head": "72ff7372ca7827ed691b19dd56d179db5dc193b7",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T01:58:02Z",
+      "updated_at": "2026-07-29T20:02:41Z",
       "actions_workflows": 2,
       "pages": {
         "enabled": false
@@ -482,9 +482,9 @@
         "origin_slug": "mark-ik/woodshed",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "df17acf65fe741996f90694de07d34d183b7e1bc",
+        "head": "72ff7372ca7827ed691b19dd56d179db5dc193b7",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 9,
+        "old_owner_tracked_files": 8,
         "old_owner_cargo_manifests": 3
       }
     },

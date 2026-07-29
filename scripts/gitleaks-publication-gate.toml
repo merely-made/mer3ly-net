@@ -1,0 +1,16 @@
+title = "Mer3ly publication-gate Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Vendored Web Platform Tests carry public detector fixtures and metadata"
+paths = [
+  '''^tests/wpt/''',
+]
+
+[[allowlists]]
+description = "Servo's fixed public TLS test key is not an operational credential"
+paths = [
+  '''^resources/privatekey_for_testing\.key$''',
+]

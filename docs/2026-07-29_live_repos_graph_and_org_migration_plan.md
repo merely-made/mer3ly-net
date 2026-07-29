@@ -1,6 +1,6 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M0 implemented; review gate active
+**Status:** M1 audited; external permission gate active
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -266,6 +266,35 @@ history rewrite.
 - do not transfer a maintained upstream fork merely because it has a
   `mark-ik` remote.
 
+#### M1 receipt: 2026-07-29
+
+The publication audit covers all 13 transfer candidates at their pushed
+default-branch heads.
+
+- All current candidate trees pass the redacted HEAD secret scan and contain
+  no local profile path, local machine name, configured contact address, or
+  first-party private-network match.
+- Full-history scanning found only reviewed historical material in Netrender,
+  Genet, Mere, Retinue, and Isometry. Genet's large count is concentrated in
+  inherited WPT and Servo test material. No history rewrite is authorized;
+  current trees were sanitized and public upstream history is retained.
+- Netrender, Genet, Mere, Turnstone, Woodshed, and Wavicle received separate
+  remediation commits and were pushed before the receipt was generated.
+- The target organization has no target-name or fork-network collision for
+  any candidate.
+- Repository settings contain no repository or environment secrets,
+  variables, deploy keys, webhooks, Pages sites, releases, branch protection,
+  repository rulesets, or Marketplace action metadata. Genet has one empty,
+  unprotected Actions environment.
+- Package state cannot be authenticated with the current token, which lacks
+  `read:packages`. Target-organization rulesets cannot be inspected with the
+  current token, which lacks `admin:org`.
+
+All 13 candidates remain blocked on those two token-scope checks. Refresh the
+GitHub CLI authorization with `read:packages` and `admin:org`, rerun
+`scripts/audit-publication-gate.ps1`, and require 13 ready results before M2.
+No repository transfer is authorized while this gate is active.
+
 ### M2: Transfer repositories in dependency-aware batches
 
 Proposed batches:
@@ -489,5 +518,5 @@ repository transfer or site rewrite.
   was unavailable to the current token, so M1 still requires an authenticated
   package audit before any transfer.
 
-The M0 review gate remains in force. No GitHub ownership, Pages deployment, or
-site implementation changed in this slice.
+M0 was reviewed and accepted on 2026-07-29, then committed as `965fc2a`. No
+GitHub ownership, Pages deployment, or site implementation changed in M0.

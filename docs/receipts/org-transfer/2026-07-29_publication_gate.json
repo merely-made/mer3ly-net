@@ -1,0 +1,1051 @@
+{
+  "schema": "mer3ly.publication-gate/v1",
+  "generated_at_utc": "2026-07-29T20:12:48.1521941Z",
+  "generated_by": "scripts/audit-publication-gate.ps1",
+  "authority_sha256": {
+    "content/repositories.toml": "1c406701ab004647a5a9a56b171553a9a88c869ddf11b046a0f5062dff574bb2",
+    "content/relations.toml": "00dc434566c8b5d407f11c9dd1f6d321e24525f2800660622a0987301de51ec1",
+    "ops/org-migration.toml": "f23da3e545b1d696be186d593bedaf565fcc1577e0839615369ddc8e39b0389d"
+  },
+  "transfer_behavior": {
+    "sources": [
+      "https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository",
+      "https://docs.github.com/en/packages/learn-github-packages/about-permissions-for-github-packages"
+    ],
+    "repository_redirects": "git-and-web-redirects-retained",
+    "pages": "pages-sites-do-not-redirect",
+    "secrets_webhooks_deploy_keys": "remain-associated",
+    "packages": "registry-dependent-authenticated-audit-required",
+    "organization_defaults": "apply-after-transfer"
+  },
+  "target_organization": {
+    "membership_active": true,
+    "membership_role": "admin",
+    "default_repository_permission": "read",
+    "member_public_repository_creation": true,
+    "rulesets_query_available": false,
+    "package_query_available": false
+  },
+  "repositories": [
+    {
+      "id": "netrender",
+      "current_slug": "mark-ik/netrender",
+      "target_slug": "merely-made/netrender",
+      "public_scope": "Netrender renderer crates, examples, tests, plans, and retained WebRender-derived history.",
+      "license_status": "MPL-2.0",
+      "provenance_status": "reviewed-webrender-derived-mpl-2.0",
+      "sensitive_information_status": "current-tree-sanitized-history-reviewed",
+      "history_remediation": "Retain public upstream history; current local paths removed and inherited detector matches classified.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "4b403c47f703af7f114d4ed1e1468edf8b195cb7",
+        "remote_head": "4b403c47f703af7f114d4ed1e1468edf8b195cb7",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 9,
+        "rule_counts": [
+          {
+            "rule": "generic-api-key",
+            "count": 9
+          }
+        ],
+        "top_path_prefixes": [
+          {
+            "prefix": "examples/animation.rs",
+            "count": 9
+          }
+        ],
+        "decision": "Retain public upstream history; current local paths removed and inherited detector matches classified."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": true,
+        "parent": "servo/webrender",
+        "source": "servo/webrender",
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 1,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "smolweb",
+      "current_slug": "mark-ik/smolweb",
+      "target_slug": "merely-made/smolweb",
+      "public_scope": "Smolweb protocol crates, examples, tests, and public design documentation.",
+      "license_status": "MIT",
+      "provenance_status": "reviewed-original",
+      "sensitive_information_status": "current-and-history-detector-clean",
+      "history_remediation": "No remediation required.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "bcc70c75ca6a350240ebeb3b15c3ca6ec6dbc83c",
+        "remote_head": "bcc70c75ca6a350240ebeb3b15c3ca6ec6dbc83c",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "No remediation required."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 1,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "wavicle",
+      "current_slug": "mark-ik/wavicle",
+      "target_slug": "merely-made/wavicle",
+      "public_scope": "Wavicle codec source, tests, fixtures, plans, and WavPack provenance records.",
+      "license_status": "MIT-OR-Apache-2.0",
+      "provenance_status": "reviewed-wavpack-5.9.0-bsd-3-clause-attributed",
+      "sensitive_information_status": "current-and-history-detector-clean",
+      "history_remediation": "No sensitive-history remediation required; attribution corrected in M1.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "a5b5b7c12a9c75cc04c2c795c6ce627fa79450ce",
+        "remote_head": "a5b5b7c12a9c75cc04c2c795c6ce627fa79450ce",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "No sensitive-history remediation required; attribution corrected in M1."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 1,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "wgpu-graft",
+      "current_slug": "mark-ik/wgpu-graft",
+      "target_slug": "merely-made/wgpu-graft",
+      "public_scope": "wgpu-graft interop crates, examples, donor patches, tests, plans, and attribution.",
+      "license_status": "MPL-2.0",
+      "provenance_status": "reviewed-slint-derived-files-attributed",
+      "sensitive_information_status": "current-and-history-detector-clean",
+      "history_remediation": "No remediation required.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "941c921acfb5a6d05271414479fb072abc058ee3",
+        "remote_head": "941c921acfb5a6d05271414479fb072abc058ee3",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "No remediation required."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 4,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "wgpu-scry",
+      "current_slug": "mark-ik/wgpu-scry",
+      "target_slug": "merely-made/wgpu-scry",
+      "public_scope": "wgpu-scry system-webview adapter source, examples, tests, plans, and attribution.",
+      "license_status": "MPL-2.0",
+      "provenance_status": "reviewed-slint-derived-files-attributed",
+      "sensitive_information_status": "current-and-history-detector-clean",
+      "history_remediation": "No remediation required.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "d8fc221a47e172ebbd1dcb0a87fd37d2e0acce06",
+        "remote_head": "d8fc221a47e172ebbd1dcb0a87fd37d2e0acce06",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "No remediation required."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 2,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "wgpu-weld",
+      "current_slug": "mark-ik/wgpu-weld",
+      "target_slug": "merely-made/wgpu-weld",
+      "public_scope": "wgpu-weld CEF surface adapter source, examples, tests, plans, and attribution.",
+      "license_status": "MPL-2.0",
+      "provenance_status": "reviewed-original",
+      "sensitive_information_status": "current-and-history-detector-clean",
+      "history_remediation": "No remediation required.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "5e46c0c8a3e3a1599e9e4e3a3725dd4f53b50f15",
+        "remote_head": "5e46c0c8a3e3a1599e9e4e3a3725dd4f53b50f15",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "No remediation required."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 0,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "genet",
+      "current_slug": "mark-ik/genet",
+      "target_slug": "merely-made/genet",
+      "public_scope": "Genet engine crates, Pelt, tests, vendored standards fixtures, resources, plans, and Servo-derived history.",
+      "license_status": "MPL-2.0",
+      "provenance_status": "reviewed-servo-derived-mpl-2.0",
+      "sensitive_information_status": "current-tree-sanitized-inherited-test-history-reviewed",
+      "history_remediation": "Retain public Servo history and public test fixtures; current first-party local paths removed.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "205cf6b3a13728cca689c58843cc070fbac24bbf",
+        "remote_head": "205cf6b3a13728cca689c58843cc070fbac24bbf",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 101862,
+        "rule_counts": [
+          {
+            "rule": "generic-api-key",
+            "count": 84
+          },
+          {
+            "rule": "jwt",
+            "count": 1
+          },
+          {
+            "rule": "private-key",
+            "count": 23
+          },
+          {
+            "rule": "sourcegraph-access-token",
+            "count": 101754
+          }
+        ],
+        "top_path_prefixes": [
+          {
+            "prefix": "tests/wpt/meta-legacy-layout",
+            "count": 86300
+          },
+          {
+            "prefix": "tests/wpt/metadata",
+            "count": 15454
+          },
+          {
+            "prefix": "tests/wpt/web-platform-tests",
+            "count": 71
+          },
+          {
+            "prefix": "tests/wpt/tests",
+            "count": 24
+          },
+          {
+            "prefix": "decision-task/vendored/mohawk",
+            "count": 5
+          },
+          {
+            "prefix": "tests/wpt/css-tests",
+            "count": 4
+          },
+          {
+            "prefix": "third_party/webrender/examples",
+            "count": 3
+          },
+          {
+            "prefix": "resources/privatekey_for_testing.key",
+            "count": 1
+          }
+        ],
+        "decision": "Retain public Servo history and public test fixtures; current first-party local paths removed."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": true,
+        "parent": "servo/servo",
+        "source": "servo/servo",
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 3,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 1,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "mere",
+      "current_slug": "mark-ik/mere",
+      "target_slug": "merely-made/mere",
+      "public_scope": "Mere graph-browser crates, ports, tests, resources, and public design and receipt documentation.",
+      "license_status": "MIT-OR-Apache-2.0",
+      "provenance_status": "reviewed-original-and-attributed-dependencies",
+      "sensitive_information_status": "current-tree-sanitized-history-reviewed",
+      "history_remediation": "Retain public history; current local paths and concrete machine and network identifiers removed.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "b58f7fb4758bea1227248fa94273db51d8a74ae6",
+        "remote_head": "b58f7fb4758bea1227248fa94273db51d8a74ae6",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 4,
+        "rule_counts": [
+          {
+            "rule": "generic-api-key",
+            "count": 3
+          },
+          {
+            "rule": "private-key",
+            "count": 1
+          }
+        ],
+        "top_path_prefixes": [
+          {
+            "prefix": "Cargo.lock",
+            "count": 1
+          },
+          {
+            "prefix": "design_docs/graphshell_docs/implementation_strategy",
+            "count": 1
+          },
+          {
+            "prefix": "ports/graphshell/web",
+            "count": 1
+          },
+          {
+            "prefix": "resources/privatekey_for_testing.key",
+            "count": 1
+          }
+        ],
+        "decision": "Retain public history; current local paths and concrete machine and network identifiers removed."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 0,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "retinue",
+      "current_slug": "mark-ik/retinue",
+      "target_slug": "merely-made/retinue",
+      "public_scope": "Retinue protocol, radio, firmware, tests, fixtures, plans, and provenance records.",
+      "license_status": "MPL-2.0",
+      "provenance_status": "reviewed-public-spec-and-permissive-source-boundaries",
+      "sensitive_information_status": "current-tree-clean-history-reviewed",
+      "history_remediation": "Retain public fixture history; detector matches were historical structured test values.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "6f04bb93e248d08756b0208db9c7b3b397182f79",
+        "remote_head": "6f04bb93e248d08756b0208db9c7b3b397182f79",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 4,
+        "rule_counts": [
+          {
+            "rule": "generic-api-key",
+            "count": 4
+          }
+        ],
+        "top_path_prefixes": [
+          {
+            "prefix": "design_docs/2026-07-22_meshcore_relay_headed.md",
+            "count": 1
+          },
+          {
+            "prefix": "design_docs/2026-07-25_outrider_lxmf_founding.md",
+            "count": 1
+          },
+          {
+            "prefix": "tests/fixtures/manifest.json",
+            "count": 1
+          },
+          {
+            "prefix": "tests/fixtures/rns_link_proof.json",
+            "count": 1
+          }
+        ],
+        "decision": "Retain public fixture history; detector matches were historical structured test values."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 1,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "turnstone",
+      "current_slug": "mark-ik/turnstone",
+      "target_slug": "merely-made/turnstone",
+      "public_scope": "Turnstone application source, scenarios, fixtures, assets, tests, and public plans.",
+      "license_status": "MIT-OR-Apache-2.0",
+      "provenance_status": "reviewed-original",
+      "sensitive_information_status": "current-tree-sanitized-history-reviewed",
+      "history_remediation": "Retain public history; current scenario paths made repository-relative.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "ad0e95faac65adcc156f762ae41284b1f4a418e3",
+        "remote_head": "ad0e95faac65adcc156f762ae41284b1f4a418e3",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "Retain public history; current scenario paths made repository-relative."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 0,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "woodshed",
+      "current_slug": "mark-ik/woodshed",
+      "target_slug": "merely-made/woodshed",
+      "public_scope": "Woodshed application and analysis crates, tests, assets, screenshots, and public plans.",
+      "license_status": "MIT-OR-Apache-2.0",
+      "provenance_status": "reviewed-original",
+      "sensitive_information_status": "machine-config-untracked-history-reviewed",
+      "history_remediation": "Retain public history; machine-local Cargo config removed from tracking and ignored.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "72ff7372ca7827ed691b19dd56d179db5dc193b7",
+        "remote_head": "72ff7372ca7827ed691b19dd56d179db5dc193b7",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "Retain public history; machine-local Cargo config removed from tracking and ignored."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 2,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "hocket",
+      "current_slug": "mark-ik/hocket",
+      "target_slug": "merely-made/hocket",
+      "public_scope": "Hocket application source, tests, fixtures, assets, and public plans.",
+      "license_status": "MIT-OR-Apache-2.0",
+      "provenance_status": "reviewed-original",
+      "sensitive_information_status": "current-and-history-detector-clean",
+      "history_remediation": "No remediation required.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "7beef7c6f026ad9aab23eba65bfeb9345f4002e2",
+        "remote_head": "7beef7c6f026ad9aab23eba65bfeb9345f4002e2",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 0,
+        "rule_counts": [],
+        "top_path_prefixes": [],
+        "decision": "No remediation required."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 0,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    },
+    {
+      "id": "isometry",
+      "current_slug": "mark-ik/isometry",
+      "target_slug": "merely-made/isometry",
+      "public_scope": "Isometry application source, system data, tests, assets, and public plans.",
+      "license_status": "MIT-OR-Apache-2.0",
+      "provenance_status": "reviewed-original",
+      "sensitive_information_status": "current-tree-clean-history-reviewed",
+      "history_remediation": "Retain public history; detector matches were historical non-secret data identifiers.",
+      "local": {
+        "present": true,
+        "origin_matches_authority": true,
+        "branch": "main",
+        "default_branch": "main",
+        "head": "e1e7d53728a32539e41d608c712b8bb2cd3ab2a8",
+        "remote_head": "e1e7d53728a32539e41d608c712b8bb2cd3ab2a8",
+        "head_is_pushed": true,
+        "dirty_entries": 0
+      },
+      "current_tree": {
+        "gitleaks_findings": 0,
+        "local_profile_path_files": 0,
+        "local_machine_name_files": 0,
+        "configured_contact_address_files": 0,
+        "private_network_files_after_vendor_exclusions": 0
+      },
+      "history": {
+        "gitleaks_findings": 2,
+        "rule_counts": [
+          {
+            "rule": "generic-api-key",
+            "count": 2
+          }
+        ],
+        "top_path_prefixes": [
+          {
+            "prefix": "crates/isometry-system/data",
+            "count": 2
+          }
+        ],
+        "decision": "Retain public history; detector matches were historical non-secret data identifiers."
+      },
+      "github": {
+        "public": true,
+        "archived": false,
+        "fork": false,
+        "parent": null,
+        "source": null,
+        "target_name_collision": false,
+        "target_fork_network_collision": false,
+        "workflows": 0,
+        "actions": {
+          "enabled": true,
+          "allowed_actions": "all",
+          "secrets": 0,
+          "variables": 0
+        },
+        "environments": 0,
+        "environment_secrets": 0,
+        "environment_variables": 0,
+        "environment_protection_rules": 0,
+        "deploy_keys": 0,
+        "webhooks": 0,
+        "direct_collaborators": 1,
+        "repository_rulesets": 0,
+        "default_branch_protected": false,
+        "releases": 0,
+        "pages": {
+          "enabled": false
+        },
+        "packages": "authenticated-query-unavailable",
+        "root_action_metadata": false
+      },
+      "blockers": [
+        "authenticated-package-audit-unavailable",
+        "target-org-rulesets-api-unavailable"
+      ],
+      "gate_status": "blocked"
+    }
+  ],
+  "summary": {
+    "candidates": 13,
+    "ready": 0,
+    "blocked": 13
+  }
+}
