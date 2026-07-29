@@ -1,0 +1,164 @@
+[[repository]]
+id = "org-profile"
+github_slug = "merely-made/.github"
+name = "Merely Made organization profile"
+summary = "The public GitHub organization profile and its short project index."
+class = "tool"
+status = "reference"
+license = "NOASSERTION"
+homepage = "https://github.com/merely-made"
+public = true
+
+[[repository]]
+id = "mer3ly"
+github_slug = "merely-made/mer3ly-net"
+name = "Mer3ly"
+summary = "The public Merely company site and repository-family map."
+class = "product"
+status = "active"
+license = "NOASSERTION"
+homepage = "https://mer3ly.net/"
+public = true
+
+[[repository]]
+id = "genet"
+github_slug = "mark-ik/genet"
+name = "Genet"
+summary = "An embeddable Rust web engine with modular static, interactive, scripted, and full-web profiles."
+class = "platform"
+status = "active"
+license = "MPL-2.0"
+homepage = "https://github.com/mark-ik/genet"
+public = true
+
+[[repository]]
+id = "mere"
+github_slug = "mark-ik/mere"
+name = "Mere"
+summary = "The graph-first library for addressable content, spatial arrangement, local memory, and trusted exchange."
+class = "platform"
+status = "active"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/mark-ik/mere"
+public = true
+
+[[repository]]
+id = "retinue"
+github_slug = "mark-ik/retinue"
+name = "Retinue"
+summary = "A Rust implementation of Reticulum and the Merely radio stack for identity, links, resources, and reliable streams."
+class = "platform"
+status = "active"
+license = "MPL-2.0"
+homepage = "https://github.com/mark-ik/retinue"
+public = true
+
+[[repository]]
+id = "netrender"
+github_slug = "mark-ik/netrender"
+name = "Netrender"
+summary = "A Vello and wgpu realization engine for Genet paint lists and other retained scenes."
+class = "foundation"
+status = "active"
+license = "MPL-2.0"
+homepage = "https://github.com/mark-ik/netrender"
+public = true
+
+[[repository]]
+id = "smolweb"
+github_slug = "mark-ik/smolweb"
+name = "Smolweb"
+summary = "Spec-faithful Rust implementations of Misfin, Spartan, Nex, Guppy, and adjacent small-web protocols."
+class = "foundation"
+status = "active"
+license = "MIT"
+homepage = "https://github.com/mark-ik/smolweb"
+public = true
+
+[[repository]]
+id = "wavicle"
+github_slug = "mark-ik/wavicle"
+name = "Wavicle"
+summary = "A pure-Rust WavPack v5 codec for lossless audio."
+class = "foundation"
+status = "active"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/mark-ik/wavicle"
+public = true
+
+[[repository]]
+id = "wgpu-graft"
+github_slug = "mark-ik/wgpu-graft"
+name = "wgpu-graft"
+summary = "A library for importing native GPU textures into wgpu textures."
+class = "foundation"
+status = "research"
+license = "MPL-2.0"
+homepage = "https://github.com/mark-ik/wgpu-graft"
+public = true
+
+[[repository]]
+id = "wgpu-scry"
+github_slug = "mark-ik/wgpu-scry"
+name = "wgpu-scry"
+summary = "A library for embedding system webviews into wgpu textures."
+class = "foundation"
+status = "research"
+license = "MPL-2.0"
+homepage = "https://github.com/mark-ik/wgpu-scry"
+public = true
+
+[[repository]]
+id = "wgpu-weld"
+github_slug = "mark-ik/wgpu-weld"
+name = "wgpu-weld"
+summary = "A library for embedding Chromium Embedded Framework surfaces into wgpu textures."
+class = "foundation"
+status = "research"
+license = "MPL-2.0"
+homepage = "https://github.com/mark-ik/wgpu-weld"
+public = true
+
+[[repository]]
+id = "turnstone"
+github_slug = "mark-ik/turnstone"
+name = "Turnstone"
+summary = "A graph-shaped browser host for relating, curating, and cooperatively browsing the web."
+class = "product"
+status = "prototype"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/mark-ik/turnstone"
+public = true
+
+[[repository]]
+id = "woodshed"
+github_slug = "mark-ik/woodshed"
+name = "Woodshed"
+summary = "An open-source practice toolkit for musicians."
+class = "product"
+status = "active"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/mark-ik/woodshed"
+public = true
+
+[[repository]]
+id = "hocket"
+github_slug = "mark-ik/hocket"
+name = "Hocket"
+summary = "A turn-based, cooperative, peer-to-peer audio looper."
+class = "product"
+status = "prototype"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/mark-ik/hocket"
+public = true
+
+[[repository]]
+id = "isometry"
+github_slug = "mark-ik/isometry"
+name = "Isometry"
+summary = "A pixel-art isometric virtual tabletop with peer-to-peer play."
+class = "product"
+status = "prototype"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/mark-ik/isometry"
+public = true

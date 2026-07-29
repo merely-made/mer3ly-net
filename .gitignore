@@ -1,0 +1,8 @@
+/target/
+/.tmp/
+/.env
+/.env.*
+!/.env.example
+*.local.toml
+Thumbs.db
+.DS_Store

@@ -1,0 +1,26 @@
+[package]
+name = "mer3ly-site"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.92"
+publish = false
+description = "Static Mer3ly site builder and public repository authority."
+repository = "https://github.com/merely-made/mer3ly-net"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "authority"
+path = "src/bin/authority.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"

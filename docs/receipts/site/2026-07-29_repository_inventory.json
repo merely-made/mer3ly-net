@@ -1,0 +1,965 @@
+{
+  "schema": "mer3ly.repository-inventory/v1",
+  "generated_at_utc": "2026-07-29T18:56:25Z",
+  "generated_by": "scripts/inventory-repositories.ps1",
+  "authority_sha256": {
+    "content/repositories.toml": "1c406701ab004647a5a9a56b171553a9a88c869ddf11b046a0f5062dff574bb2",
+    "content/relations.toml": "00dc434566c8b5d407f11c9dd1f6d321e24525f2800660622a0987301de51ec1",
+    "ops/org-migration.toml": "ecc7385fd0702e3ee4e6056e8c456075eb35d142d62f8f7dd67dc03d0f134a7b"
+  },
+  "github_package_queries": {
+    "owners": [
+      "mark-ik",
+      "merely-made"
+    ],
+    "types": [
+      "container",
+      "npm",
+      "maven",
+      "rubygems",
+      "nuget"
+    ],
+    "failures": [
+      "mark-ik/container",
+      "mark-ik/npm",
+      "mark-ik/maven",
+      "mark-ik/rubygems",
+      "mark-ik/nuget",
+      "merely-made/container",
+      "merely-made/npm",
+      "merely-made/maven",
+      "merely-made/rubygems",
+      "merely-made/nuget"
+    ],
+    "public_ui": {
+      "mark-ik": "none-publicly-listed",
+      "merely-made": "none-publicly-listed"
+    }
+  },
+  "repositories": [
+    {
+      "id": "org-profile",
+      "canonical_slug": "merely-made/.github",
+      "classification": "tool",
+      "batch": "infrastructure",
+      "disposition": "already-in-org",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "edff53c2afdff43aece1f6e4385bf9aa9ac4227c",
+      "license_detection": "none-detected",
+      "updated_at": "2026-07-29T16:31:37Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/merely-made.github",
+        "present": true,
+        "origin_slug": "merely-made/.github",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "edff53c2afdff43aece1f6e4385bf9aa9ac4227c",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "mer3ly",
+      "canonical_slug": "merely-made/mer3ly-net",
+      "classification": "product",
+      "batch": "infrastructure",
+      "disposition": "already-in-org",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "92f6fd689193e4cb70add337f02d6bac4b86479a",
+      "license_detection": "none-detected",
+      "updated_at": "2026-07-29T06:39:03Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": true,
+        "build_type": "legacy",
+        "source_branch": "main",
+        "source_path": "/",
+        "custom_domain": "mer3ly.net",
+        "https_enforced": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [
+        "merely-made/mer3ly.net"
+      ],
+      "local": {
+        "locator": "repos/mer3ly",
+        "present": true,
+        "origin_slug": "merely-made/mer3ly.net",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "92f6fd689193e4cb70add337f02d6bac4b86479a",
+        "dirty_entries": 9,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "netrender",
+      "canonical_slug": "mark-ik/netrender",
+      "classification": "foundation",
+      "batch": "foundation",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "b5d56b8ef876bfa213875ac95c2ccfa9bf53d083",
+      "license_detection": "mpl-2.0",
+      "updated_at": "2026-07-25T00:48:38Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/netrender",
+        "present": true,
+        "origin_slug": "mark-ik/netrender",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "b5d56b8ef876bfa213875ac95c2ccfa9bf53d083",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 7,
+        "old_owner_cargo_manifests": 5
+      }
+    },
+    {
+      "id": "smolweb",
+      "canonical_slug": "mark-ik/smolweb",
+      "classification": "foundation",
+      "batch": "foundation",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "bcc70c75ca6a350240ebeb3b15c3ca6ec6dbc83c",
+      "license_detection": "mit",
+      "updated_at": "2026-07-25T01:51:53Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/smolweb",
+        "present": true,
+        "origin_slug": "mark-ik/smolweb",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "bcc70c75ca6a350240ebeb3b15c3ca6ec6dbc83c",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 9,
+        "old_owner_cargo_manifests": 4
+      }
+    },
+    {
+      "id": "wavicle",
+      "canonical_slug": "mark-ik/wavicle",
+      "classification": "foundation",
+      "batch": "foundation",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "2929adff3846287b91cdf342a1f343a51c002137",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-25T00:48:52Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/wavicle",
+        "present": true,
+        "origin_slug": "mark-ik/wavicle",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "2929adff3846287b91cdf342a1f343a51c002137",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 1,
+        "old_owner_cargo_manifests": 1
+      }
+    },
+    {
+      "id": "wgpu-graft",
+      "canonical_slug": "mark-ik/wgpu-graft",
+      "classification": "foundation",
+      "batch": "foundation",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "941c921acfb5a6d05271414479fb072abc058ee3",
+      "license_detection": "other",
+      "updated_at": "2026-07-25T14:51:34Z",
+      "actions_workflows": 4,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/wgpu-graft",
+        "present": true,
+        "origin_slug": "mark-ik/wgpu-graft",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "941c921acfb5a6d05271414479fb072abc058ee3",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 4,
+        "old_owner_cargo_manifests": 3
+      }
+    },
+    {
+      "id": "wgpu-scry",
+      "canonical_slug": "mark-ik/wgpu-scry",
+      "classification": "foundation",
+      "batch": "foundation",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "d8fc221a47e172ebbd1dcb0a87fd37d2e0acce06",
+      "license_detection": "other",
+      "updated_at": "2026-07-25T00:50:11Z",
+      "actions_workflows": 2,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/wgpu-scry",
+        "present": true,
+        "origin_slug": "mark-ik/wgpu-scry",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "d8fc221a47e172ebbd1dcb0a87fd37d2e0acce06",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 10,
+        "old_owner_cargo_manifests": 2
+      }
+    },
+    {
+      "id": "wgpu-weld",
+      "canonical_slug": "mark-ik/wgpu-weld",
+      "classification": "foundation",
+      "batch": "foundation",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "5e46c0c8a3e3a1599e9e4e3a3725dd4f53b50f15",
+      "license_detection": "other",
+      "updated_at": "2026-07-25T00:50:11Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/wgpu-weld",
+        "present": true,
+        "origin_slug": "mark-ik/wgpu-weld",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "5e46c0c8a3e3a1599e9e4e3a3725dd4f53b50f15",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 4,
+        "old_owner_cargo_manifests": 2
+      }
+    },
+    {
+      "id": "genet",
+      "canonical_slug": "mark-ik/genet",
+      "classification": "platform",
+      "batch": "platform",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "acba7c842684af8674c344ccc66b01b9d27fd1bd",
+      "license_detection": "mpl-2.0",
+      "updated_at": "2026-07-29T16:32:34Z",
+      "actions_workflows": 3,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [
+        "mark-ik/serval"
+      ],
+      "local": {
+        "locator": "repos/genet",
+        "present": true,
+        "origin_slug": "mark-ik/genet",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "acba7c842684af8674c344ccc66b01b9d27fd1bd",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 93,
+        "old_owner_cargo_manifests": 50
+      }
+    },
+    {
+      "id": "mere",
+      "canonical_slug": "mark-ik/mere",
+      "classification": "platform",
+      "batch": "platform",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "471d39d82e3a88781c6532d3655a177361787f74",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-29T18:31:42Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/mere",
+        "present": true,
+        "origin_slug": "mark-ik/mere",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "471d39d82e3a88781c6532d3655a177361787f74",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 73,
+        "old_owner_cargo_manifests": 23
+      }
+    },
+    {
+      "id": "retinue",
+      "canonical_slug": "mark-ik/retinue",
+      "classification": "platform",
+      "batch": "platform",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "6f04bb93e248d08756b0208db9c7b3b397182f79",
+      "license_detection": "mpl-2.0",
+      "updated_at": "2026-07-29T18:30:44Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/retinue",
+        "present": true,
+        "origin_slug": "mark-ik/retinue",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "6f04bb93e248d08756b0208db9c7b3b397182f79",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 16,
+        "old_owner_cargo_manifests": 6
+      }
+    },
+    {
+      "id": "turnstone",
+      "canonical_slug": "mark-ik/turnstone",
+      "classification": "product",
+      "batch": "product",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "6f2fa6206245c93bf11e63377ee7266b2bc6324e",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-29T16:40:52Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/turnstone",
+        "present": true,
+        "origin_slug": "mark-ik/turnstone",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "6f2fa6206245c93bf11e63377ee7266b2bc6324e",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 2,
+        "old_owner_cargo_manifests": 1
+      }
+    },
+    {
+      "id": "woodshed",
+      "canonical_slug": "mark-ik/woodshed",
+      "classification": "product",
+      "batch": "product",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "df17acf65fe741996f90694de07d34d183b7e1bc",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-29T01:58:02Z",
+      "actions_workflows": 2,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/woodshed",
+        "present": true,
+        "origin_slug": "mark-ik/woodshed",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "df17acf65fe741996f90694de07d34d183b7e1bc",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 9,
+        "old_owner_cargo_manifests": 3
+      }
+    },
+    {
+      "id": "hocket",
+      "canonical_slug": "mark-ik/hocket",
+      "classification": "product",
+      "batch": "product",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "7beef7c6f026ad9aab23eba65bfeb9345f4002e2",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-29T01:58:01Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/hocket",
+        "present": true,
+        "origin_slug": "mark-ik/hocket",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "7beef7c6f026ad9aab23eba65bfeb9345f4002e2",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 6,
+        "old_owner_cargo_manifests": 1
+      }
+    },
+    {
+      "id": "isometry",
+      "canonical_slug": "mark-ik/isometry",
+      "classification": "product",
+      "batch": "product",
+      "disposition": "candidate",
+      "visibility": "public",
+      "archived": false,
+      "fork": false,
+      "default_branch": "main",
+      "default_branch_head": "e1e7d53728a32539e41d608c712b8bb2cd3ab2a8",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-29T16:32:22Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "repos/isometry",
+        "present": true,
+        "origin_slug": "mark-ik/isometry",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "e1e7d53728a32539e41d608c712b8bb2cd3ab2a8",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 1,
+        "old_owner_cargo_manifests": 1
+      }
+    },
+    {
+      "id": "arboard-fork",
+      "canonical_slug": "mark-ik/arboard",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "master",
+      "default_branch_head": "9f7b05ca9178e3c28ec5e59a522786a8ea591cce",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-23T03:39:38Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/arboard",
+        "present": true,
+        "origin_slug": "mark-ik/arboard",
+        "origin_matches_authority": true,
+        "branch": "custom-formats",
+        "head": "d57a91ccdbc54ed2eadd991d317272ba7005416f",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 2,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "boa-fork",
+      "canonical_slug": "mark-ik/boa",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "f54077467b4b01eb0fe221cfff470a8546ebe36c",
+      "license_detection": "mit",
+      "updated_at": "2026-07-26T00:14:46Z",
+      "actions_workflows": 12,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/boa",
+        "present": true,
+        "origin_slug": "mark-ik/boa",
+        "origin_matches_authority": true,
+        "branch": "genet",
+        "head": "114c45a9f762e488a6a454cb4d3d3d61bea6a0e3",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "emissary-fork",
+      "canonical_slug": "mark-ik/emissary",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "master",
+      "default_branch_head": "30ef8774b65ad981e8574af7bcd301bf745d7ecd",
+      "license_detection": "mit",
+      "updated_at": "2026-07-29T18:23:34Z",
+      "actions_workflows": 4,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/emissary",
+        "present": true,
+        "origin_slug": "mark-ik/emissary",
+        "origin_matches_authority": true,
+        "branch": "master",
+        "head": "30ef8774b65ad981e8574af7bcd301bf745d7ecd",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "iroh-fork",
+      "canonical_slug": "mark-ik/iroh",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "117ae31c9084d4b61b25975febc35ea28642038e",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-25T23:56:07Z",
+      "actions_workflows": 14,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/iroh",
+        "present": true,
+        "origin_slug": "mark-ik/iroh",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "117ae31c9084d4b61b25975febc35ea28642038e",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "iroh-address-lookups-fork",
+      "canonical_slug": "mark-ik/iroh-address-lookups",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "293cd810bfdba0d95e732f56978d3fc5d6b71c57",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-29T15:40:51Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": null
+    },
+    {
+      "id": "p2panda-fork",
+      "canonical_slug": "mark-ik/p2panda",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "44e067d8d4c346ce69d49d9315ea5fa66e59fd31",
+      "license_detection": "none-detected",
+      "updated_at": "2026-07-29T18:19:32Z",
+      "actions_workflows": 3,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/p2panda",
+        "present": true,
+        "origin_slug": "mark-ik/p2panda",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "44e067d8d4c346ce69d49d9315ea5fa66e59fd31",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "piccolo-fork",
+      "canonical_slug": "mark-ik/piccolo",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "master",
+      "default_branch_head": "e77309c648b91d59c1ded9b20e54999ae8b19741",
+      "license_detection": "cc0-1.0",
+      "updated_at": "2026-06-11T05:15:51Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/piccolo",
+        "present": true,
+        "origin_slug": "mark-ik/piccolo",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "e77309c648b91d59c1ded9b20e54999ae8b19741",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "stylo-fork",
+      "canonical_slug": "mark-ik/stylo",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "b157d925267fdd37b03f43e3387ab2f0909e57b0",
+      "license_detection": "none-detected",
+      "updated_at": "2026-07-19T04:48:51Z",
+      "actions_workflows": 3,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/stylo",
+        "present": true,
+        "origin_slug": "mark-ik/stylo",
+        "origin_matches_authority": true,
+        "branch": "genet-rename",
+        "head": "b157d925267fdd37b03f43e3387ab2f0909e57b0",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 5,
+        "old_owner_cargo_manifests": 5
+      }
+    },
+    {
+      "id": "swarm-discovery-fork",
+      "canonical_slug": "mark-ik/swarm-discovery",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "master",
+      "default_branch_head": "b41dbcc431f419ad0cd91f786d4d7c71ec6be9ce",
+      "license_detection": "none-detected",
+      "updated_at": "2026-07-29T15:40:53Z",
+      "actions_workflows": 0,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": null
+    },
+    {
+      "id": "vano-fork",
+      "canonical_slug": "mark-ik/vano",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "885814f2cdf3009ad87ba9212617ba7445259b66",
+      "license_detection": "mpl-2.0",
+      "updated_at": "2026-07-14T19:56:09Z",
+      "actions_workflows": 2,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [
+        "mark-ik/nova"
+      ],
+      "local": {
+        "locator": "crates/vano",
+        "present": true,
+        "origin_slug": "mark-ik/nova",
+        "origin_matches_authority": true,
+        "branch": "genet-embedder",
+        "head": "87ef049a509392f27d0b7d39ab9445abc7ea3d7d",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    },
+    {
+      "id": "xilem-fork",
+      "canonical_slug": "mark-ik/xilem",
+      "classification": "maintained-fork",
+      "batch": "fork-review",
+      "disposition": "hold",
+      "visibility": "public",
+      "archived": false,
+      "fork": true,
+      "default_branch": "main",
+      "default_branch_head": "c5950bcb03d4f3d187a20d1159f6aa276fd056bf",
+      "license_detection": "apache-2.0",
+      "updated_at": "2026-07-14T20:07:02Z",
+      "actions_workflows": 1,
+      "pages": {
+        "enabled": false
+      },
+      "github_packages": {
+        "status": "none-publicly-listed-api-incomplete",
+        "associated_count": 0
+      },
+      "declared_source_aliases": [],
+      "local": {
+        "locator": "crates/xilem",
+        "present": true,
+        "origin_slug": "mark-ik/xilem",
+        "origin_matches_authority": true,
+        "branch": "main",
+        "head": "c5950bcb03d4f3d187a20d1159f6aa276fd056bf",
+        "dirty_entries": 0,
+        "old_owner_tracked_files": 0,
+        "old_owner_cargo_manifests": 0
+      }
+    }
+  ],
+  "unresolved_products": [
+    {
+      "name": "Merecat",
+      "state": "unresolved-repository",
+      "evidence": "Current product language names Merecat, but no authoritative Code/repos Git checkout was found on 2026-07-29."
+    },
+    {
+      "name": "Strophe",
+      "state": "unresolved-repository",
+      "evidence": "Local testing material names Strophe, but no authoritative Code/repos Git checkout was found on 2026-07-29."
+    }
+  ],
+  "local_classification": {
+    "extra_git_repositories": [
+      {
+        "locator": "crates/weave",
+        "origin_slug": "Ataraxy-Labs/weave",
+        "classification": "external-donor"
+      },
+      {
+        "locator": "crates/wpt",
+        "origin_slug": "web-platform-tests/wpt",
+        "classification": "external-donor"
+      }
+    ],
+    "testing_area": {
+      "locator": "testing",
+      "classification": "local-testing",
+      "children": [
+        "_archive",
+        "_unsorted",
+        "genet",
+        "hocket",
+        "isometry",
+        "mere",
+        "rendering",
+        "strophe",
+        "turnstone",
+        "wavicle",
+        "woodshed"
+      ]
+    },
+    "generated_or_editorial_areas": [
+      "readme-clips",
+      "readme-proposals",
+      "scry-shots"
+    ]
+  },
+  "drift": []
+}

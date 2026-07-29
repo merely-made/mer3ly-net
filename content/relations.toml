@@ -1,0 +1,215 @@
+[[relation]]
+id = "genet-depends-on-netrender"
+source = "genet"
+target = "netrender"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Genet Cargo manifests use git packages from mark-ik/netrender."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "genet-depends-on-wgpu-scry"
+source = "genet"
+target = "wgpu-scry"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Genet Cargo manifests use the scrying package from mark-ik/wgpu-scry."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "hocket-depends-on-genet"
+source = "hocket"
+target = "genet"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Hocket's root Cargo manifest uses Cambium and Genet packages from mark-ik/genet."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "hocket-depends-on-mere"
+source = "hocket"
+target = "mere"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Hocket's root Cargo manifest uses Armillary, Luggage, Muniment, and Personae from mark-ik/mere."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "hocket-depends-on-netrender"
+source = "hocket"
+target = "netrender"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Hocket's root Cargo manifest uses rendering packages from mark-ik/netrender."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "hocket-depends-on-wavicle"
+source = "hocket"
+target = "wavicle"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Hocket's root Cargo manifest uses Wavicle with encoding enabled."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "hocket-depends-on-woodshed"
+source = "hocket"
+target = "woodshed"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Hocket's root Cargo manifest uses Woodshed's audio-primitives package."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "isometry-depends-on-genet"
+source = "isometry"
+target = "genet"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Isometry's root Cargo manifest uses Cambium and Genet packages from mark-ik/genet."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "isometry-depends-on-mere"
+source = "isometry"
+target = "mere"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Isometry's root Cargo manifest uses Mere graph, replication, identity, and Scenograph packages."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "isometry-depends-on-netrender"
+source = "isometry"
+target = "netrender"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Isometry's root Cargo manifest uses rendering packages from mark-ik/netrender."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "mere-depends-on-genet"
+source = "mere"
+target = "genet"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Mere Cargo manifests use Genet's host, document, layout, UI, and engine packages."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "mere-depends-on-netrender"
+source = "mere"
+target = "netrender"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Mere Cargo manifests use rendering packages from mark-ik/netrender."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "mere-depends-on-retinue"
+source = "mere"
+target = "retinue"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Mere's root Cargo manifest uses Retinue from mark-ik/retinue."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "turnstone-depends-on-genet"
+source = "turnstone"
+target = "genet"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Turnstone's root Cargo manifest uses Genet document, host, layout, UI, and scripting packages."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "turnstone-depends-on-mere"
+source = "turnstone"
+target = "mere"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Turnstone's root Cargo manifest uses Mere graph, host, memory, identity, and Scenograph packages."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "turnstone-depends-on-netrender"
+source = "turnstone"
+target = "netrender"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Turnstone's root Cargo manifest uses rendering packages from mark-ik/netrender."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "turnstone-hosts-mere"
+source = "turnstone"
+target = "mere"
+kind = "host_for"
+provenance = "curated"
+evidence = "Mere's README names Turnstone as the separate browser host that consumes the Mere library."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "woodshed-depends-on-genet"
+source = "woodshed"
+target = "genet"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Woodshed's root Cargo manifest uses Cambium and Genet packages from mark-ik/genet."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "woodshed-depends-on-mere"
+source = "woodshed"
+target = "mere"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Woodshed's root Cargo manifest uses Chartulary, Personae, and Scholia from mark-ik/mere."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "woodshed-depends-on-netrender"
+source = "woodshed"
+target = "netrender"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Woodshed's root Cargo manifest uses rendering packages from mark-ik/netrender."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "wgpu-scry-depends-on-wgpu-graft"
+source = "wgpu-scry"
+target = "wgpu-graft"
+kind = "depends_on"
+provenance = "derived"
+evidence = "wgpu-scry's root Cargo manifest uses grafting from mark-ik/wgpu-graft."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "wgpu-weld-depends-on-wgpu-graft"
+source = "wgpu-weld"
+target = "wgpu-graft"
+kind = "depends_on"
+provenance = "derived"
+evidence = "wgpu-weld's root Cargo manifest uses grafting from mark-ik/wgpu-graft."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "genet-renders-with-netrender"
+source = "genet"
+target = "netrender"
+kind = "renders_with"
+provenance = "curated"
+evidence = "Genet's README identifies Netrender as the realization engine for Genet paint lists."
+verified_on = "2026-07-29"
+
+[[relation]]
+id = "mere-renders-with-genet"
+source = "mere"
+target = "genet"
+kind = "renders_with"
+provenance = "curated"
+evidence = "Mere's README identifies Genet as its HTML engine and product-neutral host layer."
+verified_on = "2026-07-29"
