@@ -22,35 +22,35 @@ public = true
 
 [[repository]]
 id = "genet"
-github_slug = "mark-ik/genet"
+github_slug = "merely-made/genet"
 name = "Genet"
 summary = "An embeddable Rust web engine with modular static, interactive, scripted, and full-web profiles."
 class = "platform"
 status = "active"
 license = "MPL-2.0"
-homepage = "https://github.com/mark-ik/genet"
+homepage = "https://github.com/merely-made/genet"
 public = true
 
 [[repository]]
 id = "mere"
-github_slug = "mark-ik/mere"
+github_slug = "merely-made/mere"
 name = "Mere"
 summary = "The graph-first library for addressable content, spatial arrangement, local memory, and trusted exchange."
 class = "platform"
 status = "active"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/mark-ik/mere"
+homepage = "https://github.com/merely-made/mere"
 public = true
 
 [[repository]]
 id = "retinue"
-github_slug = "mark-ik/retinue"
+github_slug = "merely-made/retinue"
 name = "Retinue"
 summary = "A Rust implementation of Reticulum and the Merely radio stack for identity, links, resources, and reliable streams."
 class = "platform"
 status = "active"
 license = "MPL-2.0"
-homepage = "https://github.com/mark-ik/retinue"
+homepage = "https://github.com/merely-made/retinue"
 public = true
 
 [[repository]]

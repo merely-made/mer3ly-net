@@ -22,7 +22,7 @@ source = "hocket"
 target = "genet"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Hocket's root Cargo manifest uses Cambium and Genet packages from mark-ik/genet."
+evidence = "Hocket's root Cargo manifest uses Cambium and Genet packages from merely-made/genet."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -31,7 +31,7 @@ source = "hocket"
 target = "mere"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Hocket's root Cargo manifest uses Armillary, Luggage, Muniment, and Personae from mark-ik/mere."
+evidence = "Hocket's root Cargo manifest uses Armillary, Luggage, Muniment, and Personae from merely-made/mere."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -67,7 +67,7 @@ source = "isometry"
 target = "genet"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Isometry's root Cargo manifest uses Cambium and Genet packages from mark-ik/genet."
+evidence = "Isometry's root Cargo manifest uses Cambium and Genet packages from merely-made/genet."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -112,7 +112,7 @@ source = "mere"
 target = "retinue"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Mere's root Cargo manifest uses Retinue from mark-ik/retinue."
+evidence = "Mere's root Cargo manifest uses Retinue from merely-made/retinue."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -157,7 +157,7 @@ source = "woodshed"
 target = "genet"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Woodshed's root Cargo manifest uses Cambium and Genet packages from mark-ik/genet."
+evidence = "Woodshed's root Cargo manifest uses Cambium and Genet packages from merely-made/genet."
 verified_on = "2026-07-29"
 
 [[relation]]
@@ -166,7 +166,7 @@ source = "woodshed"
 target = "mere"
 kind = "depends_on"
 provenance = "derived"
-evidence = "Woodshed's root Cargo manifest uses Chartulary, Personae, and Scholia from mark-ik/mere."
+evidence = "Woodshed's root Cargo manifest uses Chartulary, Personae, and Scholia from merely-made/mere."
 verified_on = "2026-07-29"
 
 [[relation]]

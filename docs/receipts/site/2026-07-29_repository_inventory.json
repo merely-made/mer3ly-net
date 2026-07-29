@@ -1,11 +1,11 @@
 {
   "schema": "mer3ly.repository-inventory/v1",
-  "generated_at_utc": "2026-07-29T21:42:48Z",
+  "generated_at_utc": "2026-07-29T23:29:31Z",
   "generated_by": "scripts/inventory-repositories.ps1",
   "authority_sha256": {
-    "content/repositories.toml": "81689aec7dbd691951d9c1aa177430427d6fac25bbbb0e06f45d1612b3b9e879",
-    "content/relations.toml": "5723d94e931336783b58cd3e38f38d5328a11b22531af95defab7cc48c111745",
-    "ops/org-migration.toml": "e52767ef41115d98605565fe05085edf46d46b8e5d42abde4035a80d287dee43"
+    "content/repositories.toml": "3827077cd3c8d17ecd5598411034556aa008d029b31f0aefe5fe55acfe4869a3",
+    "content/relations.toml": "2f46b4b11603bfd407b9e58e11d3fd817d87dd7a7b9bcde089255f6c439876d9",
+    "ops/org-migration.toml": "ea7b4e38b81c92c4ebffc51e1b7834ea26ae34c4e15f1638b46d24de271b39a7"
   },
   "github_package_queries": {
     "owners": [
@@ -70,9 +70,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "f1e03d05ac4cf76b8fba08ea678886cd28ff4d8c",
+      "default_branch_head": "c04499fe5fa7034c803156b829a912d57ea91825",
       "license_detection": "none-detected",
-      "updated_at": "2026-07-29T20:26:55Z",
+      "updated_at": "2026-07-29T21:44:43Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": true,
@@ -95,9 +95,9 @@
         "origin_slug": "merely-made/mer3ly-net",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "f1e03d05ac4cf76b8fba08ea678886cd28ff4d8c",
-        "dirty_entries": 12,
-        "old_owner_tracked_files": 13,
+        "head": "c04499fe5fa7034c803156b829a912d57ea91825",
+        "dirty_entries": 9,
+        "old_owner_tracked_files": 15,
         "old_owner_cargo_manifests": 0
       }
     },
@@ -147,9 +147,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "95d110c3a76c6cd3f06c1c4c39f56ca3804d8273",
+      "default_branch_head": "8a7eac7c0639830c7f4c9b61451c3b18f951c1a9",
       "license_detection": "mit",
-      "updated_at": "2026-07-29T20:48:52Z",
+      "updated_at": "2026-07-29T23:22:05Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
@@ -167,9 +167,9 @@
         "origin_slug": "merely-made/smolweb",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "95d110c3a76c6cd3f06c1c4c39f56ca3804d8273",
+        "head": "8a7eac7c0639830c7f4c9b61451c3b18f951c1a9",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 5,
+        "old_owner_tracked_files": 0,
         "old_owner_cargo_manifests": 0
       }
     },
@@ -255,9 +255,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "0af3b54a0d3df3686a28ed99b49f654e4720522c",
+      "default_branch_head": "ec6b4565a29f299c1172ab6d744eb30e5cd6e621",
       "license_detection": "other",
-      "updated_at": "2026-07-29T20:51:39Z",
+      "updated_at": "2026-07-29T23:22:08Z",
       "actions_workflows": 2,
       "pages": {
         "enabled": false
@@ -275,9 +275,9 @@
         "origin_slug": "merely-made/wgpu-scry",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "0af3b54a0d3df3686a28ed99b49f654e4720522c",
+        "head": "ec6b4565a29f299c1172ab6d744eb30e5cd6e621",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 4,
+        "old_owner_tracked_files": 2,
         "old_owner_cargo_manifests": 0
       }
     },
@@ -319,17 +319,17 @@
     },
     {
       "id": "genet",
-      "canonical_slug": "mark-ik/genet",
+      "canonical_slug": "merely-made/genet",
       "classification": "platform",
       "batch": "platform",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "4ca5b45f0aa79b9ae6d1e2f4592cdea64a89f58e",
+      "default_branch_head": "2955d41c6c981f650f8c2274e8f5cba9aea08a96",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-29T21:13:33Z",
+      "updated_at": "2026-07-29T22:26:15Z",
       "actions_workflows": 3,
       "pages": {
         "enabled": false
@@ -339,33 +339,34 @@
         "associated_count": 0
       },
       "declared_source_aliases": [
+        "mark-ik/genet",
         "mark-ik/serval"
       ],
       "local": {
         "locator": "repos/genet",
         "present": true,
-        "origin_slug": "mark-ik/genet",
+        "origin_slug": "merely-made/genet",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "4ca5b45f0aa79b9ae6d1e2f4592cdea64a89f58e",
+        "head": "2955d41c6c981f650f8c2274e8f5cba9aea08a96",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 84,
-        "old_owner_cargo_manifests": 47
+        "old_owner_tracked_files": 42,
+        "old_owner_cargo_manifests": 13
       }
     },
     {
       "id": "mere",
-      "canonical_slug": "mark-ik/mere",
+      "canonical_slug": "merely-made/mere",
       "classification": "platform",
       "batch": "platform",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "48e277d42ac90baf2f98281f6cbc879eba099bf4",
+      "default_branch_head": "d5af0618cb30077af3f1df11b65dc6e7e0da2bd0",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T21:13:25Z",
+      "updated_at": "2026-07-29T22:38:04Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
@@ -374,32 +375,34 @@
         "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/mere"
+      ],
       "local": {
         "locator": "repos/mere",
         "present": true,
-        "origin_slug": "mark-ik/mere",
+        "origin_slug": "merely-made/mere",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "48e277d42ac90baf2f98281f6cbc879eba099bf4",
+        "head": "d5af0618cb30077af3f1df11b65dc6e7e0da2bd0",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 71,
-        "old_owner_cargo_manifests": 21
+        "old_owner_tracked_files": 30,
+        "old_owner_cargo_manifests": 1
       }
     },
     {
       "id": "retinue",
-      "canonical_slug": "mark-ik/retinue",
+      "canonical_slug": "merely-made/retinue",
       "classification": "platform",
       "batch": "platform",
-      "disposition": "candidate",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "6f04bb93e248d08756b0208db9c7b3b397182f79",
+      "default_branch_head": "7439a79de4dbdb98292f52906cacc0c7fad024e3",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-29T18:30:44Z",
+      "updated_at": "2026-07-29T22:26:09Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": false
@@ -408,17 +411,19 @@
         "status": "none-detected",
         "associated_count": 0
       },
-      "declared_source_aliases": [],
+      "declared_source_aliases": [
+        "mark-ik/retinue"
+      ],
       "local": {
         "locator": "repos/retinue",
         "present": true,
-        "origin_slug": "mark-ik/retinue",
+        "origin_slug": "merely-made/retinue",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "6f04bb93e248d08756b0208db9c7b3b397182f79",
+        "head": "7439a79de4dbdb98292f52906cacc0c7fad024e3",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 16,
-        "old_owner_cargo_manifests": 6
+        "old_owner_tracked_files": 2,
+        "old_owner_cargo_manifests": 0
       }
     },
     {
@@ -431,9 +436,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "00600c4d798ef679c4422a35ed9ecff734c8cef0",
+      "default_branch_head": "f019b23b960d48258861df0919d63357a810aaba",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T21:34:24Z",
+      "updated_at": "2026-07-29T23:22:06Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
@@ -449,9 +454,9 @@
         "origin_slug": "mark-ik/turnstone",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "00600c4d798ef679c4422a35ed9ecff734c8cef0",
+        "head": "f019b23b960d48258861df0919d63357a810aaba",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 2,
+        "old_owner_tracked_files": 1,
         "old_owner_cargo_manifests": 1
       }
     },
@@ -465,9 +470,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "6769012068e9ced358d9d1f1c980d41aaf6c4bca",
+      "default_branch_head": "99eba4aec1fb742980a3c416b714a6c0d32b6fee",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T21:34:14Z",
+      "updated_at": "2026-07-29T23:22:10Z",
       "actions_workflows": 2,
       "pages": {
         "enabled": false
@@ -483,10 +488,10 @@
         "origin_slug": "mark-ik/woodshed",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "6769012068e9ced358d9d1f1c980d41aaf6c4bca",
+        "head": "99eba4aec1fb742980a3c416b714a6c0d32b6fee",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 9,
-        "old_owner_cargo_manifests": 3
+        "old_owner_tracked_files": 5,
+        "old_owner_cargo_manifests": 1
       }
     },
     {
@@ -499,9 +504,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "4641fb30ab80997339e9bcbae297db23d26402d9",
+      "default_branch_head": "d89c862c7ade5de308eb17d1b5d0eea60f5b79f8",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T21:34:16Z",
+      "updated_at": "2026-07-29T23:22:01Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
@@ -517,9 +522,9 @@
         "origin_slug": "mark-ik/hocket",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "4641fb30ab80997339e9bcbae297db23d26402d9",
+        "head": "d89c862c7ade5de308eb17d1b5d0eea60f5b79f8",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 6,
+        "old_owner_tracked_files": 5,
         "old_owner_cargo_manifests": 1
       }
     },
@@ -533,9 +538,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "0d220ebe828d172323bb045a137aa52ca0bcb559",
+      "default_branch_head": "885d7dda41c973732e4946687ce2b7323daa3838",
       "license_detection": "apache-2.0",
-      "updated_at": "2026-07-29T21:34:30Z",
+      "updated_at": "2026-07-29T23:22:03Z",
       "actions_workflows": 0,
       "pages": {
         "enabled": false
@@ -551,9 +556,9 @@
         "origin_slug": "mark-ik/isometry",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "0d220ebe828d172323bb045a137aa52ca0bcb559",
+        "head": "885d7dda41c973732e4946687ce2b7323daa3838",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 2,
+        "old_owner_tracked_files": 1,
         "old_owner_cargo_manifests": 1
       }
     },
