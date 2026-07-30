@@ -4,9 +4,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$manifest = Join-Path $root "crates\repo-graph\Cargo.toml"
-$target = Join-Path $root "target\repo-graph"
-$bindgen = Join-Path $root ".tmp\repo-graph-bindgen"
+$manifest = Join-Path $root "crates/repo-graph/Cargo.toml"
+$target = Join-Path $root "target/repo-graph"
+$bindgen = Join-Path $root ".tmp/repo-graph-bindgen"
 $assets = Join-Path $root "assets"
 $originalEncodedRustflags = $env:CARGO_ENCODED_RUSTFLAGS
 $profileRoot = [Environment]::GetFolderPath("UserProfile")
@@ -41,7 +41,7 @@ try {
         throw "repository graph Wasm build failed"
     }
 
-    $wasm = Join-Path $target "wasm32-unknown-unknown\release\mer3ly_repo_graph.wasm"
+    $wasm = Join-Path $target "wasm32-unknown-unknown/release/mer3ly_repo_graph.wasm"
     wasm-bindgen `
         --target web `
         --no-typescript `

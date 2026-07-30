@@ -1374,8 +1374,10 @@ dependencies = [
  "cambium",
  "genet-scripted-dom",
  "layout-dom-api",
+ "regex",
  "serde",
  "serde_json",
+ "sha2",
  "toml",
 ]
 

@@ -1,0 +1,14 @@
+{
+  "name": "mer3ly-site-smoke",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node scripts/smoke-site.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

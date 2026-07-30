@@ -2,6 +2,7 @@ use std::env;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+use mer3ly_site::artifact::validate_public_artifact;
 use mer3ly_site::repositories::{Authority, PublicMetadataCache};
 
 fn main() -> ExitCode {
@@ -21,14 +22,14 @@ fn run() -> Result<(), String> {
         .next()
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")));
-    let metadata_path = arguments.next().map(PathBuf::from);
+    let path_argument = arguments.next().map(PathBuf::from);
     if arguments.next().is_some() {
         return Err(
-            "usage: authority [validate|summary|inventory-targets|public-repositories|validate-metadata] [root] [metadata-path]"
+            "usage: authority [validate|summary|inventory-targets|public-repositories|validate-metadata|validate-artifact] [root] [metadata-or-artifact-path]"
                 .to_owned(),
         );
     }
-    if command != "validate-metadata" && metadata_path.is_some() {
+    if command != "validate-metadata" && command != "validate-artifact" && path_argument.is_some() {
         return Err(format!("{command} does not accept a metadata path"));
     }
 
@@ -93,7 +94,7 @@ fn run() -> Result<(), String> {
             );
         }
         "validate-metadata" => {
-            let path = metadata_path.unwrap_or_else(|| root.join("content/github-metadata.json"));
+            let path = path_argument.unwrap_or_else(|| root.join("content/github-metadata.json"));
             let metadata = PublicMetadataCache::load(&path).map_err(|error| error.to_string())?;
             metadata.validate(&authority).map_err(|errors| {
                 format!("public metadata validation failed:\n{}", errors.join("\n"))
@@ -104,9 +105,28 @@ fn run() -> Result<(), String> {
                 metadata.generated_at_utc
             );
         }
+        "validate-artifact" => {
+            let artifact_path = path_argument.unwrap_or_else(|| root.join(".tmp/pages-artifact"));
+            let metadata_path = root.join("content/github-metadata.json");
+            let metadata =
+                PublicMetadataCache::load(&metadata_path).map_err(|error| error.to_string())?;
+            metadata.validate(&authority).map_err(|errors| {
+                format!("public metadata validation failed:\n{}", errors.join("\n"))
+            })?;
+            let receipt =
+                validate_public_artifact(&artifact_path, &authority, &metadata, &metadata_path)
+                    .map_err(|errors| {
+                        format!("public artifact validation failed:\n{}", errors.join("\n"))
+                    })?;
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&receipt)
+                    .map_err(|error| format!("serialize public artifact receipt: {error}"))?
+            );
+        }
         _ => {
             return Err(format!(
-                "unknown command {command}; expected validate, summary, inventory-targets, public-repositories, or validate-metadata"
+                "unknown command {command}; expected validate, summary, inventory-targets, public-repositories, validate-metadata, or validate-artifact"
             ));
         }
     }
