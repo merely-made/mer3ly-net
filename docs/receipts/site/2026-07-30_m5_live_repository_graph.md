@@ -4,9 +4,11 @@
 
 **Implementation commit:** `80351f6`
 
+**Pages run:** `30526690649`
+
 **Result:** model, static fallback, native and Wasm builds, privacy,
 responsive-browser, keyboard, pointer, reduced-motion, and failure-path checks
-accepted. M6 was not started.
+and public deployment accepted. M6 was not started.
 
 ## What changed
 
@@ -140,8 +142,21 @@ Cloudflare currently returns:
 
 ## Deployment
 
-Public deployment verification will be appended after the accepted commits
-are pushed.
+GitHub Pages deployed acceptance head `f5b3a54` successfully in run
+`30526690649`. The Cloudflare-fronted public site then reported:
+
+| Check | Result |
+| --- | --- |
+| `/repos/` static authority | 16 repository cards and 50 relation text projections |
+| Live graph | `ready`, 16 nodes, 25 edges |
+| Layout engine | `mere-arrangements/radial+unreachable-lane` |
+| Desktop overflow | 0 pixels at 1440 by 900 |
+| Browser diagnostics | none |
+| Forced WebGPU failure | `unavailable`, interface hidden, 16 cards retained |
+| Graph JavaScript MIME | `text/javascript` |
+| Graph Wasm MIME | `application/wasm` |
+| HSTS | `max-age=2592000` |
+| Plain HTTP `/repos/` | 301 to the matching HTTPS URL |
 
 ## Stop
 
