@@ -12,3 +12,7 @@ site, public repository authority, and optional repository graph.
 The inventory contains public GitHub metadata and workspace-relative checkout
 locators. It must not contain credentials, private repository metadata, or
 absolute machine paths.
+
+## Receipts
+
+- [M3 static Cambium/Genet site](2026-07-30_m3_static_site.md)

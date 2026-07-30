@@ -1,7 +1,7 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M2 complete; Vano admitted to `merely-made`, ten thin forks kept
-under `mark-ik`; stopped before M3
+**Status:** M3 code and public deployment complete; HTTP-to-HTTPS enforcement
+held at the Cloudflare boundary; stopped before M4
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -70,12 +70,13 @@ This snapshot is evidence for planning, not a permanent inventory.
 - `merecat` and `strophe` appear in current product language or local testing
   material but do not have an authoritative repository in the inspected
   `Code/repos/` inventory. The site must not invent repository nodes for them.
-- Mer3ly currently serves generated, roughly 1.1 MB HTML bundles from
-  `html/index.html` and `html/radio.html`.
-- GitHub Pages currently reports a legacy build from `main` at `/`, a custom
-  domain of `mer3ly.net`, and HTTPS enforcement disabled.
-- The generated site footer currently contains personal contact information.
-  That material needs an explicit public-contact decision before regeneration.
+- M3 replaced the generated, roughly 1.1 MB runtime bundle with 28,025 bytes of
+  base HTML and CSS plus a 177,124-byte social image.
+- GitHub's legacy Pages build completes from `main`, while the public domain is
+  Cloudflare-fronted. HTTPS works, but plain HTTP still returns 200 and
+  GitHub cannot issue its own certificate through the current DNS boundary.
+- The generated footer contains only the intentionally public company
+  location, domain, and GitHub organization contact.
 
 Refresh this evidence before the first transfer and store the output as a
 receipt. Do not treat the counts above as a live ledger.
@@ -489,6 +490,14 @@ and HTTPS enforced after domain verification.
 - the current React/bundler manifest is gone;
 - Pages serves the custom domain over enforced HTTPS.
 
+**M3 result, 2026-07-30:** The source, size, privacy, Genet layout, headed
+browser, and public-deployment gates passed. The last condition is only partly
+met: the custom domain serves correctly over HTTPS, but HTTP does not redirect
+and GitHub cannot enable its certificate while Cloudflare fronts the domain.
+The exact receipt is
+[`docs/receipts/site/2026-07-30_m3_static_site.md`](receipts/site/2026-07-30_m3_static_site.md).
+M4 was not started.
+
 ### M4: Publish the semantic `/repos/` page
 
 Render the repository manifest as ordinary HTML first.
@@ -645,5 +654,9 @@ dependency-aware batches and their stop rules.
 
 The maintained-fork review was authorized on 2026-07-30. It transferred Vano,
 retained ten thinner forks under `mark-ik`, and canonicalized Genet's Vano
-source without changing its locked commit. M3 is the next implementation
-boundary.
+source without changing its locked commit.
+
+M3 was implemented and accepted on 2026-07-30. Commit `b3e99e4` replaced the
+generated runtime site with the static Cambium/Genet build. The public domain
+serves the result through Cloudflare; HTTP-to-HTTPS enforcement remains an
+external configuration gate. M4 is the next implementation boundary.
