@@ -1,6 +1,7 @@
 # Merely project showcase
 
-**Status:** M7 authorized; implementation in progress
+**Status:** M7 complete; accepted by the
+[project showcase receipt](receipts/site/2026-07-30_m7_project_showcase.md)
 
 **Authority:** This is the canonical plan for turning Mer3ly's repository
 inventory into a public project showcase. It follows the completed
