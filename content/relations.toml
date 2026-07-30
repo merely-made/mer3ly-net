@@ -8,6 +8,15 @@ evidence = "Genet Cargo manifests use git packages from merely-made/netrender."
 verified_on = "2026-07-29"
 
 [[relation]]
+id = "genet-depends-on-vano"
+source = "genet"
+target = "vano"
+kind = "depends_on"
+provenance = "derived"
+evidence = "Genet's root Cargo manifest resolves nova_vm from merely-made/vano."
+verified_on = "2026-07-30"
+
+[[relation]]
 id = "genet-depends-on-wgpu-scry"
 source = "genet"
 target = "wgpu-scry"

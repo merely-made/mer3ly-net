@@ -162,3 +162,14 @@ status = "prototype"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/merely-made/isometry"
 public = true
+
+[[repository]]
+id = "vano"
+github_slug = "merely-made/vano"
+name = "Vano"
+summary = "A data-oriented JavaScript engine for Genet, maintained as a substantial Nova fork."
+class = "foundation"
+status = "active"
+license = "MPL-2.0"
+homepage = "https://github.com/merely-made/vano"
+public = true

@@ -1,6 +1,7 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M2 product batch complete; stopped before maintained-fork review
+**Status:** M2 complete; Vano admitted to `merely-made`, ten thin forks kept
+under `mark-ik`; stopped before M3
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -425,6 +426,37 @@ The four product receipts under `docs/receipts/org-transfer/` record heads,
 settings, redirects, commits, and verification. The transfer sequence stops
 before the maintained-fork review; none of the fork-review holds moved.
 
+#### M2 maintained-fork review receipt: 2026-07-30
+
+The review kept ten thin forks under `mark-ik` and admitted Vano to
+`merely-made`.
+
+- All eleven are genuine GitHub forks with explicit upstream parents and no
+  target-name or fork-network collision in `merely-made`.
+- Vano crossed the organization threshold because its data-oriented engine
+  architecture is integral to Genet and its maintained branch carries a
+  substantial independent project surface.
+- Arboard, Boa, Iroh Address Lookups, P2panda, Piccolo, Stylo, and Swarm
+  Discovery remain personal patch carriers. Emissary remains an evaluation
+  patch, Iroh is an upstream mirror, and Xilem's former Woodshed branches are
+  retired from active manifests.
+- Future fork admissions use the same test: integral to a Merely project and
+  substantial enough to present an independent maintained surface.
+- Redacted current-tree and fork-only history scans found no credential,
+  machine-profile path, machine name, configured contact address, or
+  first-party private endpoint. Two P2panda detector matches are inherited
+  variable names, not credential material.
+- Vano's integration line fast-forwarded `main`; project commit `1816f328`
+  established its identity and organization metadata before transfer.
+- Genet now resolves `merely-made/vano` while preserving Vano commit
+  `22b42989` in the ignored local lock. A clean-path locked offline check
+  compiled that commit from the canonical repository.
+
+The aggregate fork review receipt is
+`docs/receipts/org-transfer/2026-07-30_fork_review.md`; Vano's repository
+receipt is `docs/receipts/org-transfer/vano.md`. No other fork transferred,
+rewrote history, deleted a repository, or changed archival state.
+
 ### M3: Replace the generated site bundle with a static Cambium build
 
 Create a small Rust site builder. Cambium views build `ScriptedDom` trees;
@@ -575,14 +607,16 @@ Do not collapse these into one claim:
 
 These do not block M0:
 
-1. Whether maintained forks belong in `merely-made`, stay under `mark-ik`, or
-   move to a separate fork-focused organization.
-2. Whether Mer3ly's source and editorial content receive an explicit license.
-3. Which public contact channel replaces the current personal footer details.
-4. Whether the final Pages deployment commits generated `html/` or deploys
+1. Whether Mer3ly's source and editorial content receive an explicit license.
+2. Which public contact channel replaces the current personal footer details.
+3. Whether the final Pages deployment commits generated `html/` or deploys
    only an Actions artifact. The recommended endpoint is the artifact.
-5. Whether repository metadata refreshes on a schedule alone or later receives
+4. Whether repository metadata refreshes on a schedule alone or later receives
    narrow cross-repository dispatch events.
+
+Maintained-fork ownership was resolved on 2026-07-30: Vano belongs in
+`merely-made`; the ten thinner forks stay under `mark-ik`. Re-run the
+integral-and-substantial test as those forks evolve.
 
 ## Authorization history
 
@@ -606,6 +640,10 @@ M0 was reviewed and accepted on 2026-07-29, then committed as `965fc2a`. No
 GitHub ownership, Pages deployment, or site implementation changed in M0.
 
 M1 was reviewed and accepted on 2026-07-29. The refreshed authenticated audit
-reported 13 ready candidates and 0 blockers. M2 is authorized through the
-dependency-aware batches and their stop rules; maintained forks remain a
-separate decision.
+reported 13 ready candidates and 0 blockers. M2 was executed through the
+dependency-aware batches and their stop rules.
+
+The maintained-fork review was authorized on 2026-07-30. It transferred Vano,
+retained ten thinner forks under `mark-ik`, and canonicalized Genet's Vano
+source without changing its locked commit. M3 is the next implementation
+boundary.

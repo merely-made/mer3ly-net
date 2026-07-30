@@ -90,6 +90,8 @@ pub struct MigrationManifest {
     #[serde(default)]
     pub publication_gate_receipt: Option<String>,
     #[serde(default)]
+    pub fork_review_receipt: Option<String>,
+    #[serde(default)]
     pub migration: Vec<MigrationRecord>,
     #[serde(default)]
     pub unresolved_product: Vec<UnresolvedProduct>,
@@ -155,6 +157,7 @@ pub enum MigrationDisposition {
     AlreadyInOrg,
     Candidate,
     Hold,
+    KeepPersonal,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -490,6 +493,26 @@ impl Authority {
                         ));
                     }
                 }
+                MigrationDisposition::KeepPersonal => {
+                    if migration.classification != MigrationClass::MaintainedFork {
+                        errors.push(format!(
+                            "migration {} keeps personal ownership but is not a maintained fork",
+                            migration.id
+                        ));
+                    }
+                    if migration.target_slug.is_some() {
+                        errors.push(format!(
+                            "migration {} keeps personal ownership but claims a target slug",
+                            migration.id
+                        ));
+                    }
+                    if !migration.current_slug.starts_with("mark-ik/") {
+                        errors.push(format!(
+                            "migration {} keeps personal ownership outside mark-ik",
+                            migration.id
+                        ));
+                    }
+                }
             }
         }
 
@@ -511,6 +534,9 @@ impl Authority {
 
         check_receipt_path(&self.migration.inventory_receipt, &mut errors);
         if let Some(receipt) = &self.migration.publication_gate_receipt {
+            check_receipt_path(receipt, &mut errors);
+        }
+        if let Some(receipt) = &self.migration.fork_review_receipt {
             check_receipt_path(receipt, &mut errors);
         }
 

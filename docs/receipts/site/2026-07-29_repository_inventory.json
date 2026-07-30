@@ -1,11 +1,11 @@
 {
   "schema": "mer3ly.repository-inventory/v1",
-  "generated_at_utc": "2026-07-30T00:26:23Z",
+  "generated_at_utc": "2026-07-30T02:19:43Z",
   "generated_by": "scripts/inventory-repositories.ps1",
   "authority_sha256": {
-    "content/repositories.toml": "f1c052a3b0481d31400e8271b57dffa6c67a178fdf0095ed75bf80fbd2c60306",
-    "content/relations.toml": "2f46b4b11603bfd407b9e58e11d3fd817d87dd7a7b9bcde089255f6c439876d9",
-    "ops/org-migration.toml": "7d5566a6c55aff8a5b92e9b780d92f37fd58caeefe57feeea32dbbc3995ae68e"
+    "content/repositories.toml": "18262bc929abb7fe62aef2b0a824cfc49da2834894c52aa173b1f3f2d33a5101",
+    "content/relations.toml": "24073565208a888dbe94e0a36907fa7ddad43620526344deddfdb8adc9740edc",
+    "ops/org-migration.toml": "138f6068025d7f38681bc543ad695b8359bdd7b8827441644b7862b17bd9985d"
   },
   "github_package_queries": {
     "owners": [
@@ -21,8 +21,8 @@
     ],
     "failures": [],
     "public_ui": {
-      "merely-made": "none-publicly-listed",
-      "mark-ik": "none-publicly-listed"
+      "mark-ik": "none-publicly-listed",
+      "merely-made": "none-publicly-listed"
     }
   },
   "repositories": [
@@ -70,9 +70,9 @@
       "archived": false,
       "fork": false,
       "default_branch": "main",
-      "default_branch_head": "8b0f50ab4b4a00a3bdf31bd550d1ca6dcf6ae65c",
+      "default_branch_head": "bfe5a79f1ebbd8f0cf441ae0b76df8ba2ad37acb",
       "license_detection": "none-detected",
-      "updated_at": "2026-07-29T23:30:51Z",
+      "updated_at": "2026-07-30T00:26:55Z",
       "actions_workflows": 1,
       "pages": {
         "enabled": true,
@@ -95,9 +95,9 @@
         "origin_slug": "merely-made/mer3ly-net",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "8b0f50ab4b4a00a3bdf31bd550d1ca6dcf6ae65c",
-        "dirty_entries": 9,
-        "old_owner_tracked_files": 18,
+        "head": "bfe5a79f1ebbd8f0cf441ae0b76df8ba2ad37acb",
+        "dirty_entries": 11,
+        "old_owner_tracked_files": 21,
         "old_owner_cargo_manifests": 0
       }
     },
@@ -327,9 +327,9 @@
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "2955d41c6c981f650f8c2274e8f5cba9aea08a96",
+      "default_branch_head": "5a8d2734c76ac4c4df665a567141ca97d2e6fdd9",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-29T22:26:15Z",
+      "updated_at": "2026-07-30T02:13:13Z",
       "actions_workflows": 3,
       "pages": {
         "enabled": false
@@ -348,9 +348,9 @@
         "origin_slug": "merely-made/genet",
         "origin_matches_authority": true,
         "branch": "main",
-        "head": "2955d41c6c981f650f8c2274e8f5cba9aea08a96",
+        "head": "5a8d2734c76ac4c4df665a567141ca97d2e6fdd9",
         "dirty_entries": 0,
-        "old_owner_tracked_files": 42,
+        "old_owner_tracked_files": 36,
         "old_owner_cargo_manifests": 13
       }
     },
@@ -575,7 +575,7 @@
       "canonical_slug": "mark-ik/arboard",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -609,7 +609,7 @@
       "canonical_slug": "mark-ik/boa",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -643,7 +643,7 @@
       "canonical_slug": "mark-ik/emissary",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -677,7 +677,7 @@
       "canonical_slug": "mark-ik/iroh",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -711,7 +711,7 @@
       "canonical_slug": "mark-ik/iroh-address-lookups",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -735,7 +735,7 @@
       "canonical_slug": "mark-ik/p2panda",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -769,7 +769,7 @@
       "canonical_slug": "mark-ik/piccolo",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -803,7 +803,7 @@
       "canonical_slug": "mark-ik/stylo",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -837,7 +837,7 @@
       "canonical_slug": "mark-ik/swarm-discovery",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,
@@ -857,18 +857,18 @@
       "local": null
     },
     {
-      "id": "vano-fork",
-      "canonical_slug": "mark-ik/vano",
-      "classification": "maintained-fork",
+      "id": "vano",
+      "canonical_slug": "merely-made/vano",
+      "classification": "foundation",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "already-in-org",
       "visibility": "public",
       "archived": false,
       "fork": true,
       "default_branch": "main",
-      "default_branch_head": "885814f2cdf3009ad87ba9212617ba7445259b66",
+      "default_branch_head": "1816f328fab7151a06e999d4353022fabd9b7d28",
       "license_detection": "mpl-2.0",
-      "updated_at": "2026-07-14T19:56:09Z",
+      "updated_at": "2026-07-30T02:13:31Z",
       "actions_workflows": 2,
       "pages": {
         "enabled": false
@@ -878,15 +878,16 @@
         "associated_count": 0
       },
       "declared_source_aliases": [
+        "mark-ik/vano",
         "mark-ik/nova"
       ],
       "local": {
         "locator": "crates/vano",
         "present": true,
-        "origin_slug": "mark-ik/nova",
+        "origin_slug": "merely-made/vano",
         "origin_matches_authority": true,
-        "branch": "genet-embedder",
-        "head": "87ef049a509392f27d0b7d39ab9445abc7ea3d7d",
+        "branch": "main",
+        "head": "1816f328fab7151a06e999d4353022fabd9b7d28",
         "dirty_entries": 0,
         "old_owner_tracked_files": 0,
         "old_owner_cargo_manifests": 0
@@ -897,7 +898,7 @@
       "canonical_slug": "mark-ik/xilem",
       "classification": "maintained-fork",
       "batch": "fork-review",
-      "disposition": "hold",
+      "disposition": "keep-personal",
       "visibility": "public",
       "archived": false,
       "fork": true,

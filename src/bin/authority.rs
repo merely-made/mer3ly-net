@@ -57,8 +57,17 @@ fn run() -> Result<(), String> {
                     record.disposition == mer3ly_site::repositories::MigrationDisposition::Hold
                 })
                 .count();
+            let personal_forks = authority
+                .migration
+                .migration
+                .iter()
+                .filter(|record| {
+                    record.disposition
+                        == mer3ly_site::repositories::MigrationDisposition::KeepPersonal
+                })
+                .count();
             println!(
-                "{} public site repositories; {candidates} transfer candidates; {holds} fork-review holds",
+                "{} public site repositories; {candidates} transfer candidates; {personal_forks} maintained forks kept personal; {holds} unresolved fork-review holds",
                 authority.repositories.repository.len()
             );
         }
