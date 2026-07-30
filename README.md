@@ -51,7 +51,33 @@ cargo test --manifest-path crates/repo-graph/Cargo.toml --locked
 cargo clippy --locked --all-targets -- -D warnings
 cargo run --locked --bin authority -- validate
 cargo run --locked --bin authority -- validate-metadata
+npm ci --ignore-scripts
+npx playwright install chromium
+npm run smoke
 ```
+
+The browser smoke serves committed `html/` locally and checks the home,
+community-radio, desktop, mobile, reduced-motion, and WebGPU-fallback paths.
+Set `MER3LY_SITE_DIR` to check another generated site directory.
+
+`authority validate-artifact` accepts a Pages artifact root after the
+repository root. It enforces the exact public file set, public authority and
+graph counts, displayed metadata timestamp, Wasm header, reduced GitHub links,
+and the absence of secrets, personal data patterns, local paths, and private
+network addresses. It emits a JSON receipt with SHA-256 hashes:
+
+```powershell
+cargo run --locked --bin authority -- validate-artifact . .tmp/pages-artifact
+```
+
+## Deployment
+
+[`pages.yml`](.github/workflows/pages.yml) refreshes the reduced public
+metadata cache, rebuilds and validates the exact static artifact, runs a
+headed Chromium smoke under a virtual display, and deploys that artifact to
+GitHub Pages. It runs on manual dispatch and a daily schedule. The build has
+read-only repository permission; only the separate deployment job receives
+the Pages and identity grants.
 
 ## Plans
 

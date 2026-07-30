@@ -1,0 +1,129 @@
+name: Build and deploy public site
+
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Validate, build, and smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pages: read
+    env:
+      CARGO_TERM_COLOR: always
+      GH_TOKEN: ${{ github.token }}
+      MER3LY_SITE_DIR: .tmp/pages-artifact/html
+      MER3LY_RECEIPT_DIR: .tmp/m6-headed
+      MER3LY_HEADLESS: "false"
+    steps:
+      - name: Check out the pinned source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install the pinned Rust toolchain
+        run: rustup toolchain install 1.97.1 --profile minimal --component clippy,rustfmt --target wasm32-unknown-unknown
+
+      - name: Install locked build dependencies
+        run: |
+          npm ci --ignore-scripts
+          cargo install wasm-bindgen-cli --version 0.2.126 --locked
+
+      - name: Validate the committed authority
+        run: cargo run --locked --bin authority -- validate
+
+      - name: Refresh reduced public GitHub metadata
+        shell: pwsh
+        run: ./scripts/refresh-public-metadata.ps1
+
+      - name: Validate refreshed public metadata
+        run: cargo run --locked --bin authority -- validate-metadata
+
+      - name: Verify Rust source and behavior
+        shell: pwsh
+        run: |
+          cargo fmt --all -- --check
+          cargo fmt --manifest-path crates/repo-graph/Cargo.toml -- --check
+          cargo test --locked
+          cargo test --manifest-path crates/repo-graph/Cargo.toml --locked
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo clippy --manifest-path crates/repo-graph/Cargo.toml --locked --all-targets -- -D warnings
+
+      - name: Build the pinned Mere graph runtime
+        shell: pwsh
+        run: |
+          ./scripts/build-repo-graph.ps1
+          git diff --exit-code -- assets/mer3ly_repo_graph.js assets/mer3ly_repo_graph_bg.wasm
+
+      - name: Build and validate the exact Pages artifact
+        shell: pwsh
+        run: |
+          $artifact = ".tmp/pages-artifact"
+          New-Item -ItemType Directory -Force -Path $artifact | Out-Null
+          Copy-Item -LiteralPath "CNAME" -Destination (Join-Path $artifact "CNAME")
+          cargo run --locked --bin site -- --output (Join-Path $artifact "html")
+          if ($LASTEXITCODE -ne 0) {
+            throw "static site build failed"
+          }
+          $receipt = cargo run --quiet --locked --bin authority -- validate-artifact "." $artifact
+          if ($LASTEXITCODE -ne 0) {
+            throw "public artifact validation failed"
+          }
+          Set-Content -LiteralPath ".tmp/m6-static-receipt.json" -Value $receipt -Encoding utf8
+
+      - name: Install headed-smoke browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run headed desktop, mobile, and fallback smoke
+        run: xvfb-run --auto-servernum npm run smoke
+
+      - name: Upload acceptance receipts
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: m6-acceptance-${{ github.sha }}
+          path: |
+            content/github-metadata.json
+            .tmp/m6-static-receipt.json
+            .tmp/m6-headed/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload the exact checked Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: .tmp/pages-artifact
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the checked artifact
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
