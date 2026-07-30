@@ -66,8 +66,9 @@ graph counts, displayed metadata timestamp, Wasm header, reduced GitHub links,
 and the absence of secrets, personal data patterns, local paths, and private
 network addresses. The artifact is a conventional, self-contained site root:
 `index.html`, `repos/index.html`, `radio.html`, their assets, and `CNAME` all
-live directly beneath the supplied directory. The command emits a JSON receipt
-with SHA-256 hashes:
+live directly beneath the supplied directory. The exact public contact
+`markik@mer3ly.net` is allowed; other contact addresses are rejected. The
+command emits a JSON receipt with SHA-256 hashes:
 
 ```powershell
 cargo run --locked --bin authority -- validate-artifact . .tmp/pages-artifact
@@ -87,5 +88,5 @@ domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
 
 ## Plans
 
-- [Live repository graph and Merely Made organization migration](docs/2026-07-29_live_repos_graph_and_org_migration_plan.md)
+- [Live repository graph and Merely organization migration](docs/2026-07-29_live_repos_graph_and_org_migration_plan.md)
 - [Site acceptance receipts](docs/receipts/site/README.md)

@@ -1,4 +1,4 @@
-# Live repository graph and Merely Made organization migration
+# Live repository graph and Merely organization migration
 
 **Status:** M6 automated metadata and Pages deployment accepted; plan complete
 **Date:** 2026-07-29
@@ -651,6 +651,10 @@ These do not block M0:
 M6 resolved decisions 3 and 4: deployment uses only the checked Actions
 artifact, with scheduled refresh and manual dispatch. Cross-repository
 dispatch remains unimplemented.
+
+The public contact decision was resolved on 2026-07-30:
+`markik@mer3ly.net` is the approved address. The artifact validator permits
+that exact address and continues to reject other email addresses.
 
 Maintained-fork ownership was resolved on 2026-07-30: Vano belongs in
 `merely-made`; the ten thinner forks stay under `mark-ik`. Re-run the

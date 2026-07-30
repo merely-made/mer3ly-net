@@ -24,7 +24,7 @@
 
 Commit `1816f328`:
 
-- names Vano as Merely Made's data-oriented JavaScript engine for Genet;
+- names Vano as Merely's data-oriented JavaScript engine for Genet;
 - preserves the Nova upstream attribution and project links;
 - points workspace and package repository metadata at
   `https://github.com/merely-made/vano`;

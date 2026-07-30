@@ -8,7 +8,7 @@
 
 Fork ancestry alone does not decide organization ownership. A downstream fork
 stays under the personal owner while it is a thin patch carrier, mirror, or
-evaluation checkout. It becomes a Merely Made repository when both conditions
+evaluation checkout. It becomes a Merely repository when both conditions
 hold:
 
 1. the fork is integral to a Merely platform or product; and

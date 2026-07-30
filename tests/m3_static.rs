@@ -4,7 +4,6 @@ use mer3ly_site::pages::{home, radio};
 use mer3ly_site::site::SITE_CSS;
 
 const FORBIDDEN_PUBLIC_MARKERS: &[&str] = &[
-    "mailto:",
     "tel:",
     "outlook.com",
     "C:\\Users\\",
@@ -30,6 +29,10 @@ fn pages_are_static_genet_documents() {
         assert!(
             document.contains("<main id=\"main\""),
             "{name} exposes the skip-link target"
+        );
+        assert!(
+            document.contains("href=\"mailto:markik@mer3ly.net\""),
+            "{name} exposes the approved public contact"
         );
         assert!(
             document.contains("<link rel=\"canonical\""),

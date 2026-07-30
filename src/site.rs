@@ -13,6 +13,7 @@ const ORGANIZATION_JSON_LD: &str = r#"{
   "@type": "Organization",
   "name": "Merely LLC",
   "url": "https://mer3ly.net/",
+  "email": "markik@mer3ly.net",
   "sameAs": ["https://github.com/merely-made"],
   "address": {
     "@type": "PostalAddress",
@@ -168,11 +169,19 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
             element(
                 "p",
                 &[],
-                vec![external_link(
-                    "https://github.com/merely-made",
-                    "Public work and contact on GitHub ↗",
-                    "footer-link",
-                )],
+                vec![
+                    link(
+                        "mailto:markik@mer3ly.net",
+                        "markik@mer3ly.net",
+                        "footer-link",
+                    ),
+                    txt(" · "),
+                    external_link(
+                        "https://github.com/merely-made",
+                        "public work on GitHub ↗",
+                        "footer-link",
+                    ),
+                ],
             ),
         ],
     );

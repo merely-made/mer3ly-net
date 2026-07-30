@@ -681,7 +681,7 @@ function nodeColor(repositoryClass, selected) {
 }
 
 function shortName(name) {
-  if (name === "Merely Made organization profile") return "MM";
+  if (name === "Merely organization profile") return "M";
   if (name === "Mer3ly") return "M3";
   const pieces = name.split(/[\s-]+/).filter(Boolean);
   if (pieces.length > 1) {

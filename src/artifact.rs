@@ -12,6 +12,7 @@ use crate::repositories::{Authority, PublicMetadataCache};
 
 const RECEIPT_SCHEMA: &str = "mer3ly.public-artifact-receipt/v1";
 const GRAPH_SCHEMA: &str = "mer3ly.repo-graph/v1";
+const APPROVED_CONTACT_EMAIL: &str = "markik@mer3ly.net";
 const EXPECTED_FILES: &[&str] = &[
     "CNAME",
     "index.html",
@@ -271,7 +272,11 @@ fn scan_public_text(
 
     let email =
         Regex::new(r"(?i)\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b").expect("valid email regex");
-    if email.is_match(text) {
+    if email.find_iter(text).any(|candidate| {
+        !candidate
+            .as_str()
+            .eq_ignore_ascii_case(APPROVED_CONTACT_EMAIL)
+    }) {
         errors.push(format!(
             "{relative_path} contains an unapproved contact address"
         ));
@@ -471,7 +476,7 @@ mod tests {
         let mut errors = Vec::new();
         scan_public_text(
             "index.html",
-            "https://github.com/merely-made https://github.com/merely-made/mere",
+            "mailto:markik@mer3ly.net https://github.com/merely-made https://github.com/merely-made/mere",
             &allowed,
             &mut errors,
         );

@@ -62,6 +62,9 @@ fn repository_page_is_static_semantic_and_filterable() {
     assert!(document.contains("provenance-derived"));
     assert!(document.contains("provenance-curated"));
     assert!(document.contains("<script type=\"module\" src=\"/repo-graph.js\"></script>"));
+    assert!(document.contains("href=\"mailto:markik@mer3ly.net\""));
+    assert!(document.contains(">Merely organization profile</h2>"));
+    assert!(!document.contains("Merely Made"));
 
     for forbidden in [
         "x-dc",
@@ -69,7 +72,6 @@ fn repository_page_is_static_semantic_and_filterable() {
         "__next",
         "mark-ik",
         "C:\\Users\\",
-        "mailto:",
         "tel:",
     ] {
         assert!(

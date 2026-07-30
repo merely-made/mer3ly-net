@@ -1,7 +1,7 @@
 [[repository]]
 id = "org-profile"
 github_slug = "merely-made/.github"
-name = "Merely Made organization profile"
+name = "Merely organization profile"
 summary = "The public GitHub organization profile and its short project index."
 class = "tool"
 status = "reference"
