@@ -16,7 +16,7 @@ name = "Mer3ly"
 summary = "The public Merely company site and repository-family map."
 class = "product"
 status = "active"
-license = "NOASSERTION"
+license = "MPL-2.0"
 homepage = "https://mer3ly.net/"
 public = true
 

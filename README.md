@@ -9,6 +9,11 @@ The complete site remains readable without JavaScript, WebAssembly, or WebGPU.
 Source CSS, graph runtime, and social preview live under `assets/`; generated
 deployment files live under `html/`.
 
+Source code is licensed under MPL-2.0. Original Mer3ly prose and site artwork
+are available under CC BY 4.0; imported project screenshots retain their source
+repository licenses. See [`LICENSE`](LICENSE) and
+[`CONTENT_LICENSE.md`](CONTENT_LICENSE.md).
+
 ## Build
 
 Refresh the committed public GitHub metadata cache when authenticated `gh`
@@ -31,7 +36,8 @@ The script compiles the nested client crate against a pinned Mere revision,
 runs `wasm-bindgen`, copies the deployable module into `assets/`, and removes
 its temporary Cargo target.
 
-Generate the static home, community-radio, and repository pages with:
+Generate the static home, community-radio, repository map, and project profiles
+with:
 
 ```powershell
 cargo run --locked --bin site
@@ -65,8 +71,9 @@ repository root. It enforces the exact public file set, public authority and
 graph counts, displayed metadata timestamp, Wasm header, reduced GitHub links,
 and the absence of secrets, personal data patterns, local paths, and private
 network addresses. The artifact is a conventional, self-contained site root:
-`index.html`, `repos/index.html`, `radio.html`, their assets, and `CNAME` all
-live directly beneath the supplied directory. The exact public contact
+`index.html`, `repos/index.html`, `projects/<id>/index.html`, `radio.html`,
+their approved showcase images and runtime assets, and `CNAME` all live
+directly beneath the supplied directory. The exact public contact
 `markik@mer3ly.net` is allowed; other contact addresses are rejected. The
 command emits a JSON receipt with SHA-256 hashes:
 
@@ -89,4 +96,5 @@ domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
 ## Plans
 
 - [Live repository graph and Merely organization migration](docs/2026-07-29_live_repos_graph_and_org_migration_plan.md)
+- [Merely project showcase](docs/2026-07-30_project_showcase_plan.md)
 - [Site acceptance receipts](docs/receipts/site/README.md)

@@ -1,0 +1,54 @@
+[[showcase]]
+repository = "mere"
+order = 1
+headline = "One graph model, carried between applications."
+copy = "Mere gives Merely applications portable contracts for content, arrangement, memory, identity, and trusted exchange. Graphshell proves those projection contracts in a small reference host."
+image = "showcase/mere.png"
+alt = "Graphshell displaying a local Mere graph arranged as a grid beside search, arrangement, and transfer controls."
+caption = "Graphshell, Mere's reference projection host, arranging a local graph."
+source_url = "https://github.com/merely-made/mere/blob/main/assets/screenshots/graphshell-grid.png"
+source_license = "MIT OR Apache-2.0"
+
+[[showcase]]
+repository = "genet"
+order = 2
+headline = "Web content as an embeddable engine."
+copy = "Genet separates documents, layout, scripting, and realization so a host can take the browser profile it needs. Pelt is the thin reference browser that keeps those engine boundaries visible."
+image = "showcase/genet.png"
+alt = "Pelt displaying a green and white local test document beneath a compact native browser bar."
+caption = "Pelt, Genet's thin reference browser, rendering a local document."
+source_url = "https://github.com/merely-made/genet/blob/main/assets/screenshots/pelt-chrome.png"
+source_license = "MPL-2.0"
+
+[[showcase]]
+repository = "turnstone"
+order = 3
+headline = "Browse a web of things, not a stack of tabs."
+copy = "Turnstone keeps pages, media, and notes as graph nodes that can be related, arranged, and opened together. Its current workbench is an early host for Mere and Genet rather than a finished browser shell."
+image = "showcase/turnstone.png"
+alt = "Turnstone showing a graph canvas beside two tiled web documents for IANA and Example Domain."
+caption = "Turnstone's early workbench opening two related web documents in place."
+source_url = "https://github.com/merely-made/turnstone/blob/main/assets/screenshots/workbench-split.png"
+source_license = "MIT OR Apache-2.0"
+
+[[showcase]]
+repository = "woodshed"
+order = 4
+headline = "Practice material that knows how it relates."
+copy = "Woodshed stages scales, chords, arpeggios, progressions, exercises, and sets through a typed musical graph. Related material remains visible while the musician chooses what to hear, draw, or practice next."
+image = "showcase/woodshed.png"
+alt = "Woodshed Stage showing an A dominant seventh sharp five chord across a fretboard with related musical material below."
+caption = "Woodshed staging a chord, its fretboard positions, and related material."
+source_url = "https://github.com/merely-made/woodshed/blob/main/assets/screenshots/stage-related-chord.png"
+source_license = "MIT OR Apache-2.0"
+
+[[showcase]]
+repository = "isometry"
+order = 5
+headline = "A tabletop that keeps the world around the board."
+copy = "Isometry combines a pixel-art battlemap with campaign records, turn order, adjudication, and peer-to-peer play. The battlemap remains one projection of a larger shared tactical and historical account."
+image = "showcase/isometry.png"
+alt = "Isometry displaying a painted isometric battlemap with terrain, four tokens, editing tools, and turn order."
+caption = "Isometry's battlemap without the overmap covering the tactical view."
+source_url = "https://github.com/merely-made/isometry/blob/main/assets/screenshots/battlemap-demo.png"
+source_license = "MIT OR Apache-2.0"

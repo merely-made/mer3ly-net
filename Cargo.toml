@@ -6,6 +6,7 @@ rust-version = "1.92"
 publish = false
 description = "Static Mer3ly site builder and public repository authority."
 repository = "https://github.com/merely-made/mer3ly-net"
+license = "MPL-2.0"
 
 [lib]
 path = "src/lib.rs"
