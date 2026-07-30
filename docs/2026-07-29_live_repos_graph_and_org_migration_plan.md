@@ -1,6 +1,6 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M5 live Mere repository graph accepted; stopped before M6
+**Status:** M6 automated metadata and Pages deployment accepted; plan complete
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -598,6 +598,15 @@ follow only if it does not require a broad personal token.
   with a partial page;
 - the page displays its metadata refresh timestamp.
 
+**M6 result, 2026-07-30:** Scheduled and manually dispatched GitHub Actions now
+refresh the reduced public metadata, verify the authority, reproduce the pinned
+Mere graph build, validate and smoke the exact self-contained site artifact,
+and deploy it through GitHub Pages. Cloudflare proxies that origin for DNS,
+TLS, HTTPS redirection, and HSTS. Its former Worker custom domain was detached,
+and the public edge was hash-matched to the checked Pages artifact. The exact
+receipt is
+[`docs/receipts/site/2026-07-30_m6_automated_pages_deployment.md`](receipts/site/2026-07-30_m6_automated_pages_deployment.md).
+
 ## Verification ladder
 
 Do not collapse these into one claim:
@@ -638,6 +647,10 @@ These do not block M0:
    only an Actions artifact. The recommended endpoint is the artifact.
 4. Whether repository metadata refreshes on a schedule alone or later receives
    narrow cross-repository dispatch events.
+
+M6 resolved decisions 3 and 4: deployment uses only the checked Actions
+artifact, with scheduled refresh and manual dispatch. Cross-repository
+dispatch remains unimplemented.
 
 Maintained-fork ownership was resolved on 2026-07-30: Vano belongs in
 `merely-made`; the ten thinner forks stay under `mark-ik`. Re-run the
@@ -684,3 +697,15 @@ organization repositories received bounded, project-specific GitHub topics.
 Pages run `30518337035` deployed the page successfully. Work stopped before
 the optional live Mere graph in M5. The HTTPS redirect closure was verified
 against the repository page as well as the home and community-radio routes.
+
+M5 was implemented and accepted on 2026-07-30. Commit `80351f6` added the
+optional Mere-arranged WebGPU graph while retaining the complete semantic
+repository index and explicit failure paths.
+
+M6 was implemented and accepted on 2026-07-30. Commits `4d4be38`, `1e23c17`,
+`b2a52fa`, and `248aecc` added the artifact validator, scheduled/manual Pages
+workflow, deployment-host reproducibility check, and conventional root
+artifact. Pages run `30557137565` deployed source
+`248aecc90f7c8f09212135cdaa50aef7e01c1e60`. The Cloudflare Worker custom
+domain was removed, and the proxied public site matched the checked Pages
+artifact at the home, repository, and community-radio routes.

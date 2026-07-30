@@ -83,7 +83,7 @@ read-only repository permission; only the separate deployment job receives
 the Pages and identity grants. The graph runtime is built twice and must have
 identical hashes on the deployment host before either output can be published.
 GitHub Pages is the sole deployment origin. Cloudflare may proxy the custom
-domain for DNS, TLS, and HSTS, but does not build or serve a second site bundle.
+domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
 
 ## Plans
 
