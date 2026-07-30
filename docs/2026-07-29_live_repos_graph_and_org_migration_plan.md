@@ -1,7 +1,6 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M4 semantic repository page, repository-topic pass, and
-HTTP-to-HTTPS enforcement complete; stopped before M5
+**Status:** M5 live Mere repository graph accepted; stopped before M6
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -565,6 +564,14 @@ the production browser requirement.
   paths have explicit receipts;
 - the graph has no dependency on Graphshell application state, browser
   history, Personae identity, or a resident Mere host.
+
+**M5 result, 2026-07-30:** `/repos/` now progressively loads a 16-node,
+25-edge WebGPU map laid out by Mere's pinned radial arrangement. Keyboard,
+pointer, pan, zoom, reduced-motion, narrow-layout, and forced WebGPU, Wasm,
+and initialization failure paths passed headed review. All failures retain the
+complete semantic index. The exact receipt is
+[`docs/receipts/site/2026-07-30_m5_live_repository_graph.md`](receipts/site/2026-07-30_m5_live_repository_graph.md).
+M6 was not started.
 
 ### M6: Automate metadata and deployment
 
