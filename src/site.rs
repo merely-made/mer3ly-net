@@ -3,25 +3,17 @@ use std::rc::Rc;
 
 use cambium::{AnyView, GenetAppRunner, GenetCtx, GenetElement, el, text};
 use genet_scripted_dom::ScriptedDom;
+use serde_json::{Value, json};
 
 pub type SiteView = Box<dyn AnyView<(), (), GenetCtx, GenetElement>>;
 
 pub const SITE_CSS: &str = include_str!("../assets/site.css");
 
-const ORGANIZATION_JSON_LD: &str = r#"{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Merely LLC",
-  "url": "https://mer3ly.net/",
-  "email": "markik@mer3ly.net",
-  "sameAs": ["https://github.com/merely-made"],
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Ashland",
-    "addressRegion": "KY",
-    "addressCountry": "US"
-  }
-}"#;
+pub const ORGANIZATION_ID: &str = "https://mer3ly.net/#organization";
+pub const WEBSITE_ID: &str = "https://mer3ly.net/#website";
+pub const DEFAULT_SOCIAL_IMAGE_URL: &str = "https://mer3ly.net/og.jpg";
+pub const DEFAULT_SOCIAL_IMAGE_ALT: &str =
+    "Merely, software and hardware for people who are their own infrastructure.";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ActivePage {
@@ -34,6 +26,61 @@ pub struct PageMetadata {
     pub title: &'static str,
     pub description: &'static str,
     pub canonical_url: &'static str,
+}
+
+pub struct SocialImage<'a> {
+    pub url: &'a str,
+    pub mime_type: &'a str,
+    pub alt: &'a str,
+}
+
+pub struct DocumentMetadata<'a> {
+    pub title: &'a str,
+    pub description: &'a str,
+    pub canonical_url: &'a str,
+    pub social_image: SocialImage<'a>,
+    pub json_ld: &'a str,
+}
+
+pub fn base_schema_graph() -> Vec<Value> {
+    vec![
+        json!({
+            "@type": "Organization",
+            "@id": ORGANIZATION_ID,
+            "name": "Merely LLC",
+            "url": "https://mer3ly.net/",
+            "email": "markik@mer3ly.net",
+            "sameAs": ["https://github.com/merely-made"],
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Ashland",
+                "addressRegion": "KY",
+                "addressCountry": "US"
+            }
+        }),
+        json!({
+            "@type": "WebSite",
+            "@id": WEBSITE_ID,
+            "name": "Merely",
+            "url": "https://mer3ly.net/",
+            "publisher": { "@id": ORGANIZATION_ID }
+        }),
+    ]
+}
+
+pub fn site_json_ld() -> String {
+    json_ld_for_script(&json!({
+        "@context": "https://schema.org",
+        "@graph": base_schema_graph()
+    }))
+}
+
+pub fn json_ld_for_script(value: &Value) -> String {
+    serde_json::to_string(value)
+        .expect("site structured data is serializable")
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
 }
 
 pub fn txt(value: impl Into<String>) -> SiteView {
@@ -221,13 +268,8 @@ pub fn render_with(metadata: &PageMetadata, view: impl Fn() -> SiteView) -> Stri
     render_with_body_end(metadata, view, "")
 }
 
-pub fn render_with_dynamic(
-    title: &str,
-    description: &str,
-    canonical_url: &str,
-    view: impl Fn() -> SiteView,
-) -> String {
-    render_body(title, description, canonical_url, view, "")
+pub fn render_with_dynamic(metadata: &DocumentMetadata<'_>, view: impl Fn() -> SiteView) -> String {
+    render_body(metadata, view, "")
 }
 
 pub fn render_with_body_end(
@@ -235,19 +277,23 @@ pub fn render_with_body_end(
     view: impl Fn() -> SiteView,
     body_end: &str,
 ) -> String {
-    render_body(
-        metadata.title,
-        metadata.description,
-        metadata.canonical_url,
-        view,
-        body_end,
-    )
+    let json_ld = site_json_ld();
+    let metadata = DocumentMetadata {
+        title: metadata.title,
+        description: metadata.description,
+        canonical_url: metadata.canonical_url,
+        social_image: SocialImage {
+            url: DEFAULT_SOCIAL_IMAGE_URL,
+            mime_type: "image/jpeg",
+            alt: DEFAULT_SOCIAL_IMAGE_ALT,
+        },
+        json_ld: &json_ld,
+    };
+    render_body(&metadata, view, body_end)
 }
 
 fn render_body(
-    title: &str,
-    description: &str,
-    canonical_url: &str,
+    metadata: &DocumentMetadata<'_>,
     view: impl Fn() -> SiteView,
     body_end: &str,
 ) -> String {
@@ -259,10 +305,10 @@ fn render_body(
     } else {
         body_markup.replacen("</body>", &format!("{body_end}\n</body>"), 1)
     };
-    render_shell(title, description, canonical_url, &body_markup)
+    render_shell(metadata, &body_markup)
 }
 
-fn render_shell(title: &str, description: &str, canonical_url: &str, body_markup: &str) -> String {
+fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
     format!(
         "<!doctype html>\n\
 <html lang=\"en\">\n\
@@ -277,9 +323,17 @@ fn render_shell(title: &str, description: &str, canonical_url: &str, body_markup
   <meta property=\"og:title\" content=\"{title}\">\n\
   <meta property=\"og:description\" content=\"{description}\">\n\
   <meta property=\"og:url\" content=\"{canonical}\">\n\
-  <meta property=\"og:image\" content=\"https://mer3ly.net/og.jpg\">\n\
+  <meta property=\"og:image\" content=\"{image_url}\">\n\
+  <meta property=\"og:image:type\" content=\"{image_type}\">\n\
+  <meta property=\"og:image:alt\" content=\"{image_alt}\">\n\
   <meta name=\"twitter:card\" content=\"summary_large_image\">\n\
+  <meta name=\"twitter:title\" content=\"{title}\">\n\
+  <meta name=\"twitter:description\" content=\"{description}\">\n\
+  <meta name=\"twitter:image\" content=\"{image_url}\">\n\
+  <meta name=\"twitter:image:alt\" content=\"{image_alt}\">\n\
   <meta name=\"theme-color\" content=\"#f0ebdd\">\n\
+  <link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\">\n\
+  <link rel=\"sitemap\" href=\"/sitemap.xml\" type=\"application/xml\" title=\"Sitemap\">\n\
   <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n\
   <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n\
   <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Young+Serif&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap\">\n\
@@ -288,10 +342,13 @@ fn render_shell(title: &str, description: &str, canonical_url: &str, body_markup
 </head>\n\
 {body}\n\
 </html>\n",
-        title = escape_text(title),
-        description = escape_attr(description),
-        canonical = escape_attr(canonical_url),
-        json_ld = ORGANIZATION_JSON_LD,
+        title = escape_text(metadata.title),
+        description = escape_attr(metadata.description),
+        canonical = escape_attr(metadata.canonical_url),
+        image_url = escape_attr(metadata.social_image.url),
+        image_type = escape_attr(metadata.social_image.mime_type),
+        image_alt = escape_attr(metadata.social_image.alt),
+        json_ld = metadata.json_ld,
         body = body_markup,
     )
 }
@@ -315,5 +372,13 @@ mod tests {
     fn metadata_escaping_is_safe() {
         assert_eq!(escape_text("A & B < C"), "A &amp; B &lt; C");
         assert_eq!(escape_attr("\"quoted\""), "&quot;quoted&quot;");
+    }
+
+    #[test]
+    fn structured_data_escaping_closes_no_script_element() {
+        let value = json!({ "description": "</script><script>alert(1)</script>" });
+        let encoded = json_ld_for_script(&value);
+        assert!(!encoded.contains("</script>"));
+        assert!(encoded.contains("\\u003c/script\\u003e"));
     }
 }

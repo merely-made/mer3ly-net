@@ -2,10 +2,12 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use mer3ly_site::discovery::{ROBOTS_TXT, sitemap};
 use mer3ly_site::pages::{home, projects, radio, repositories};
 use mer3ly_site::repositories::PublicSiteData;
 use mer3ly_site::site::SITE_CSS;
 
+const FAVICON: &[u8] = include_bytes!("../assets/favicon.svg");
 const OG_IMAGE: &[u8] = include_bytes!("../assets/og.jpg");
 const REPO_GRAPH_LOADER: &[u8] = include_bytes!("../assets/repo-graph.js");
 const REPO_GRAPH_WASM_GLUE: &[u8] = include_bytes!("../assets/mer3ly_repo_graph.js");
@@ -69,6 +71,9 @@ fn build_site(output: &Path) -> std::io::Result<()> {
     fs::write(output.join("mer3ly_repo_graph.js"), REPO_GRAPH_WASM_GLUE)?;
     fs::write(output.join("mer3ly_repo_graph_bg.wasm"), REPO_GRAPH_WASM)?;
     fs::write(output.join("og.jpg"), OG_IMAGE)?;
+    fs::write(output.join("favicon.svg"), FAVICON)?;
+    fs::write(output.join("sitemap.xml"), sitemap(&data))?;
+    fs::write(output.join("robots.txt"), ROBOTS_TXT)?;
     fs::write(output.join("CNAME"), "mer3ly.net\n")?;
     Ok(())
 }

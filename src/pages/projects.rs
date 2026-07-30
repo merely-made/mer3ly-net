@@ -1,13 +1,16 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use serde_json::{Map, Value, json};
+
 use crate::repositories::{
     AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationRecord, RepositoryRecord,
     ShowcaseRecord,
 };
 use crate::site::{
-    ActivePage, SiteView, element, external_link, link, render_with_dynamic, section_heading,
-    shell, txt,
+    ActivePage, DEFAULT_SOCIAL_IMAGE_ALT, DEFAULT_SOCIAL_IMAGE_URL, DocumentMetadata,
+    ORGANIZATION_ID, SiteView, SocialImage, WEBSITE_ID, base_schema_graph, element, external_link,
+    json_ld_for_script, link, render_with_dynamic, section_heading, shell, txt,
 };
 
 pub fn documents(data: &PublicSiteData) -> Vec<(String, String)> {
@@ -39,9 +42,103 @@ pub fn document(root: &Path, repository_id: &str) -> Result<String, AuthorityErr
 pub fn document_for(data: &PublicSiteData, repository: &RepositoryRecord) -> String {
     let title = format!("{} | Merely", repository.name);
     let canonical = format!("https://mer3ly.net/projects/{}/", repository.id);
-    render_with_dynamic(&title, &repository.summary, &canonical, || {
-        view(data, repository)
-    })
+    let repository_metadata = data
+        .metadata
+        .repository
+        .iter()
+        .find(|metadata| metadata.id == repository.id);
+    let showcase = data.showcases.for_repository(&repository.id);
+    let image_url = showcase.map_or_else(
+        || DEFAULT_SOCIAL_IMAGE_URL.to_owned(),
+        |showcase| format!("https://mer3ly.net/{}", showcase.image),
+    );
+    let image_type = if showcase.is_some() {
+        "image/png"
+    } else {
+        "image/jpeg"
+    };
+    let image_alt = showcase.map_or(DEFAULT_SOCIAL_IMAGE_ALT, |showcase| showcase.alt.as_str());
+    let json_ld = project_json_ld(repository, repository_metadata, &canonical);
+    let metadata = DocumentMetadata {
+        title: &title,
+        description: &repository.summary,
+        canonical_url: &canonical,
+        social_image: SocialImage {
+            url: &image_url,
+            mime_type: image_type,
+            alt: image_alt,
+        },
+        json_ld: &json_ld,
+    };
+    render_with_dynamic(&metadata, || view(data, repository))
+}
+
+fn project_json_ld(
+    repository: &RepositoryRecord,
+    metadata: Option<&PublicRepositoryMetadata>,
+    canonical: &str,
+) -> String {
+    let repository_url = format!("https://github.com/{}", repository.github_slug);
+    let entity_id = format!("{canonical}#repository");
+    let entity_type = if repository.id == "org-profile" {
+        "CreativeWork"
+    } else {
+        "SoftwareSourceCode"
+    };
+    let mut entity = Map::from_iter([
+        ("@type".to_owned(), Value::String(entity_type.to_owned())),
+        ("@id".to_owned(), Value::String(entity_id.clone())),
+        ("name".to_owned(), Value::String(repository.name.clone())),
+        (
+            "description".to_owned(),
+            Value::String(repository.summary.clone()),
+        ),
+        ("url".to_owned(), Value::String(canonical.to_owned())),
+        (
+            "sameAs".to_owned(),
+            Value::Array(vec![Value::String(repository_url.clone())]),
+        ),
+        ("publisher".to_owned(), json!({ "@id": ORGANIZATION_ID })),
+    ]);
+    if entity_type == "SoftwareSourceCode" {
+        entity.insert("codeRepository".to_owned(), Value::String(repository_url));
+        if let Some(language) = metadata.and_then(|metadata| metadata.primary_language.as_ref()) {
+            entity.insert(
+                "programmingLanguage".to_owned(),
+                Value::String(language.clone()),
+            );
+        }
+    }
+    if let Some(metadata) = metadata
+        && !metadata.topics.is_empty()
+    {
+        entity.insert(
+            "keywords".to_owned(),
+            Value::Array(
+                metadata
+                    .topics
+                    .iter()
+                    .map(|topic| Value::String(topic.clone()))
+                    .collect(),
+            ),
+        );
+    }
+
+    let mut graph = base_schema_graph();
+    graph.push(json!({
+        "@type": "WebPage",
+        "@id": canonical,
+        "url": canonical,
+        "name": repository.name,
+        "description": repository.summary,
+        "isPartOf": { "@id": WEBSITE_ID },
+        "about": { "@id": entity_id }
+    }));
+    graph.push(Value::Object(entity));
+    json_ld_for_script(&json!({
+        "@context": "https://schema.org",
+        "@graph": graph
+    }))
 }
 
 pub fn view(data: &PublicSiteData, repository: &RepositoryRecord) -> SiteView {
