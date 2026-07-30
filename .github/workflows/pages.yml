@@ -23,7 +23,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
       GH_TOKEN: ${{ github.token }}
-      MER3LY_SITE_DIR: .tmp/pages-artifact/html
+      MER3LY_SITE_DIR: .tmp/pages-artifact
       MER3LY_RECEIPT_DIR: .tmp/m6-headed
       MER3LY_HEADLESS: "false"
     steps:
@@ -81,9 +81,7 @@ jobs:
         shell: pwsh
         run: |
           $artifact = ".tmp/pages-artifact"
-          New-Item -ItemType Directory -Force -Path $artifact | Out-Null
-          Copy-Item -LiteralPath "CNAME" -Destination (Join-Path $artifact "CNAME")
-          cargo run --locked --bin site -- --output (Join-Path $artifact "html")
+          cargo run --locked --bin site -- --output $artifact
           if ($LASTEXITCODE -ne 0) {
             throw "static site build failed"
           }

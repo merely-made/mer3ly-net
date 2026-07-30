@@ -64,7 +64,10 @@ Set `MER3LY_SITE_DIR` to check another generated site directory.
 repository root. It enforces the exact public file set, public authority and
 graph counts, displayed metadata timestamp, Wasm header, reduced GitHub links,
 and the absence of secrets, personal data patterns, local paths, and private
-network addresses. It emits a JSON receipt with SHA-256 hashes:
+network addresses. The artifact is a conventional, self-contained site root:
+`index.html`, `repos/index.html`, `radio.html`, their assets, and `CNAME` all
+live directly beneath the supplied directory. The command emits a JSON receipt
+with SHA-256 hashes:
 
 ```powershell
 cargo run --locked --bin authority -- validate-artifact . .tmp/pages-artifact
@@ -79,6 +82,8 @@ GitHub Pages. It runs on manual dispatch and a daily schedule. The build has
 read-only repository permission; only the separate deployment job receives
 the Pages and identity grants. The graph runtime is built twice and must have
 identical hashes on the deployment host before either output can be published.
+GitHub Pages is the sole deployment origin. Cloudflare may proxy the custom
+domain for DNS, TLS, and HSTS, but does not build or serve a second site bundle.
 
 ## Plans
 

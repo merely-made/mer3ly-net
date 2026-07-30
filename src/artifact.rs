@@ -14,15 +14,14 @@ const RECEIPT_SCHEMA: &str = "mer3ly.public-artifact-receipt/v1";
 const GRAPH_SCHEMA: &str = "mer3ly.repo-graph/v1";
 const EXPECTED_FILES: &[&str] = &[
     "CNAME",
-    "html/CNAME",
-    "html/index.html",
-    "html/mer3ly_repo_graph.js",
-    "html/mer3ly_repo_graph_bg.wasm",
-    "html/og.jpg",
-    "html/radio.html",
-    "html/repo-graph.js",
-    "html/repos/index.html",
-    "html/site.css",
+    "index.html",
+    "mer3ly_repo_graph.js",
+    "mer3ly_repo_graph_bg.wasm",
+    "og.jpg",
+    "radio.html",
+    "repo-graph.js",
+    "repos/index.html",
+    "site.css",
 ];
 
 #[derive(Debug, Serialize)]
@@ -128,11 +127,10 @@ pub fn validate_public_artifact(
     }
 
     validate_cname(artifact_root, "CNAME", &mut errors);
-    validate_cname(artifact_root, "html/CNAME", &mut errors);
 
-    let home = read_text(artifact_root, "html/index.html", &mut errors);
-    let radio = read_text(artifact_root, "html/radio.html", &mut errors);
-    let repositories = read_text(artifact_root, "html/repos/index.html", &mut errors);
+    let home = read_text(artifact_root, "index.html", &mut errors);
+    let radio = read_text(artifact_root, "radio.html", &mut errors);
+    let repositories = read_text(artifact_root, "repos/index.html", &mut errors);
     if !home.starts_with("<!doctype html>") || !radio.starts_with("<!doctype html>") {
         errors.push("home or community-radio output is not a complete HTML document".to_owned());
     }
@@ -161,7 +159,7 @@ pub fn validate_public_artifact(
         validate_graph_payload(payload, authority, &mut errors);
     }
 
-    let wasm_path = artifact_root.join("html/mer3ly_repo_graph_bg.wasm");
+    let wasm_path = artifact_root.join("mer3ly_repo_graph_bg.wasm");
     match fs::read(&wasm_path) {
         Ok(bytes) if bytes.starts_with(b"\0asm") => {}
         Ok(_) => errors.push("repository graph Wasm has an invalid magic header".to_owned()),
@@ -472,7 +470,7 @@ mod tests {
         let allowed = BTreeSet::from(["merely-made/mere".to_owned()]);
         let mut errors = Vec::new();
         scan_public_text(
-            "html/index.html",
+            "index.html",
             "https://github.com/merely-made https://github.com/merely-made/mere",
             &allowed,
             &mut errors,
@@ -485,7 +483,7 @@ mod tests {
         let allowed = BTreeSet::from(["merely-made/mere".to_owned()]);
         let mut errors = Vec::new();
         scan_public_text(
-            "html/index.html",
+            "index.html",
             "C:\\Users\\person\\secret 192.168.1.4 person@example.com https://github.com/private-owner/private-repo",
             &allowed,
             &mut errors,
