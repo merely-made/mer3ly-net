@@ -6,6 +6,9 @@ use mer3ly_site::pages::{home, radio, repositories};
 use mer3ly_site::site::SITE_CSS;
 
 const OG_IMAGE: &[u8] = include_bytes!("../assets/og.jpg");
+const REPO_GRAPH_LOADER: &[u8] = include_bytes!("../assets/repo-graph.js");
+const REPO_GRAPH_WASM_GLUE: &[u8] = include_bytes!("../assets/mer3ly_repo_graph.js");
+const REPO_GRAPH_WASM: &[u8] = include_bytes!("../assets/mer3ly_repo_graph_bg.wasm");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let output = output_directory()?;
@@ -47,6 +50,9 @@ fn build_site(output: &Path) -> std::io::Result<()> {
         repositories_document,
     )?;
     fs::write(output.join("site.css"), SITE_CSS)?;
+    fs::write(output.join("repo-graph.js"), REPO_GRAPH_LOADER)?;
+    fs::write(output.join("mer3ly_repo_graph.js"), REPO_GRAPH_WASM_GLUE)?;
+    fs::write(output.join("mer3ly_repo_graph_bg.wasm"), REPO_GRAPH_WASM)?;
     fs::write(output.join("og.jpg"), OG_IMAGE)?;
     fs::write(output.join("CNAME"), "mer3ly.net\n")?;
     Ok(())

@@ -1,13 +1,15 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
+use serde::Serialize;
+
 use crate::repositories::{
-    AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationRecord, RepositoryClass,
-    RepositoryRecord,
+    AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationKind, RelationProvenance,
+    RelationRecord, RepositoryClass, RepositoryRecord, RepositoryStatus,
 };
 use crate::site::{
-    ActivePage, PageMetadata, SiteView, element, external_link, render_with, section_heading,
-    shell, txt,
+    ActivePage, PageMetadata, SiteView, element, external_link, render_with_body_end,
+    section_heading, shell, txt,
 };
 
 pub const METADATA: PageMetadata = PageMetadata {
@@ -18,7 +20,12 @@ pub const METADATA: PageMetadata = PageMetadata {
 
 pub fn document(root: &Path) -> Result<String, AuthorityError> {
     let data = PublicSiteData::load(root)?;
-    Ok(render_with(&METADATA, move || view(&data)))
+    let bootstrap = graph_bootstrap(&data);
+    Ok(render_with_body_end(
+        &METADATA,
+        move || view(&data),
+        &bootstrap,
+    ))
 }
 
 pub fn view(data: &PublicSiteData) -> SiteView {
@@ -27,7 +34,12 @@ pub fn view(data: &PublicSiteData) -> SiteView {
         element(
             "main",
             &[("id", "main"), ("class", "repositories-main")],
-            vec![hero(data), repository_index(data), source_note(data)],
+            vec![
+                hero(data),
+                repository_graph(data),
+                repository_index(data),
+                source_note(data),
+            ],
         ),
     )
 }
@@ -73,6 +85,285 @@ fn hero(data: &PublicSiteData) -> SiteView {
                     overview_stat("relationships", relations.len()),
                     overview_stat("derived edges", derived),
                     overview_stat("curated edges", curated),
+                ],
+            ),
+        ],
+    )
+}
+
+fn repository_graph(data: &PublicSiteData) -> SiteView {
+    element(
+        "section",
+        &[
+            ("class", "content-section repository-graph-section"),
+            ("aria-label", "Live repository relationship map"),
+        ],
+        vec![
+            section_heading("01", "live relationship map"),
+            element(
+                "div",
+                &[("class", "repository-graph-heading")],
+                vec![
+                    element(
+                        "h3",
+                        &[],
+                        vec![txt("A small Mere canvas for the public project family.")],
+                    ),
+                    element(
+                        "p",
+                        &[],
+                        vec![txt(
+                            "Select a node to inspect its neighborhood. Open it to move to the complete semantic entry below.",
+                        )],
+                    ),
+                ],
+            ),
+            element(
+                "div",
+                &[
+                    ("class", "repository-graph-shell"),
+                    ("data-repository-graph", ""),
+                    ("data-graph-state", "pending"),
+                ],
+                vec![
+                    element(
+                        "p",
+                        &[
+                            ("class", "repository-graph-fallback"),
+                            ("data-graph-fallback", ""),
+                        ],
+                        vec![txt(
+                            "The interactive map requires WebGPU and WebAssembly. The complete repository index remains available below.",
+                        )],
+                    ),
+                    element(
+                        "div",
+                        &[
+                            ("class", "repository-graph-interface"),
+                            ("data-graph-interface", ""),
+                            ("hidden", "hidden"),
+                        ],
+                        vec![
+                            graph_toolbar(),
+                            element(
+                                "div",
+                                &[
+                                    ("class", "repository-graph-stage"),
+                                    ("data-graph-stage", ""),
+                                ],
+                                vec![
+                                    element(
+                                        "canvas",
+                                        &[
+                                            ("class", "repository-graph-canvas"),
+                                            ("aria-hidden", "true"),
+                                        ],
+                                        vec![],
+                                    ),
+                                    element(
+                                        "div",
+                                        &[
+                                            ("class", "repository-graph-nodes"),
+                                            ("data-graph-nodes", ""),
+                                            ("role", "group"),
+                                            ("aria-label", "Repository graph nodes"),
+                                        ],
+                                        vec![],
+                                    ),
+                                ],
+                            ),
+                            graph_legend(data),
+                        ],
+                    ),
+                    element(
+                        "p",
+                        &[
+                            ("class", "repository-graph-status sr-only"),
+                            ("data-graph-status", ""),
+                            ("aria-live", "polite"),
+                        ],
+                        vec![txt("Interactive repository map not initialized.")],
+                    ),
+                ],
+            ),
+        ],
+    )
+}
+
+fn graph_toolbar() -> SiteView {
+    element(
+        "div",
+        &[
+            ("class", "repository-graph-toolbar"),
+            ("data-graph-controls", ""),
+            ("aria-label", "Repository map controls"),
+        ],
+        vec![
+            element(
+                "div",
+                &[
+                    ("class", "repository-graph-control-group"),
+                    ("role", "group"),
+                    ("aria-label", "Zoom controls"),
+                ],
+                vec![
+                    graph_button("zoom-out", "Zoom out", "−"),
+                    graph_button("fit", "Fit the graph", "fit"),
+                    graph_button("zoom-in", "Zoom in", "+"),
+                ],
+            ),
+            element(
+                "div",
+                &[
+                    ("class", "repository-graph-control-group graph-pan-controls"),
+                    ("role", "group"),
+                    ("aria-label", "Pan controls"),
+                ],
+                vec![
+                    graph_button("pan-left", "Pan left", "←"),
+                    graph_button("pan-up", "Pan up", "↑"),
+                    graph_button("pan-down", "Pan down", "↓"),
+                    graph_button("pan-right", "Pan right", "→"),
+                ],
+            ),
+            graph_button("open", "Open selected repository entry", "open selected"),
+        ],
+    )
+}
+
+fn graph_button(action: &str, label: &str, text: &str) -> SiteView {
+    element(
+        "button",
+        &[
+            ("type", "button"),
+            ("class", "repository-graph-control"),
+            ("data-graph-action", action),
+            ("aria-label", label),
+        ],
+        vec![txt(text)],
+    )
+}
+
+fn graph_legend(data: &PublicSiteData) -> SiteView {
+    let mut relation_kinds = data
+        .authority
+        .relations
+        .relation
+        .iter()
+        .map(|relation| relation.kind)
+        .collect::<Vec<_>>();
+    relation_kinds.sort_by_key(|kind| kind.slug());
+    relation_kinds.dedup();
+
+    element(
+        "aside",
+        &[
+            ("class", "repository-graph-legend"),
+            ("aria-label", "Repository map legend"),
+        ],
+        vec![
+            element(
+                "div",
+                &[],
+                vec![
+                    element("h3", &[], vec![txt("Repository role")]),
+                    element(
+                        "ul",
+                        &[],
+                        [
+                            RepositoryClass::Product,
+                            RepositoryClass::Platform,
+                            RepositoryClass::Foundation,
+                            RepositoryClass::Tool,
+                        ]
+                        .into_iter()
+                        .map(|class| {
+                            element(
+                                "li",
+                                &[],
+                                vec![
+                                    element(
+                                        "span",
+                                        &[(
+                                            "class",
+                                            &format!("graph-legend-node class-{}", class.slug()),
+                                        )],
+                                        vec![],
+                                    ),
+                                    txt(class.label()),
+                                ],
+                            )
+                        })
+                        .collect(),
+                    ),
+                ],
+            ),
+            element(
+                "div",
+                &[],
+                vec![
+                    element("h3", &[], vec![txt("Relationship")]),
+                    element(
+                        "ul",
+                        &[],
+                        relation_kinds
+                            .into_iter()
+                            .map(|kind| {
+                                element(
+                                    "li",
+                                    &[],
+                                    vec![
+                                        element(
+                                            "span",
+                                            &[(
+                                                "class",
+                                                &format!("graph-legend-edge kind-{}", kind.slug()),
+                                            )],
+                                            vec![],
+                                        ),
+                                        txt(kind.label()),
+                                    ],
+                                )
+                            })
+                            .collect(),
+                    ),
+                ],
+            ),
+            element(
+                "div",
+                &[],
+                vec![
+                    element("h3", &[], vec![txt("Evidence")]),
+                    element(
+                        "ul",
+                        &[],
+                        vec![
+                            element(
+                                "li",
+                                &[],
+                                vec![
+                                    element(
+                                        "span",
+                                        &[("class", "provenance-badge provenance-derived")],
+                                        vec![txt("derived")],
+                                    ),
+                                    txt(" manifests"),
+                                ],
+                            ),
+                            element(
+                                "li",
+                                &[],
+                                vec![
+                                    element(
+                                        "span",
+                                        &[("class", "provenance-badge provenance-curated")],
+                                        vec![txt("curated")],
+                                    ),
+                                    txt(" documentation"),
+                                ],
+                            ),
+                        ],
+                    ),
                 ],
             ),
         ],
@@ -125,7 +416,7 @@ fn repository_index(data: &PublicSiteData) -> SiteView {
             ("aria-label", "Repository index"),
         ],
         vec![
-            section_heading("01", "repository index"),
+            section_heading("02", "repository index"),
             element(
                 "p",
                 &[("class", "index-intro")],
@@ -547,17 +838,82 @@ fn source_note(data: &PublicSiteData) -> SiteView {
             element(
                 "h2",
                 &[("id", "repository-source-title")],
-                vec![txt("Readable first. Refreshable second.")],
+                vec![txt("One authority. Two projections.")],
             ),
             element(
                 "p",
                 &[],
                 vec![txt(format!(
-                    "Repository identity and relationships come from committed typed authority. Public GitHub metadata was refreshed {}. If a future refresh fails, the last validated snapshot remains in place.",
+                    "The semantic index and optional Mere canvas consume the same committed repository ids and relationship ids. Public GitHub metadata was refreshed {}. If a future refresh fails, the last validated snapshot remains in place.",
                     format_timestamp(&data.metadata.generated_at_utc)
                 ))],
             ),
         ],
+    )
+}
+
+#[derive(Serialize)]
+struct GraphAuthority<'a> {
+    schema: &'static str,
+    nodes: Vec<GraphAuthorityNode<'a>>,
+    edges: Vec<GraphAuthorityEdge<'a>>,
+}
+
+#[derive(Serialize)]
+struct GraphAuthorityNode<'a> {
+    id: &'a str,
+    name: &'a str,
+    class: RepositoryClass,
+    status: RepositoryStatus,
+}
+
+#[derive(Serialize)]
+struct GraphAuthorityEdge<'a> {
+    id: &'a str,
+    source: &'a str,
+    target: &'a str,
+    kind: RelationKind,
+    provenance: RelationProvenance,
+}
+
+fn graph_bootstrap(data: &PublicSiteData) -> String {
+    let authority = GraphAuthority {
+        schema: "mer3ly.repo-graph/v1",
+        nodes: data
+            .authority
+            .repositories
+            .repository
+            .iter()
+            .filter(|repository| repository.public)
+            .map(|repository| GraphAuthorityNode {
+                id: &repository.id,
+                name: &repository.name,
+                class: repository.class,
+                status: repository.status,
+            })
+            .collect(),
+        edges: data
+            .authority
+            .relations
+            .relation
+            .iter()
+            .map(|relation| GraphAuthorityEdge {
+                id: &relation.id,
+                source: &relation.source,
+                target: &relation.target,
+                kind: relation.kind,
+                provenance: relation.provenance,
+            })
+            .collect(),
+    };
+    let json = serde_json::to_string(&authority)
+        .expect("repository graph authority contains serializable records")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+        .replace('&', "\\u0026");
+    format!(
+        "<script id=\"repository-graph-data\" type=\"application/json\">{json}</script>\n\
+<script type=\"module\" src=\"/repo-graph.js\"></script>"
     )
 }
 

@@ -2,10 +2,12 @@
 
 The public site for [Merely](https://mer3ly.net/). It is a small static Rust
 build: Cambium views construct Genet `ScriptedDom` documents, which are
-serialized into ordinary HTML.
+serialized into ordinary HTML. The repository page progressively adds a small
+Mere-arranged WebGPU graph over the same committed public records.
 
-The deployed pages require no JavaScript. Source CSS and the social preview
-live under `assets/`; generated deployment files live under `html/`.
+The complete site remains readable without JavaScript, WebAssembly, or WebGPU.
+Source CSS, graph runtime, and social preview live under `assets/`; generated
+deployment files live under `html/`.
 
 ## Build
 
@@ -18,6 +20,16 @@ access is available:
 
 The refresh validates a complete temporary snapshot before replacing the
 cache. A failed refresh leaves the last valid public snapshot in place.
+
+When changing the repository graph client, rebuild its committed Wasm runtime:
+
+```powershell
+.\scripts\build-repo-graph.ps1
+```
+
+The script compiles the nested client crate against a pinned Mere revision,
+runs `wasm-bindgen`, copies the deployable module into `assets/`, and removes
+its temporary Cargo target.
 
 Generate the static home, community-radio, and repository pages with:
 
@@ -35,6 +47,7 @@ cargo run --locked --bin site -- --output path/to/output
 
 ```powershell
 cargo test --locked
+cargo test --manifest-path crates/repo-graph/Cargo.toml --locked
 cargo clippy --locked --all-targets -- -D warnings
 cargo run --locked --bin authority -- validate
 cargo run --locked --bin authority -- validate-metadata

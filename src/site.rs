@@ -192,9 +192,22 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
 }
 
 pub fn render_with(metadata: &PageMetadata, view: impl Fn() -> SiteView) -> String {
+    render_with_body_end(metadata, view, "")
+}
+
+pub fn render_with_body_end(
+    metadata: &PageMetadata,
+    view: impl Fn() -> SiteView,
+    body_end: &str,
+) -> String {
     let dom = Rc::new(RefCell::new(ScriptedDom::new()));
     let runner = GenetAppRunner::<_, _, _, ()>::new(dom, move |_: &()| view(), ());
     let body_markup = runner.dom().borrow().outer_html(runner.root());
+    let body_markup = if body_end.is_empty() {
+        body_markup
+    } else {
+        body_markup.replacen("</body>", &format!("{body_end}\n</body>"), 1)
+    };
     render_shell(metadata, &body_markup)
 }
 

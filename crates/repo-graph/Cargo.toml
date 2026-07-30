@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+
+[package]
+name = "mer3ly-repo-graph"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.92"
+publish = false
+description = "Thin Wasm projection of Mer3ly repository authority through Mere arrangements."
+repository = "https://github.com/merely-made/mer3ly-net"
+license = "MIT OR Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+arrangements = { git = "https://github.com/merely-made/mere.git", rev = "d18cfdf7c2695dbfa271a1c263c09b0d2248ab89" }
+euclid = { version = "0.22", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["js"] }
+wasm-bindgen = "=0.2.126"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = "s"
+panic = "abort"
+strip = "symbols"

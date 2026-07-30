@@ -805,6 +805,18 @@ impl RepositoryStatus {
 }
 
 impl RelationKind {
+    pub const fn slug(self) -> &'static str {
+        match self {
+            Self::DependsOn => "depends-on",
+            Self::Contains => "contains",
+            Self::ReferenceAppFor => "reference-app-for",
+            Self::HostFor => "host-for",
+            Self::UsesUiFrom => "uses-ui-from",
+            Self::RendersWith => "renders-with",
+            Self::ForkOf => "fork-of",
+        }
+    }
+
     pub const fn label(self) -> &'static str {
         match self {
             Self::DependsOn => "depends on",

@@ -61,9 +61,9 @@ fn repository_page_is_static_semantic_and_filterable() {
     assert!(document.contains("aria-label=\"Relationship key\""));
     assert!(document.contains("provenance-derived"));
     assert!(document.contains("provenance-curated"));
+    assert!(document.contains("<script type=\"module\" src=\"/repo-graph.js\"></script>"));
 
     for forbidden in [
-        "<script src",
         "x-dc",
         "webpack",
         "__next",
