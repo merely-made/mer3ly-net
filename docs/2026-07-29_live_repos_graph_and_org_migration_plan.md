@@ -1,7 +1,7 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M3 code and public deployment complete; HTTP-to-HTTPS enforcement
-held at the Cloudflare boundary; stopped before M4
+**Status:** M4 semantic repository page and repository-topic pass complete;
+HTTP-to-HTTPS enforcement held at the Cloudflare boundary; stopped before M5
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -525,6 +525,14 @@ credential.
 - links, filters, and relation summaries work by keyboard and screen reader;
 - the narrow-width receipt has no horizontal overflow.
 
+**M4 result, 2026-07-30:** `/repos/` now projects all 16 public repositories
+and 25 typed relations as semantic static HTML. The reduced GitHub cache,
+atomic stale-cache fallback, native class filters, responsive Genet and headed
+receipts, repository-topic taxonomy, and public deployment passed. The exact
+receipt is
+[`docs/receipts/site/2026-07-30_m4_repository_index.md`](receipts/site/2026-07-30_m4_repository_index.md).
+M5 was not started.
+
 ### M5: Add the live Mere graph
 
 Build a thin `mer3ly-repo-graph` Wasm client over Mere's reusable graph and
@@ -659,4 +667,10 @@ source without changing its locked commit.
 M3 was implemented and accepted on 2026-07-30. Commit `b3e99e4` replaced the
 generated runtime site with the static Cambium/Genet build. The public domain
 serves the result through Cloudflare; HTTP-to-HTTPS enforcement remains an
-external configuration gate. M4 is the next implementation boundary.
+external configuration gate.
+
+M4 was implemented and accepted on 2026-07-30. Commit `0b1ddff` published the
+semantic repository index and validated public metadata cache. All 16 public
+organization repositories received bounded, project-specific GitHub topics.
+Pages run `30518337035` deployed the page successfully. Work stopped before
+the optional live Mere graph in M5.

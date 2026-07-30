@@ -16,3 +16,4 @@ absolute machine paths.
 ## Receipts
 
 - [M3 static Cambium/Genet site](2026-07-30_m3_static_site.md)
+- [M4 semantic repository index](2026-07-30_m4_repository_index.md)
