@@ -6,8 +6,8 @@ serialized into ordinary HTML. The repository page progressively adds a small
 Mere-arranged WebGPU graph over the same committed public records.
 
 The complete site remains readable without JavaScript, WebAssembly, or WebGPU.
-Source CSS, graph runtime, and social preview live under `assets/`; generated
-deployment files live under `html/`.
+Source CSS, graph runtime, social previews, and site identity live under
+`assets/`; generated deployment files live under `html/`.
 
 Source code is licensed under MPL-2.0. Original Mer3ly prose and site artwork
 are available under CC BY 4.0; imported project screenshots retain their source
@@ -62,18 +62,21 @@ npx playwright install chromium
 npm run smoke
 ```
 
-The browser smoke serves committed `html/` locally and checks the home,
-community-radio, desktop, mobile, reduced-motion, and WebGPU-fallback paths.
-Set `MER3LY_SITE_DIR` to check another generated site directory.
+The browser smoke serves committed `html/` locally and checks discovery files,
+project social metadata and structured data, the home and community-radio
+pages, and desktop, mobile, reduced-motion, and WebGPU-fallback paths. Set
+`MER3LY_SITE_DIR` to check another generated site directory.
 
 `authority validate-artifact` accepts a Pages artifact root after the
 repository root. It enforces the exact public file set, public authority and
-graph counts, displayed metadata timestamp, Wasm header, reduced GitHub links,
-and the absence of secrets, personal data patterns, local paths, and private
-network addresses. The artifact is a conventional, self-contained site root:
-`index.html`, `repos/index.html`, `projects/<id>/index.html`, `radio.html`,
-their approved showcase images and runtime assets, and `CNAME` all live
-directly beneath the supplied directory. The exact public contact
+graph counts, canonical sitemap coverage, project social and structured
+metadata, favicon identity, displayed metadata timestamp, Wasm header, reduced
+GitHub links, and the absence of secrets, personal data patterns, local paths,
+and private network addresses. The artifact is a conventional, self-contained
+site root: `index.html`, `repos/index.html`, `projects/<id>/index.html`,
+`radio.html`, `sitemap.xml`, `robots.txt`, their approved showcase images and
+runtime assets, and `CNAME` all live directly beneath the supplied directory.
+The exact public contact
 `markik@mer3ly.net` is allowed; other contact addresses are rejected. The
 command emits a JSON receipt with SHA-256 hashes:
 
@@ -97,4 +100,5 @@ domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
 
 - [Live repository graph and Merely organization migration](docs/2026-07-29_live_repos_graph_and_org_migration_plan.md)
 - [Merely project showcase](docs/2026-07-30_project_showcase_plan.md)
+- [Discovery and sharing](docs/2026-07-30_discovery_and_sharing_plan.md)
 - [Site acceptance receipts](docs/receipts/site/README.md)

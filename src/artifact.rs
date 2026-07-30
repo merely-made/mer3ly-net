@@ -6,15 +6,21 @@ use std::path::{Path, PathBuf};
 
 use regex::Regex;
 use serde::Serialize;
+use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-use crate::repositories::{Authority, PublicMetadataCache, ShowcaseManifest};
+use crate::discovery::{ROBOTS_TXT, canonical_urls_from_authority};
+use crate::repositories::{Authority, PublicMetadataCache, RepositoryRecord, ShowcaseManifest};
+use crate::site::{
+    DEFAULT_SOCIAL_IMAGE_ALT, DEFAULT_SOCIAL_IMAGE_URL, ORGANIZATION_ID, WEBSITE_ID,
+};
 
 const RECEIPT_SCHEMA: &str = "mer3ly.public-artifact-receipt/v1";
 const GRAPH_SCHEMA: &str = "mer3ly.repo-graph/v1";
 const APPROVED_CONTACT_EMAIL: &str = "markik@mer3ly.net";
 const BASE_FILES: &[&str] = &[
     "CNAME",
+    "favicon.svg",
     "index.html",
     "mer3ly_repo_graph.js",
     "mer3ly_repo_graph_bg.wasm",
@@ -22,6 +28,8 @@ const BASE_FILES: &[&str] = &[
     "radio.html",
     "repo-graph.js",
     "repos/index.html",
+    "robots.txt",
+    "sitemap.xml",
     "site.css",
 ];
 
@@ -38,6 +46,9 @@ pub struct ArtifactReceipt {
     project_profiles: usize,
     project_relation_projections: usize,
     showcase_images: usize,
+    sitemap_urls: usize,
+    project_social_previews: usize,
+    project_structured_records: usize,
     metadata_generated_at_utc: String,
     metadata_sha256: String,
 }
@@ -66,6 +77,13 @@ struct GraphEdge {
     id: String,
     source: String,
     target: String,
+}
+
+struct ExpectedSocialMetadata<'a> {
+    canonical: &'a str,
+    image_url: &'a str,
+    image_type: &'a str,
+    image_alt: &'a str,
 }
 
 pub fn validate_public_artifact(
@@ -144,13 +162,52 @@ pub fn validate_public_artifact(
     }
 
     validate_cname(artifact_root, "CNAME", &mut errors);
+    validate_copied_asset(
+        artifact_root,
+        source_root,
+        "favicon.svg",
+        "assets/favicon.svg",
+        "favicon",
+        &mut errors,
+    );
 
     let home = read_text(artifact_root, "index.html", &mut errors);
     let radio = read_text(artifact_root, "radio.html", &mut errors);
     let repositories = read_text(artifact_root, "repos/index.html", &mut errors);
+    let robots = read_text(artifact_root, "robots.txt", &mut errors);
+    let sitemap = read_text(artifact_root, "sitemap.xml", &mut errors);
     if !home.starts_with("<!doctype html>") || !radio.starts_with("<!doctype html>") {
         errors.push("home or community-radio output is not a complete HTML document".to_owned());
     }
+    validate_fixed_metadata(
+        &home,
+        "https://mer3ly.net/",
+        DEFAULT_SOCIAL_IMAGE_URL,
+        "image/jpeg",
+        DEFAULT_SOCIAL_IMAGE_ALT,
+        &mut errors,
+    );
+    validate_fixed_metadata(
+        &radio,
+        "https://mer3ly.net/radio.html",
+        DEFAULT_SOCIAL_IMAGE_URL,
+        "image/jpeg",
+        DEFAULT_SOCIAL_IMAGE_ALT,
+        &mut errors,
+    );
+    validate_fixed_metadata(
+        &repositories,
+        "https://mer3ly.net/repos/",
+        DEFAULT_SOCIAL_IMAGE_URL,
+        "image/jpeg",
+        DEFAULT_SOCIAL_IMAGE_ALT,
+        &mut errors,
+    );
+    if robots != ROBOTS_TXT {
+        errors.push("robots policy differs from the approved public policy".to_owned());
+    }
+    let expected_sitemap_urls = canonical_urls_from_authority(authority);
+    let sitemap_urls = validate_sitemap(&sitemap, &expected_sitemap_urls, &mut errors);
 
     let repository_ids = attribute_values(&repositories, "data-repository-id");
     let relation_ids = attribute_values(&repositories, "data-relation-id");
@@ -163,6 +220,8 @@ pub fn validate_public_artifact(
 
     let mut project_ids = Vec::new();
     let mut project_relation_ids = Vec::new();
+    let mut project_social_previews = 0;
+    let mut project_structured_records = 0;
     for repository in authority
         .repositories
         .repository
@@ -179,6 +238,37 @@ pub fn validate_public_artifact(
         }
         project_ids.extend(attribute_values(&project, "data-project-id"));
         project_relation_ids.extend(attribute_values(&project, "data-relation-id"));
+        let canonical = format!("https://mer3ly.net/projects/{}/", repository.id);
+        let showcase = showcases.for_repository(&repository.id);
+        let social_image = showcase.map_or(DEFAULT_SOCIAL_IMAGE_URL.to_owned(), |showcase| {
+            format!("https://mer3ly.net/{}", showcase.image)
+        });
+        let social_type = if showcase.is_some() {
+            "image/png"
+        } else {
+            "image/jpeg"
+        };
+        let social_alt =
+            showcase.map_or(DEFAULT_SOCIAL_IMAGE_ALT, |showcase| showcase.alt.as_str());
+        let expected_social = ExpectedSocialMetadata {
+            canonical: &canonical,
+            image_url: &social_image,
+            image_type: social_type,
+            image_alt: social_alt,
+        };
+        let (social_valid, structured_valid) = validate_project_metadata(
+            &project,
+            repository,
+            metadata,
+            &expected_social,
+            &mut errors,
+        );
+        if social_valid {
+            project_social_previews += 1;
+        }
+        if structured_valid {
+            project_structured_records += 1;
+        }
         let profile_href = format!("/projects/{}/", repository.id);
         if !home.contains(&profile_href) && showcases.for_repository(&repository.id).is_some() {
             errors.push(format!(
@@ -264,6 +354,9 @@ pub fn validate_public_artifact(
             project_profiles: project_ids.len(),
             project_relation_projections: project_relation_ids.len(),
             showcase_images: showcases.showcase.len(),
+            sitemap_urls,
+            project_social_previews,
+            project_structured_records,
             metadata_generated_at_utc: metadata.generated_at_utc.clone(),
             metadata_sha256: sha256(&metadata_bytes),
         })
@@ -303,6 +396,9 @@ fn is_scannable(path: &str) -> bool {
     path.ends_with(".html")
         || path.ends_with(".css")
         || path.ends_with(".js")
+        || path.ends_with(".svg")
+        || path.ends_with(".txt")
+        || path.ends_with(".xml")
         || path.ends_with(".wasm")
         || path.ends_with("CNAME")
 }
@@ -427,6 +523,390 @@ fn read_text(root: &Path, relative: &str, errors: &mut Vec<String>) -> String {
             String::new()
         }
     }
+}
+
+fn validate_copied_asset(
+    artifact_root: &Path,
+    source_root: &Path,
+    artifact_relative: &str,
+    source_relative: &str,
+    label: &str,
+    errors: &mut Vec<String>,
+) {
+    match (
+        fs::read(artifact_root.join(artifact_relative)),
+        fs::read(source_root.join(source_relative)),
+    ) {
+        (Ok(artifact), Ok(source)) if artifact == source => {}
+        (Ok(_), Ok(_)) => errors.push(format!("{label} artifact differs from its approved source")),
+        _ => errors.push(format!("{label} artifact or approved source is missing")),
+    }
+}
+
+fn validate_fixed_metadata(
+    document: &str,
+    canonical: &str,
+    image_url: &str,
+    image_type: &str,
+    image_alt: &str,
+    errors: &mut Vec<String>,
+) {
+    let expected = ExpectedSocialMetadata {
+        canonical,
+        image_url,
+        image_type,
+        image_alt,
+    };
+    validate_social_head(document, "fixed page", &expected, errors);
+    let Some(value) = parse_json_ld(document, "fixed page", errors) else {
+        return;
+    };
+    let Some(graph) = schema_graph(&value, "fixed page", errors) else {
+        return;
+    };
+    validate_base_schema(graph, "fixed page", errors);
+}
+
+fn validate_project_metadata(
+    document: &str,
+    repository: &RepositoryRecord,
+    metadata: &PublicMetadataCache,
+    expected: &ExpectedSocialMetadata<'_>,
+    errors: &mut Vec<String>,
+) -> (bool, bool) {
+    let social_start = errors.len();
+    validate_social_head(
+        document,
+        &format!("project profile {}", repository.id),
+        expected,
+        errors,
+    );
+    let social_valid = errors.len() == social_start;
+
+    let structured_start = errors.len();
+    let Some(value) = parse_json_ld(
+        document,
+        &format!("project profile {}", repository.id),
+        errors,
+    ) else {
+        return (social_valid, false);
+    };
+    let Some(graph) = schema_graph(
+        &value,
+        &format!("project profile {}", repository.id),
+        errors,
+    ) else {
+        return (social_valid, false);
+    };
+    validate_base_schema(graph, &format!("project profile {}", repository.id), errors);
+
+    let entity_id = format!("{}#repository", expected.canonical);
+    let page = graph
+        .iter()
+        .find(|node| node.get("@id").and_then(Value::as_str) == Some(expected.canonical));
+    if page.is_none_or(|page| {
+        page.get("@type").and_then(Value::as_str) != Some("WebPage")
+            || page.pointer("/about/@id").and_then(Value::as_str) != Some(entity_id.as_str())
+            || page.pointer("/isPartOf/@id").and_then(Value::as_str) != Some(WEBSITE_ID)
+    }) {
+        errors.push(format!(
+            "project profile {} has invalid WebPage structured data",
+            repository.id
+        ));
+    }
+
+    let entity = graph
+        .iter()
+        .find(|node| node.get("@id").and_then(Value::as_str) == Some(entity_id.as_str()));
+    let expected_type = if repository.id == "org-profile" {
+        "CreativeWork"
+    } else {
+        "SoftwareSourceCode"
+    };
+    let repository_url = format!("https://github.com/{}", repository.github_slug);
+    if entity.is_none_or(|entity| {
+        entity.get("@type").and_then(Value::as_str) != Some(expected_type)
+            || entity.get("url").and_then(Value::as_str) != Some(expected.canonical)
+            || entity.pointer("/publisher/@id").and_then(Value::as_str) != Some(ORGANIZATION_ID)
+            || entity
+                .get("sameAs")
+                .and_then(Value::as_array)
+                .is_none_or(|same_as| {
+                    same_as.len() != 1 || same_as[0].as_str() != Some(repository_url.as_str())
+                })
+    }) {
+        errors.push(format!(
+            "project profile {} has invalid repository structured data",
+            repository.id
+        ));
+    }
+
+    if expected_type == "SoftwareSourceCode" {
+        if entity
+            .and_then(|entity| entity.get("codeRepository"))
+            .and_then(Value::as_str)
+            != Some(repository_url.as_str())
+        {
+            errors.push(format!(
+                "project profile {} has invalid source repository structured data",
+                repository.id
+            ));
+        }
+        let public_metadata = metadata
+            .repository
+            .iter()
+            .find(|record| record.id == repository.id);
+        let expected_language =
+            public_metadata.and_then(|record| record.primary_language.as_deref());
+        let actual_language = entity
+            .and_then(|entity| entity.get("programmingLanguage"))
+            .and_then(Value::as_str);
+        if actual_language != expected_language {
+            errors.push(format!(
+                "project profile {} has invalid language structured data",
+                repository.id
+            ));
+        }
+        let expected_topics = public_metadata
+            .map(|record| record.topics.as_slice())
+            .unwrap_or_default();
+        let actual_topics = entity
+            .and_then(|entity| entity.get("keywords"))
+            .and_then(Value::as_array);
+        if expected_topics.is_empty() {
+            if actual_topics.is_some() {
+                errors.push(format!(
+                    "project profile {} has unexpected topic structured data",
+                    repository.id
+                ));
+            }
+        } else if actual_topics.is_none_or(|topics| {
+            topics.len() != expected_topics.len()
+                || topics
+                    .iter()
+                    .zip(expected_topics)
+                    .any(|(actual, expected)| actual.as_str() != Some(expected.as_str()))
+        }) {
+            errors.push(format!(
+                "project profile {} has invalid topic structured data",
+                repository.id
+            ));
+        }
+    }
+
+    (social_valid, errors.len() == structured_start)
+}
+
+fn validate_social_head(
+    document: &str,
+    label: &str,
+    expected: &ExpectedSocialMetadata<'_>,
+    errors: &mut Vec<String>,
+) {
+    for (name, needle) in [
+        (
+            "canonical URL",
+            format!(
+                "<link rel=\"canonical\" href=\"{}\">",
+                escape_html_attr(expected.canonical)
+            ),
+        ),
+        (
+            "Open Graph type",
+            "<meta property=\"og:type\" content=\"website\">".to_owned(),
+        ),
+        (
+            "Open Graph site name",
+            "<meta property=\"og:site_name\" content=\"Merely\">".to_owned(),
+        ),
+        (
+            "Open Graph URL",
+            format!(
+                "<meta property=\"og:url\" content=\"{}\">",
+                escape_html_attr(expected.canonical)
+            ),
+        ),
+        (
+            "Open Graph image",
+            format!(
+                "<meta property=\"og:image\" content=\"{}\">",
+                escape_html_attr(expected.image_url)
+            ),
+        ),
+        (
+            "Open Graph image type",
+            format!(
+                "<meta property=\"og:image:type\" content=\"{}\">",
+                escape_html_attr(expected.image_type)
+            ),
+        ),
+        (
+            "Open Graph image alt",
+            format!(
+                "<meta property=\"og:image:alt\" content=\"{}\">",
+                escape_html_attr(expected.image_alt)
+            ),
+        ),
+        (
+            "Twitter card",
+            "<meta name=\"twitter:card\" content=\"summary_large_image\">".to_owned(),
+        ),
+        (
+            "Twitter image",
+            format!(
+                "<meta name=\"twitter:image\" content=\"{}\">",
+                escape_html_attr(expected.image_url)
+            ),
+        ),
+        (
+            "Twitter image alt",
+            format!(
+                "<meta name=\"twitter:image:alt\" content=\"{}\">",
+                escape_html_attr(expected.image_alt)
+            ),
+        ),
+        (
+            "favicon",
+            "<link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\">".to_owned(),
+        ),
+        (
+            "sitemap link",
+            "<link rel=\"sitemap\" href=\"/sitemap.xml\" type=\"application/xml\" title=\"Sitemap\">"
+                .to_owned(),
+        ),
+    ] {
+        if document.matches(&needle).count() != 1 {
+            errors.push(format!("{label} has invalid {name} metadata"));
+        }
+    }
+
+    for (name, first, second) in [
+        (
+            "title",
+            "<meta property=\"og:title\" content=\"",
+            "<meta name=\"twitter:title\" content=\"",
+        ),
+        (
+            "description",
+            "<meta property=\"og:description\" content=\"",
+            "<meta name=\"twitter:description\" content=\"",
+        ),
+    ] {
+        let first_value = quoted_attribute_value(document, first);
+        let second_value = quoted_attribute_value(document, second);
+        if first_value.is_none()
+            || first_value.is_some_and(str::is_empty)
+            || first_value != second_value
+            || document.matches(first).count() != 1
+            || document.matches(second).count() != 1
+        {
+            errors.push(format!("{label} has invalid social {name} metadata"));
+        }
+    }
+}
+
+fn quoted_attribute_value<'a>(document: &'a str, marker: &str) -> Option<&'a str> {
+    let start = document.find(marker)? + marker.len();
+    let end = document[start..].find('"')? + start;
+    Some(&document[start..end])
+}
+
+fn escape_html_attr(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+}
+
+fn parse_json_ld(document: &str, label: &str, errors: &mut Vec<String>) -> Option<Value> {
+    let marker = "<script type=\"application/ld+json\">";
+    if document.matches(marker).count() != 1 {
+        errors.push(format!("{label} does not have exactly one JSON-LD record"));
+        return None;
+    }
+    let start = document.find(marker)? + marker.len();
+    let Some(end) = document[start..]
+        .find("</script>")
+        .map(|offset| start + offset)
+    else {
+        errors.push(format!("{label} JSON-LD record is not terminated"));
+        return None;
+    };
+    match serde_json::from_str(&document[start..end]) {
+        Ok(value) => Some(value),
+        Err(_) => {
+            errors.push(format!("{label} JSON-LD record is invalid"));
+            None
+        }
+    }
+}
+
+fn schema_graph<'a>(
+    value: &'a Value,
+    label: &str,
+    errors: &mut Vec<String>,
+) -> Option<&'a [Value]> {
+    if value.get("@context").and_then(Value::as_str) != Some("https://schema.org") {
+        errors.push(format!("{label} has invalid JSON-LD context"));
+    }
+    let Some(graph) = value.get("@graph").and_then(Value::as_array) else {
+        errors.push(format!("{label} has no JSON-LD graph"));
+        return None;
+    };
+    Some(graph)
+}
+
+fn validate_base_schema(graph: &[Value], label: &str, errors: &mut Vec<String>) {
+    let organization = graph
+        .iter()
+        .find(|node| node.get("@id").and_then(Value::as_str) == Some(ORGANIZATION_ID));
+    if organization.is_none_or(|node| {
+        node.get("@type").and_then(Value::as_str) != Some("Organization")
+            || node.get("name").and_then(Value::as_str) != Some("Merely LLC")
+    }) {
+        errors.push(format!("{label} has invalid organization structured data"));
+    }
+    let website = graph
+        .iter()
+        .find(|node| node.get("@id").and_then(Value::as_str) == Some(WEBSITE_ID));
+    if website.is_none_or(|node| {
+        node.get("@type").and_then(Value::as_str) != Some("WebSite")
+            || node.pointer("/publisher/@id").and_then(Value::as_str) != Some(ORGANIZATION_ID)
+    }) {
+        errors.push(format!("{label} has invalid website structured data"));
+    }
+}
+
+fn validate_sitemap(sitemap: &str, expected: &[String], errors: &mut Vec<String>) -> usize {
+    if !sitemap.starts_with("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+        || !sitemap.contains("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">")
+        || !sitemap.ends_with("</urlset>\n")
+    {
+        errors.push("sitemap does not use the approved XML envelope".to_owned());
+    }
+    for unsupported in ["<lastmod>", "<changefreq>", "<priority>"] {
+        if sitemap.contains(unsupported) {
+            errors.push("sitemap contains unsupported freshness metadata".to_owned());
+            break;
+        }
+    }
+
+    let loc = Regex::new(r"<loc>([^<]+)</loc>").expect("valid sitemap location regex");
+    let actual = loc
+        .captures_iter(sitemap)
+        .filter_map(|capture| capture.get(1).map(|value| value.as_str().to_owned()))
+        .collect::<Vec<_>>();
+    let unique = actual.iter().collect::<BTreeSet<_>>();
+    if actual != expected
+        || unique.len() != actual.len()
+        || actual
+            .iter()
+            .any(|url| !url.starts_with("https://mer3ly.net/"))
+    {
+        errors.push("sitemap URLs differ from canonical public authority".to_owned());
+    }
+    actual.len()
 }
 
 fn parse_graph_payload(document: &str, errors: &mut Vec<String>) -> Option<GraphPayload> {

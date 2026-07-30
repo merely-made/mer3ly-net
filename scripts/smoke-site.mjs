@@ -7,7 +7,7 @@ import { chromium } from "playwright";
 
 const siteRoot = path.resolve(process.env.MER3LY_SITE_DIR ?? "html");
 const receiptRoot = path.resolve(
-  process.env.MER3LY_RECEIPT_DIR ?? ".tmp/m7-headed",
+  process.env.MER3LY_RECEIPT_DIR ?? ".tmp/m8-headed",
 );
 const headless = process.env.MER3LY_HEADLESS !== "false";
 const mimeTypes = {
@@ -16,7 +16,10 @@ const mimeTypes = {
   ".jpg": "image/jpeg",
   ".js": "text/javascript; charset=utf-8",
   ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".txt": "text/plain; charset=utf-8",
   ".wasm": "application/wasm",
+  ".xml": "application/xml; charset=utf-8",
 };
 
 await mkdir(receiptRoot, { recursive: true });
@@ -69,7 +72,7 @@ const browser = await chromium.launch({
 });
 
 const receipt = {
-  schema: "mer3ly.browser-smoke-receipt/v2",
+  schema: "mer3ly.browser-smoke-receipt/v3",
   source_sha: process.env.GITHUB_SHA ?? "local",
   browser: `Chromium ${browser.version()}`,
   mode: headless ? "headless" : "headed",
@@ -80,9 +83,54 @@ const receipt = {
   fallback: {},
   showcase: {},
   projects: {},
+  discovery: {},
 };
 
 try {
+  const sitemapResponse = await fetch(`${baseUrl}/sitemap.xml`);
+  assert.equal(sitemapResponse.status, 200);
+  assert.match(
+    sitemapResponse.headers.get("content-type") ?? "",
+    /^application\/xml/,
+  );
+  const sitemapText = await sitemapResponse.text();
+  const sitemapUrls = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+    (match) => match[1],
+  );
+  assert.equal(sitemapUrls.length, 19);
+  assert.equal(new Set(sitemapUrls).size, 19);
+  assert.equal(
+    sitemapUrls.every((url) => url.startsWith("https://mer3ly.net/")),
+    true,
+  );
+  for (const unsupported of ["lastmod", "changefreq", "priority"]) {
+    assert.equal(sitemapText.includes(unsupported), false);
+  }
+
+  const robotsResponse = await fetch(`${baseUrl}/robots.txt`);
+  assert.equal(robotsResponse.status, 200);
+  assert.match(
+    robotsResponse.headers.get("content-type") ?? "",
+    /^text\/plain/,
+  );
+  assert.equal(
+    await robotsResponse.text(),
+    "User-agent: *\nAllow: /\nSitemap: https://mer3ly.net/sitemap.xml\n",
+  );
+
+  const faviconResponse = await fetch(`${baseUrl}/favicon.svg`);
+  assert.equal(faviconResponse.status, 200);
+  assert.match(
+    faviconResponse.headers.get("content-type") ?? "",
+    /^image\/svg\+xml/,
+  );
+  assert.ok((await faviconResponse.arrayBuffer()).byteLength > 0);
+  receipt.discovery = {
+    sitemap_urls: sitemapUrls.length,
+    robots_policy: "allow-public",
+    favicon: "favicon.svg",
+  };
+
   for (const route of [
     "/",
     "/radio.html",
@@ -206,6 +254,23 @@ try {
     await visualProject.locator(".project-showcase-figure img").count(),
     1,
   );
+  const visualMetadata = await projectMetadata(visualProject);
+  assert.equal(
+    visualMetadata.social_image,
+    "https://mer3ly.net/showcase/mere.png",
+  );
+  assert.equal(visualMetadata.social_image_type, "image/png");
+  assert.equal(visualMetadata.twitter_image, visualMetadata.social_image);
+  assert.equal(
+    visualMetadata.twitter_image_alt,
+    visualMetadata.social_image_alt,
+  );
+  assert.ok(visualMetadata.social_image_alt.length > 0);
+  assert.equal(visualMetadata.structured_type, "SoftwareSourceCode");
+  assert.equal(
+    visualMetadata.code_repository,
+    "https://github.com/merely-made/mere",
+  );
   assert.equal(await horizontalOverflow(visualProject), 0);
   assert.deepEqual(
     visualProjectDiagnostics,
@@ -219,6 +284,8 @@ try {
   receipt.projects.visual = {
     repository: "mere",
     showcase_images: 1,
+    social_image: visualMetadata.social_image,
+    structured_type: visualMetadata.structured_type,
     horizontal_overflow: 0,
   };
   await visualProject.close();
@@ -247,6 +314,17 @@ try {
       .count(),
     1,
   );
+  const textMetadata = await projectMetadata(textProject);
+  assert.equal(textMetadata.social_image, "https://mer3ly.net/og.jpg");
+  assert.equal(textMetadata.social_image_type, "image/jpeg");
+  assert.equal(textMetadata.twitter_image, textMetadata.social_image);
+  assert.equal(textMetadata.twitter_image_alt, textMetadata.social_image_alt);
+  assert.ok(textMetadata.social_image_alt.length > 0);
+  assert.equal(textMetadata.structured_type, "SoftwareSourceCode");
+  assert.equal(
+    textMetadata.code_repository,
+    "https://github.com/merely-made/retinue",
+  );
   assert.equal(await horizontalOverflow(textProject), 0);
   assert.deepEqual(
     textProjectDiagnostics,
@@ -260,6 +338,8 @@ try {
   receipt.projects.text_only = {
     repository: "retinue",
     showcase_images: 0,
+    social_image: textMetadata.social_image,
+    structured_type: textMetadata.structured_type,
     horizontal_overflow: 0,
   };
   await textProject.close();
@@ -456,6 +536,37 @@ async function graphState(page) {
       horizontal_overflow:
         document.documentElement.scrollWidth -
         document.documentElement.clientWidth,
+    };
+  });
+}
+
+async function projectMetadata(page) {
+  return page.evaluate(() => {
+    const canonical = document.querySelector('link[rel="canonical"]').href;
+    const payload = JSON.parse(
+      document.querySelector('script[type="application/ld+json"]').textContent,
+    );
+    const entity = payload["@graph"].find(
+      (node) => node["@id"] === `${canonical}#repository`,
+    );
+    return {
+      social_image: document
+        .querySelector('meta[property="og:image"]')
+        .getAttribute("content"),
+      social_image_type: document
+        .querySelector('meta[property="og:image:type"]')
+        .getAttribute("content"),
+      social_image_alt: document
+        .querySelector('meta[property="og:image:alt"]')
+        .getAttribute("content"),
+      twitter_image: document
+        .querySelector('meta[name="twitter:image"]')
+        .getAttribute("content"),
+      twitter_image_alt: document
+        .querySelector('meta[name="twitter:image:alt"]')
+        .getAttribute("content"),
+      structured_type: entity["@type"],
+      code_repository: entity.codeRepository,
     };
   });
 }
