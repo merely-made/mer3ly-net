@@ -315,7 +315,8 @@ pub fn validate_public_artifact(
         &metadata.generated_at_utc[..10],
         &metadata.generated_at_utc[11..16]
     );
-    if !repositories.contains(&timestamp) {
+    let refresh_statement = format!("Public GitHub metadata was refreshed {timestamp}.");
+    if !repositories.contains(&refresh_statement) {
         errors.push("repository page does not display the validated metadata timestamp".to_owned());
     }
 
