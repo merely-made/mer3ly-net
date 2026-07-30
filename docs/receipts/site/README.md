@@ -20,3 +20,4 @@ absolute machine paths.
 - [M5 live Mere repository graph](2026-07-30_m5_live_repository_graph.md)
 - [M6 automated Pages deployment](2026-07-30_m6_automated_pages_deployment.md)
 - [M7 project showcase](2026-07-30_m7_project_showcase.md)
+- [M8 discovery and sharing](2026-07-30_m8_discovery_and_sharing.md)

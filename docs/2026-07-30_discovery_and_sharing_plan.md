@@ -1,6 +1,7 @@
 # Merely discovery and sharing
 
-**Status:** M8 locally accepted; deployment acceptance pending
+**Status:** M8 complete; accepted by the
+[discovery and sharing receipt](receipts/site/2026-07-30_m8_discovery_and_sharing.md)
 
 **Authority:** This is the canonical plan for making the completed Mer3ly
 project profiles independently discoverable and shareable. It follows the
