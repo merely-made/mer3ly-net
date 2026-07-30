@@ -1,0 +1,399 @@
+use std::collections::BTreeMap;
+use std::path::Path;
+
+use crate::repositories::{
+    AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationRecord, RepositoryRecord,
+    ShowcaseRecord,
+};
+use crate::site::{
+    ActivePage, SiteView, element, external_link, link, render_with_dynamic, section_heading,
+    shell, txt,
+};
+
+pub fn documents(data: &PublicSiteData) -> Vec<(String, String)> {
+    data.authority
+        .repositories
+        .repository
+        .iter()
+        .filter(|repository| repository.public)
+        .map(|repository| (repository.id.clone(), document_for(data, repository)))
+        .collect()
+}
+
+pub fn document(root: &Path, repository_id: &str) -> Result<String, AuthorityError> {
+    let data = PublicSiteData::load(root)?;
+    let repository = data
+        .authority
+        .repositories
+        .repository
+        .iter()
+        .find(|repository| repository.public && repository.id == repository_id)
+        .ok_or_else(|| {
+            AuthorityError::from_message(format!(
+                "unknown public project repository {repository_id}"
+            ))
+        })?;
+    Ok(document_for(&data, repository))
+}
+
+pub fn document_for(data: &PublicSiteData, repository: &RepositoryRecord) -> String {
+    let title = format!("{} | Merely", repository.name);
+    let canonical = format!("https://mer3ly.net/projects/{}/", repository.id);
+    render_with_dynamic(&title, &repository.summary, &canonical, || {
+        view(data, repository)
+    })
+}
+
+pub fn view(data: &PublicSiteData, repository: &RepositoryRecord) -> SiteView {
+    let metadata = data
+        .metadata
+        .repository
+        .iter()
+        .find(|metadata| metadata.id == repository.id);
+    let showcase = data.showcases.for_repository(&repository.id);
+
+    shell(
+        ActivePage::Repositories,
+        element(
+            "main",
+            &[
+                ("id", "main"),
+                ("class", "project-profile-main"),
+                ("data-project-id", repository.id.as_str()),
+            ],
+            vec![
+                hero(repository),
+                showcase_section(showcase),
+                place_in_family(data, repository),
+                project_facts(repository, metadata),
+                profile_closing(repository),
+            ],
+        ),
+    )
+}
+
+fn hero(repository: &RepositoryRecord) -> SiteView {
+    let github_url = format!("https://github.com/{}", repository.github_slug);
+    let project_href = format!("/projects/{}/", repository.id);
+    let mut links = vec![
+        external_link(&github_url, "Open repository ↗", "button button-primary"),
+        link(
+            "/repos/",
+            "See the complete repository map",
+            "button button-quiet",
+        ),
+    ];
+    if repository.homepage != github_url
+        && repository.homepage != format!("https://mer3ly.net{project_href}")
+    {
+        links.push(external_link(
+            &repository.homepage,
+            "Visit project site ↗",
+            "button button-quiet",
+        ));
+    }
+
+    element(
+        "section",
+        &[
+            ("class", "hero project-profile-hero"),
+            ("aria-labelledby", "project-title"),
+        ],
+        vec![
+            element(
+                "p",
+                &[("class", "eyebrow")],
+                vec![txt(format!(
+                    "Merely project · {} · {}",
+                    repository.class.label(),
+                    repository.status.label()
+                ))],
+            ),
+            element(
+                "h1",
+                &[("id", "project-title")],
+                vec![txt(&repository.name)],
+            ),
+            element(
+                "p",
+                &[("class", "hero-copy")],
+                vec![txt(&repository.summary)],
+            ),
+            element("div", &[("class", "hero-actions")], links),
+            element(
+                "div",
+                &[("class", "signal-rule"), ("aria-hidden", "true")],
+                vec![],
+            ),
+        ],
+    )
+}
+
+fn showcase_section(showcase: Option<&ShowcaseRecord>) -> SiteView {
+    let Some(showcase) = showcase else {
+        return element(
+            "section",
+            &[("class", "content-section project-no-image")],
+            vec![
+                section_heading("01", "current public description"),
+                element(
+                    "p",
+                    &[("class", "project-no-image-copy")],
+                    vec![txt(
+                        "This profile is intentionally text-first. Merely has not selected a current visual that would clarify the project without overstating its state.",
+                    )],
+                ),
+            ],
+        );
+    };
+
+    let image_src = format!("/{}", showcase.image);
+    element(
+        "section",
+        &[("class", "content-section project-showcase-section")],
+        vec![
+            section_heading("01", "current view"),
+            element(
+                "div",
+                &[("class", "project-showcase-layout")],
+                vec![
+                    element(
+                        "div",
+                        &[("class", "project-showcase-copy")],
+                        vec![
+                            element("h2", &[], vec![txt(&showcase.headline)]),
+                            element("p", &[], vec![txt(&showcase.copy)]),
+                        ],
+                    ),
+                    element(
+                        "figure",
+                        &[("class", "project-showcase-figure")],
+                        vec![
+                            element(
+                                "img",
+                                &[
+                                    ("src", image_src.as_str()),
+                                    ("alt", showcase.alt.as_str()),
+                                    ("loading", "eager"),
+                                    ("decoding", "async"),
+                                ],
+                                vec![],
+                            ),
+                            element(
+                                "figcaption",
+                                &[],
+                                vec![
+                                    txt(format!("{} Source image: ", showcase.caption)),
+                                    external_link(
+                                        &showcase.source_url,
+                                        "repository ↗",
+                                        "text-link",
+                                    ),
+                                    txt(format!(". License: {}.", showcase.source_license)),
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+}
+
+fn place_in_family(data: &PublicSiteData, repository: &RepositoryRecord) -> SiteView {
+    let repositories = data
+        .authority
+        .repositories
+        .repository
+        .iter()
+        .filter(|repository| repository.public)
+        .map(|repository| (repository.id.as_str(), repository))
+        .collect::<BTreeMap<_, _>>();
+    let outgoing = data
+        .authority
+        .relations
+        .relation
+        .iter()
+        .filter(|relation| relation.source == repository.id)
+        .collect::<Vec<_>>();
+    let incoming = data
+        .authority
+        .relations
+        .relation
+        .iter()
+        .filter(|relation| relation.target == repository.id)
+        .collect::<Vec<_>>();
+
+    element(
+        "section",
+        &[("class", "content-section project-relations-section")],
+        vec![
+            section_heading("02", "place in the family"),
+            element(
+                "div",
+                &[("class", "project-relation-columns")],
+                vec![
+                    relation_group("This project uses", &outgoing, true, &repositories),
+                    relation_group("Other projects use this", &incoming, false, &repositories),
+                ],
+            ),
+        ],
+    )
+}
+
+fn relation_group(
+    heading: &str,
+    relations: &[&RelationRecord],
+    outgoing: bool,
+    repositories: &BTreeMap<&str, &RepositoryRecord>,
+) -> SiteView {
+    let body = if relations.is_empty() {
+        vec![element(
+            "p",
+            &[("class", "project-relation-empty")],
+            vec![txt("No public relationship is currently recorded.")],
+        )]
+    } else {
+        vec![element(
+            "ul",
+            &[("class", "project-relation-list")],
+            relations
+                .iter()
+                .map(|relation| {
+                    let other_id = if outgoing {
+                        relation.target.as_str()
+                    } else {
+                        relation.source.as_str()
+                    };
+                    let other = repositories
+                        .get(other_id)
+                        .expect("validated relation repository");
+                    let href = format!("/projects/{}/", other.id);
+                    let label = if outgoing {
+                        relation.kind.label()
+                    } else {
+                        relation.kind.incoming_label()
+                    };
+                    element(
+                        "li",
+                        &[("data-relation-id", relation.id.as_str())],
+                        vec![
+                            element("span", &[("class", "relation-verb")], vec![txt(label)]),
+                            link(&href, &other.name, "project-relation-link"),
+                            element(
+                                "span",
+                                &[("class", "relation-provenance")],
+                                vec![txt(relation.provenance.label())],
+                            ),
+                        ],
+                    )
+                })
+                .collect(),
+        )]
+    };
+
+    element(
+        "section",
+        &[("class", "project-relation-group")],
+        vec![
+            element("h3", &[], vec![txt(heading)]),
+            element("div", &[], body),
+        ],
+    )
+}
+
+fn project_facts(
+    repository: &RepositoryRecord,
+    metadata: Option<&PublicRepositoryMetadata>,
+) -> SiteView {
+    let mut facts = vec![
+        fact("working role", repository.class.label()),
+        fact("status", repository.status.label()),
+        fact("license", &repository.license),
+    ];
+    if let Some(metadata) = metadata {
+        if let Some(language) = &metadata.primary_language {
+            facts.push(fact("primary language", language));
+        }
+        facts.push(fact(
+            "metadata refreshed",
+            &format_date(&metadata.updated_at),
+        ));
+    }
+
+    let topics = metadata.map_or_else(Vec::new, |metadata| {
+        metadata
+            .topics
+            .iter()
+            .map(|topic| element("li", &[], vec![txt(topic)]))
+            .collect()
+    });
+
+    element(
+        "section",
+        &[("class", "content-section project-facts-section")],
+        vec![
+            section_heading("03", "project facts"),
+            element(
+                "div",
+                &[("class", "project-facts-layout")],
+                vec![
+                    element("dl", &[("class", "project-facts")], facts),
+                    element(
+                        "section",
+                        &[
+                            ("class", "project-topics"),
+                            ("aria-label", "Repository topics"),
+                        ],
+                        vec![
+                            element("h3", &[], vec![txt("Public topics")]),
+                            if topics.is_empty() {
+                                element(
+                                    "p",
+                                    &[],
+                                    vec![txt("No public topics are currently recorded.")],
+                                )
+                            } else {
+                                element("ul", &[], topics)
+                            },
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+}
+
+fn fact(term: &str, description: &str) -> SiteView {
+    element(
+        "div",
+        &[("class", "project-fact")],
+        vec![
+            element("dt", &[], vec![txt(term)]),
+            element("dd", &[], vec![txt(description)]),
+        ],
+    )
+}
+
+fn profile_closing(repository: &RepositoryRecord) -> SiteView {
+    let github_url = format!("https://github.com/{}", repository.github_slug);
+    element(
+        "section",
+        &[("class", "closing-note project-profile-closing")],
+        vec![
+            element("p", &[("class", "eyebrow")], vec![txt("source of truth")]),
+            element(
+                "p",
+                &[("class", "closing-copy")],
+                vec![txt(
+                    "This profile projects committed Mer3ly authority and validated public GitHub metadata. The repository remains authoritative for implementation and current project documentation.",
+                )],
+            ),
+            external_link(&github_url, "Read the repository ↗", "text-link"),
+        ],
+    )
+}
+
+fn format_date(timestamp: &str) -> String {
+    timestamp.get(..10).unwrap_or(timestamp).to_owned()
+}

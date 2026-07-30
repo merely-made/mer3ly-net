@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 const REPOSITORIES_PATH: &str = "content/repositories.toml";
 const RELATIONS_PATH: &str = "content/relations.toml";
+const SHOWCASES_PATH: &str = "content/showcases.toml";
 const MIGRATION_PATH: &str = "ops/org-migration.toml";
 const PUBLIC_METADATA_PATH: &str = "content/github-metadata.json";
 
@@ -27,6 +28,25 @@ pub struct RepositoryRecord {
     pub license: String,
     pub homepage: String,
     pub public: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ShowcaseManifest {
+    #[serde(default)]
+    pub showcase: Vec<ShowcaseRecord>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ShowcaseRecord {
+    pub repository: String,
+    pub order: u32,
+    pub headline: String,
+    pub copy: String,
+    pub image: String,
+    pub alt: String,
+    pub caption: String,
+    pub source_url: String,
+    pub source_license: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -216,6 +236,7 @@ pub struct Authority {
 pub struct PublicSiteData {
     pub authority: Authority,
     pub metadata: PublicMetadataCache,
+    pub showcases: ShowcaseManifest,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -260,6 +281,10 @@ impl AuthorityError {
         Self {
             context: context.into(),
         }
+    }
+
+    pub fn from_message(context: impl Into<String>) -> Self {
+        Self::new(context)
     }
 }
 
@@ -652,10 +677,144 @@ impl PublicSiteData {
                 errors.join("\n")
             ))
         })?;
+        let showcases: ShowcaseManifest = read_toml(root.join(SHOWCASES_PATH))?;
+        showcases.validate(root, &authority).map_err(|errors| {
+            AuthorityError::new(format!(
+                "showcase validation failed:\n{}",
+                errors.join("\n")
+            ))
+        })?;
         Ok(Self {
             authority,
             metadata,
+            showcases,
         })
+    }
+}
+
+impl ShowcaseManifest {
+    pub fn validate(&self, root: &Path, authority: &Authority) -> Result<(), Vec<String>> {
+        let mut errors = Vec::new();
+        let repositories = authority
+            .repositories
+            .repository
+            .iter()
+            .filter(|repository| repository.public)
+            .map(|repository| (repository.id.as_str(), repository))
+            .collect::<BTreeMap<_, _>>();
+        let mut seen_repositories = BTreeSet::new();
+        let mut seen_orders = BTreeSet::new();
+        let mut seen_images = BTreeSet::new();
+
+        if self.showcase.is_empty() {
+            errors.push("showcase authority has no records".to_owned());
+        }
+
+        for showcase in &self.showcase {
+            check_nonempty("showcase repository", &showcase.repository, &mut errors);
+            check_nonempty(
+                &format!("showcase {} headline", showcase.repository),
+                &showcase.headline,
+                &mut errors,
+            );
+            check_nonempty(
+                &format!("showcase {} copy", showcase.repository),
+                &showcase.copy,
+                &mut errors,
+            );
+            check_nonempty(
+                &format!("showcase {} alt", showcase.repository),
+                &showcase.alt,
+                &mut errors,
+            );
+            check_nonempty(
+                &format!("showcase {} caption", showcase.repository),
+                &showcase.caption,
+                &mut errors,
+            );
+
+            if !seen_repositories.insert(showcase.repository.as_str()) {
+                errors.push(format!(
+                    "duplicate showcase repository {}",
+                    showcase.repository
+                ));
+            }
+            if showcase.order == 0 || !seen_orders.insert(showcase.order) {
+                errors.push(format!(
+                    "showcase {} has a zero or duplicate order",
+                    showcase.repository
+                ));
+            }
+            if !seen_images.insert(showcase.image.as_str()) {
+                errors.push(format!(
+                    "showcase {} repeats an image path",
+                    showcase.repository
+                ));
+            }
+
+            let Some(repository) = repositories.get(showcase.repository.as_str()) else {
+                errors.push(format!(
+                    "showcase {} does not name a public repository",
+                    showcase.repository
+                ));
+                continue;
+            };
+
+            let expected_image = format!("showcase/{}.png", showcase.repository);
+            if showcase.image != expected_image
+                || showcase.image.contains('\\')
+                || showcase
+                    .image
+                    .split('/')
+                    .any(|segment| segment.is_empty() || segment == "." || segment == "..")
+            {
+                errors.push(format!(
+                    "showcase {} image does not use its approved normalized path",
+                    showcase.repository
+                ));
+            }
+
+            if showcase.source_license != repository.license {
+                errors.push(format!(
+                    "showcase {} source license disagrees with repository authority",
+                    showcase.repository
+                ));
+            }
+
+            let expected_source_prefix =
+                format!("https://github.com/{}/blob/", repository.github_slug);
+            if !showcase.source_url.starts_with(&expected_source_prefix) {
+                errors.push(format!(
+                    "showcase {} source URL does not belong to its repository",
+                    showcase.repository
+                ));
+            }
+
+            validate_showcase_png(
+                &root.join("assets").join(&showcase.image),
+                &showcase.repository,
+                &mut errors,
+            );
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            errors.sort();
+            Err(errors)
+        }
+    }
+
+    pub fn ordered(&self) -> Vec<&ShowcaseRecord> {
+        let mut showcases = self.showcase.iter().collect::<Vec<_>>();
+        showcases.sort_by_key(|showcase| showcase.order);
+        showcases
+    }
+
+    pub fn for_repository(&self, repository_id: &str) -> Option<&ShowcaseRecord> {
+        self.showcase
+            .iter()
+            .find(|showcase| showcase.repository == repository_id)
     }
 }
 
@@ -869,6 +1028,113 @@ where
         .map_err(|error| AuthorityError::new(format!("read {}: {error}", path.display())))?;
     serde_json::from_str(&source)
         .map_err(|error| AuthorityError::new(format!("parse {}: {error}", path.display())))
+}
+
+fn validate_showcase_png(path: &Path, repository_id: &str, errors: &mut Vec<String>) {
+    const SIGNATURE: &[u8] = b"\x89PNG\r\n\x1a\n";
+    const RETAINED_CHUNKS: &[&str] = &[
+        "IHDR", "PLTE", "IDAT", "IEND", "tRNS", "sRGB", "gAMA", "cHRM",
+    ];
+
+    let Ok(bytes) = fs::read(path) else {
+        errors.push(format!(
+            "showcase {repository_id} normalized image is missing"
+        ));
+        return;
+    };
+    if !bytes.starts_with(SIGNATURE) {
+        errors.push(format!(
+            "showcase {repository_id} image is not a normalized PNG"
+        ));
+        return;
+    }
+
+    let mut offset = SIGNATURE.len();
+    let mut saw_header = false;
+    let mut saw_image_data = false;
+    let mut saw_end = false;
+    while offset < bytes.len() {
+        let Some(header_end) = offset.checked_add(8) else {
+            break;
+        };
+        if header_end > bytes.len() {
+            break;
+        }
+        let length = u32::from_be_bytes(
+            bytes[offset..offset + 4]
+                .try_into()
+                .expect("four-byte PNG length"),
+        ) as usize;
+        let Some(chunk_end) = offset
+            .checked_add(12)
+            .and_then(|value| value.checked_add(length))
+        else {
+            break;
+        };
+        if chunk_end > bytes.len() {
+            break;
+        }
+        let chunk_type = &bytes[offset + 4..offset + 8];
+        let Ok(chunk_type) = std::str::from_utf8(chunk_type) else {
+            break;
+        };
+        if !saw_header && chunk_type != "IHDR" {
+            break;
+        }
+        if !RETAINED_CHUNKS.contains(&chunk_type) {
+            errors.push(format!(
+                "showcase {repository_id} image contains an unapproved PNG chunk"
+            ));
+            return;
+        }
+        match chunk_type {
+            "IHDR" => {
+                if saw_header || length != 13 {
+                    break;
+                }
+                let width = u32::from_be_bytes(
+                    bytes[offset + 8..offset + 12]
+                        .try_into()
+                        .expect("four-byte PNG width"),
+                );
+                let height = u32::from_be_bytes(
+                    bytes[offset + 12..offset + 16]
+                        .try_into()
+                        .expect("four-byte PNG height"),
+                );
+                if width == 0 || height == 0 || width > 4096 || height > 4096 {
+                    errors.push(format!(
+                        "showcase {repository_id} image dimensions are outside the approved range"
+                    ));
+                    return;
+                }
+                saw_header = true;
+            }
+            "IDAT" => {
+                if !saw_header {
+                    break;
+                }
+                saw_image_data = true;
+            }
+            "IEND" => {
+                if length != 0 || !saw_image_data {
+                    break;
+                }
+                saw_end = true;
+            }
+            _ => {}
+        }
+        offset = chunk_end;
+        if saw_end {
+            break;
+        }
+    }
+
+    if !saw_header || !saw_image_data || !saw_end || offset != bytes.len() {
+        errors.push(format!(
+            "showcase {repository_id} image is not a complete normalized PNG"
+        ));
+    }
 }
 
 fn check_nonempty(label: &str, value: &str, errors: &mut Vec<String>) {

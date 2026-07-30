@@ -8,12 +8,12 @@ use regex::Regex;
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 
-use crate::repositories::{Authority, PublicMetadataCache};
+use crate::repositories::{Authority, PublicMetadataCache, ShowcaseManifest};
 
 const RECEIPT_SCHEMA: &str = "mer3ly.public-artifact-receipt/v1";
 const GRAPH_SCHEMA: &str = "mer3ly.repo-graph/v1";
 const APPROVED_CONTACT_EMAIL: &str = "markik@mer3ly.net";
-const EXPECTED_FILES: &[&str] = &[
+const BASE_FILES: &[&str] = &[
     "CNAME",
     "index.html",
     "mer3ly_repo_graph.js",
@@ -35,6 +35,9 @@ pub struct ArtifactReceipt {
     relation_text_projections: usize,
     graph_nodes: usize,
     graph_edges: usize,
+    project_profiles: usize,
+    project_relation_projections: usize,
+    showcase_images: usize,
     metadata_generated_at_utc: String,
     metadata_sha256: String,
 }
@@ -67,8 +70,10 @@ struct GraphEdge {
 
 pub fn validate_public_artifact(
     artifact_root: &Path,
+    source_root: &Path,
     authority: &Authority,
     metadata: &PublicMetadataCache,
+    showcases: &ShowcaseManifest,
     metadata_path: &Path,
 ) -> Result<ArtifactReceipt, Vec<String>> {
     let mut errors = Vec::new();
@@ -82,10 +87,21 @@ pub fn validate_public_artifact(
         .iter()
         .map(|path| artifact_relative_path(artifact_root, path))
         .collect::<BTreeSet<_>>();
-    let expected_paths = EXPECTED_FILES
+    let mut expected_paths = BASE_FILES
         .iter()
         .map(|path| (*path).to_owned())
         .collect::<BTreeSet<_>>();
+    for repository in authority
+        .repositories
+        .repository
+        .iter()
+        .filter(|repository| repository.public)
+    {
+        expected_paths.insert(format!("projects/{}/index.html", repository.id));
+    }
+    for showcase in &showcases.showcase {
+        expected_paths.insert(showcase.image.clone());
+    }
     if actual_paths != expected_paths {
         errors.push("public artifact file set differs from the approved shape".to_owned());
     }
@@ -144,6 +160,66 @@ pub fn validate_public_artifact(
     if !repositories.contains("<script type=\"module\" src=\"/repo-graph.js\"></script>") {
         errors.push("repository page is missing the optional graph module".to_owned());
     }
+
+    let mut project_ids = Vec::new();
+    let mut project_relation_ids = Vec::new();
+    for repository in authority
+        .repositories
+        .repository
+        .iter()
+        .filter(|repository| repository.public)
+    {
+        let relative = format!("projects/{}/index.html", repository.id);
+        let project = read_text(artifact_root, &relative, &mut errors);
+        if !project.starts_with("<!doctype html>") {
+            errors.push(format!(
+                "project profile {} is not a complete HTML document",
+                repository.id
+            ));
+        }
+        project_ids.extend(attribute_values(&project, "data-project-id"));
+        project_relation_ids.extend(attribute_values(&project, "data-relation-id"));
+        let profile_href = format!("/projects/{}/", repository.id);
+        if !home.contains(&profile_href) && showcases.for_repository(&repository.id).is_some() {
+            errors.push(format!(
+                "home page is missing showcased project profile {}",
+                repository.id
+            ));
+        }
+        if !repositories.contains(&format!("data-project-href=\"{profile_href}\"")) {
+            errors.push(format!(
+                "repository page is missing project profile link {}",
+                repository.id
+            ));
+        }
+        if let Some(showcase) = showcases.for_repository(&repository.id)
+            && (!project.contains(&format!("src=\"/{}\"", showcase.image))
+                || !project.contains(&showcase.source_url)
+                || !project.contains(&showcase.alt))
+        {
+            errors.push(format!(
+                "project profile {} is missing approved showcase evidence",
+                repository.id
+            ));
+        }
+    }
+    validate_project_authority(&project_ids, &project_relation_ids, authority, &mut errors);
+
+    for showcase in &showcases.showcase {
+        let artifact_image = artifact_root.join(&showcase.image);
+        let source_image = source_root.join("assets").join(&showcase.image);
+        match (fs::read(&artifact_image), fs::read(&source_image)) {
+            (Ok(artifact_bytes), Ok(source_bytes)) if artifact_bytes == source_bytes => {}
+            (Ok(_), Ok(_)) => errors.push(format!(
+                "showcase {} artifact image differs from its approved source",
+                showcase.repository
+            )),
+            _ => errors.push(format!(
+                "showcase {} artifact or approved source image is missing",
+                showcase.repository
+            )),
+        }
+    }
     let timestamp = format!(
         "{} {} UTC",
         &metadata.generated_at_utc[..10],
@@ -185,6 +261,9 @@ pub fn validate_public_artifact(
             relation_text_projections,
             graph_nodes,
             graph_edges,
+            project_profiles: project_ids.len(),
+            project_relation_projections: project_relation_ids.len(),
+            showcase_images: showcases.showcase.len(),
             metadata_generated_at_utc: metadata.generated_at_utc.clone(),
             metadata_sha256: sha256(&metadata_bytes),
         })
@@ -459,6 +538,42 @@ fn validate_graph_payload(payload: &GraphPayload, authority: &Authority, errors:
         !actual_nodes.contains(edge.source.as_str()) || !actual_nodes.contains(edge.target.as_str())
     }) {
         errors.push("repository graph contains an edge with an unknown endpoint".to_owned());
+    }
+}
+
+fn validate_project_authority(
+    project_ids: &[String],
+    relation_ids: &[String],
+    authority: &Authority,
+    errors: &mut Vec<String>,
+) {
+    let expected_projects = authority
+        .repositories
+        .repository
+        .iter()
+        .filter(|repository| repository.public)
+        .map(|repository| (repository.id.as_str(), 1_usize))
+        .collect::<BTreeMap<_, _>>();
+    let mut actual_projects = BTreeMap::new();
+    for project_id in project_ids {
+        *actual_projects.entry(project_id.as_str()).or_insert(0) += 1;
+    }
+    if actual_projects != expected_projects {
+        errors.push("project profile ids differ from repository authority".to_owned());
+    }
+
+    let expected_relations = authority
+        .relations
+        .relation
+        .iter()
+        .map(|relation| (relation.id.as_str(), 2_usize))
+        .collect::<BTreeMap<_, _>>();
+    let mut actual_relations = BTreeMap::new();
+    for relation_id in relation_ids {
+        *actual_relations.entry(relation_id.as_str()).or_insert(0) += 1;
+    }
+    if actual_relations != expected_relations {
+        errors.push("project profile relation ids differ from relation authority".to_owned());
     }
 }
 

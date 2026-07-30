@@ -7,7 +7,7 @@ import { chromium } from "playwright";
 
 const siteRoot = path.resolve(process.env.MER3LY_SITE_DIR ?? "html");
 const receiptRoot = path.resolve(
-  process.env.MER3LY_RECEIPT_DIR ?? ".tmp/m6-headed",
+  process.env.MER3LY_RECEIPT_DIR ?? ".tmp/m7-headed",
 );
 const headless = process.env.MER3LY_HEADLESS !== "false";
 const mimeTypes = {
@@ -15,6 +15,7 @@ const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".jpg": "image/jpeg",
   ".js": "text/javascript; charset=utf-8",
+  ".png": "image/png",
   ".wasm": "application/wasm",
 };
 
@@ -68,7 +69,7 @@ const browser = await chromium.launch({
 });
 
 const receipt = {
-  schema: "mer3ly.browser-smoke-receipt/v1",
+  schema: "mer3ly.browser-smoke-receipt/v2",
   source_sha: process.env.GITHUB_SHA ?? "local",
   browser: `Chromium ${browser.version()}`,
   mode: headless ? "headless" : "headed",
@@ -77,10 +78,17 @@ const receipt = {
   mobile: {},
   reduced_motion: {},
   fallback: {},
+  showcase: {},
+  projects: {},
 };
 
 try {
-  for (const route of ["/", "/radio.html"]) {
+  for (const route of [
+    "/",
+    "/radio.html",
+    "/projects/mere/",
+    "/projects/retinue/",
+  ]) {
     const page = await browser.newPage({ viewport: { width: 900, height: 900 } });
     const diagnostics = collectDiagnostics(page);
     const response = await page.goto(`${baseUrl}${route}`, {
@@ -93,6 +101,168 @@ try {
     receipt.routes[route] = { status: 200, horizontal_overflow: 0 };
     await page.close();
   }
+
+  const showcaseDesktop = await browser.newPage({
+    viewport: { width: 1440, height: 1000 },
+  });
+  const showcaseDesktopDiagnostics = collectDiagnostics(showcaseDesktop);
+  await showcaseDesktop.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
+  assert.equal(
+    await showcaseDesktop.locator(".home-showcase-card").count(),
+    5,
+  );
+  const showcaseImages = showcaseDesktop.locator(".home-showcase-figure img");
+  for (const image of await showcaseImages.all()) {
+    await image.scrollIntoViewIfNeeded();
+  }
+  await showcaseDesktop.waitForFunction(() =>
+    [...document.querySelectorAll(".home-showcase-figure img")].every(
+      (image) => image.complete,
+    ),
+  );
+  assert.equal(
+    await showcaseImages.evaluateAll((images) =>
+      images.every(
+        (image) =>
+          image.complete && image.naturalWidth > 0 && image.naturalHeight > 0,
+      ),
+    ),
+    true,
+    "desktop showcase images did not decode",
+  );
+  assert.equal(await horizontalOverflow(showcaseDesktop), 0);
+  assert.deepEqual(
+    showcaseDesktopDiagnostics,
+    [],
+    "desktop showcase emitted browser errors",
+  );
+  await showcaseDesktop.screenshot({
+    path: path.join(receiptRoot, "home-showcase-desktop.png"),
+    fullPage: true,
+  });
+  receipt.showcase.desktop = {
+    cards: 5,
+    images: 5,
+    horizontal_overflow: 0,
+  };
+  await showcaseDesktop.close();
+
+  const showcaseMobile = await browser.newPage({
+    viewport: { width: 375, height: 812 },
+  });
+  const showcaseMobileDiagnostics = collectDiagnostics(showcaseMobile);
+  await showcaseMobile.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
+  const mobileShowcaseImages = showcaseMobile.locator(
+    ".home-showcase-figure img",
+  );
+  for (const image of await mobileShowcaseImages.all()) {
+    await image.scrollIntoViewIfNeeded();
+  }
+  await showcaseMobile.waitForFunction(() =>
+    [...document.querySelectorAll(".home-showcase-figure img")].every(
+      (image) => image.complete,
+    ),
+  );
+  assert.equal(
+    await mobileShowcaseImages.evaluateAll((images) =>
+      images.every(
+        (image) =>
+          image.complete && image.naturalWidth > 0 && image.naturalHeight > 0,
+      ),
+    ),
+    true,
+    "mobile showcase images did not decode",
+  );
+  assert.equal(await horizontalOverflow(showcaseMobile), 0);
+  assert.deepEqual(
+    showcaseMobileDiagnostics,
+    [],
+    "mobile showcase emitted browser errors",
+  );
+  await showcaseMobile.screenshot({
+    path: path.join(receiptRoot, "home-showcase-mobile.png"),
+    fullPage: true,
+  });
+  receipt.showcase.mobile = {
+    cards: await showcaseMobile.locator(".home-showcase-card").count(),
+    horizontal_overflow: 0,
+  };
+  await showcaseMobile.close();
+
+  const visualProject = await browser.newPage({
+    viewport: { width: 1200, height: 900 },
+  });
+  const visualProjectDiagnostics = collectDiagnostics(visualProject);
+  await visualProject.goto(`${baseUrl}/projects/mere/`, {
+    waitUntil: "networkidle",
+  });
+  assert.equal(
+    await visualProject.locator("[data-project-id]").getAttribute(
+      "data-project-id",
+    ),
+    "mere",
+  );
+  assert.equal(
+    await visualProject.locator(".project-showcase-figure img").count(),
+    1,
+  );
+  assert.equal(await horizontalOverflow(visualProject), 0);
+  assert.deepEqual(
+    visualProjectDiagnostics,
+    [],
+    "visual project profile emitted browser errors",
+  );
+  await visualProject.screenshot({
+    path: path.join(receiptRoot, "project-mere-desktop.png"),
+    fullPage: true,
+  });
+  receipt.projects.visual = {
+    repository: "mere",
+    showcase_images: 1,
+    horizontal_overflow: 0,
+  };
+  await visualProject.close();
+
+  const textProject = await browser.newPage({
+    viewport: { width: 375, height: 812 },
+  });
+  const textProjectDiagnostics = collectDiagnostics(textProject);
+  await textProject.goto(`${baseUrl}/projects/retinue/`, {
+    waitUntil: "networkidle",
+  });
+  assert.equal(
+    await textProject.locator("[data-project-id]").getAttribute(
+      "data-project-id",
+    ),
+    "retinue",
+  );
+  assert.equal(
+    await textProject.locator(".project-showcase-figure").count(),
+    0,
+  );
+  assert.equal(
+    await textProject
+      .locator(".project-no-image-copy")
+      .getByText("intentionally text-first")
+      .count(),
+    1,
+  );
+  assert.equal(await horizontalOverflow(textProject), 0);
+  assert.deepEqual(
+    textProjectDiagnostics,
+    [],
+    "text-only project profile emitted browser errors",
+  );
+  await textProject.screenshot({
+    path: path.join(receiptRoot, "project-retinue-mobile.png"),
+    fullPage: true,
+  });
+  receipt.projects.text_only = {
+    repository: "retinue",
+    showcase_images: 0,
+    horizontal_overflow: 0,
+  };
+  await textProject.close();
 
   const desktop = await browser.newPage({
     viewport: { width: 1440, height: 900 },
@@ -114,6 +284,7 @@ try {
     "graph did not settle into ready or fallback state",
   );
 
+  let selectedProfile = "fallback-not-applicable";
   if (desktopState.state === "ready") {
     const mere = desktop.getByRole("button", {
       name: "Mere, platform, active",
@@ -126,19 +297,25 @@ try {
         .getAttribute("data-graph-node-id"),
       "retinue",
     );
+    await desktop.locator("[data-repository-graph]").screenshot({
+      path: path.join(receiptRoot, "desktop-repository-graph.png"),
+    });
     await desktop
       .getByRole("button", { name: "Retinue, platform, active" })
       .press("Enter");
+    await desktop.waitForURL("**/projects/retinue/");
     assert.equal(
-      await desktop.evaluate(() => document.activeElement?.id),
-      "repo-retinue",
+      await desktop.locator("[data-project-id]").getAttribute("data-project-id"),
+      "retinue",
     );
+    selectedProfile = "retinue";
+  } else {
+    await desktop.locator("[data-repository-graph]").screenshot({
+      path: path.join(receiptRoot, "desktop-repository-graph.png"),
+    });
   }
   assert.deepEqual(desktopDiagnostics, [], "desktop emitted browser errors");
-  await desktop.locator("[data-repository-graph]").screenshot({
-    path: path.join(receiptRoot, "desktop-repository-graph.png"),
-  });
-  receipt.desktop = desktopState;
+  receipt.desktop = { ...desktopState, selected_profile: selectedProfile };
   await desktop.close();
 
   const mobile = await browser.newPage({

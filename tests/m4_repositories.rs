@@ -63,7 +63,8 @@ fn repository_page_is_static_semantic_and_filterable() {
     assert!(document.contains("provenance-curated"));
     assert!(document.contains("<script type=\"module\" src=\"/repo-graph.js\"></script>"));
     assert!(document.contains("href=\"mailto:markik@mer3ly.net\""));
-    assert!(document.contains(">Merely organization profile</h2>"));
+    assert!(document.contains(">Merely organization profile</a></h2>"));
+    assert!(document.contains("data-project-href=\"/projects/mere/\""));
     assert!(!document.contains("Merely Made"));
 
     for forbidden in [
@@ -125,6 +126,7 @@ fn stylesheet_contains_keyboard_and_narrow_filter_contracts() {
         "#repository-filter-product:checked",
         ".repository-card:not(.class-product)",
         ".relationship-grid",
+        ".repository-profile-link",
         "@media (max-width: 760px)",
         "@media (max-width: 440px)",
     ] {

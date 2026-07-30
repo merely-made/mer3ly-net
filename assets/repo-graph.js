@@ -445,12 +445,10 @@ class RepositoryGraphRenderer {
     if (!target) {
       return;
     }
-    target.tabIndex = -1;
-    target.scrollIntoView({
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-      block: "start",
-    });
-    target.focus({ preventScroll: true });
+    const projectHref = target.dataset.projectHref;
+    if (projectHref) {
+      window.location.assign(projectHref);
+    }
   }
 
   fit() {

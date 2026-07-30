@@ -2,7 +2,8 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use mer3ly_site::pages::{home, radio, repositories};
+use mer3ly_site::pages::{home, projects, radio, repositories};
+use mer3ly_site::repositories::PublicSiteData;
 use mer3ly_site::site::SITE_CSS;
 
 const OG_IMAGE: &[u8] = include_bytes!("../assets/og.jpg");
@@ -39,16 +40,30 @@ fn output_directory() -> Result<PathBuf, String> {
 }
 
 fn build_site(output: &Path) -> std::io::Result<()> {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let data = PublicSiteData::load(root).map_err(std::io::Error::other)?;
     fs::create_dir_all(output)?;
     fs::create_dir_all(output.join("repos"))?;
-    fs::write(output.join("index.html"), home::document())?;
+    fs::create_dir_all(output.join("projects"))?;
+    fs::write(output.join("index.html"), home::document_for(&data))?;
     fs::write(output.join("radio.html"), radio::document())?;
-    let repositories_document = repositories::document(Path::new(env!("CARGO_MANIFEST_DIR")))
-        .map_err(std::io::Error::other)?;
     fs::write(
         output.join("repos").join("index.html"),
-        repositories_document,
+        repositories::document_for(&data),
     )?;
+    for (repository_id, document) in projects::documents(&data) {
+        let project_directory = output.join("projects").join(repository_id);
+        fs::create_dir_all(&project_directory)?;
+        fs::write(project_directory.join("index.html"), document)?;
+    }
+    for showcase in &data.showcases.showcase {
+        let source = root.join("assets").join(&showcase.image);
+        let destination = output.join(&showcase.image);
+        if let Some(parent) = destination.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::copy(source, destination)?;
+    }
     fs::write(output.join("site.css"), SITE_CSS)?;
     fs::write(output.join("repo-graph.js"), REPO_GRAPH_LOADER)?;
     fs::write(output.join("mer3ly_repo_graph.js"), REPO_GRAPH_WASM_GLUE)?;

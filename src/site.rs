@@ -183,6 +183,23 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
                     ),
                 ],
             ),
+            element(
+                "p",
+                &[("class", "footer-licenses")],
+                vec![
+                    external_link(
+                        "https://www.mozilla.org/MPL/2.0/",
+                        "source MPL-2.0 ↗",
+                        "footer-link",
+                    ),
+                    txt(" · "),
+                    external_link(
+                        "https://creativecommons.org/licenses/by/4.0/",
+                        "original content CC BY 4.0 ↗",
+                        "footer-link",
+                    ),
+                ],
+            ),
         ],
     );
 
@@ -204,8 +221,33 @@ pub fn render_with(metadata: &PageMetadata, view: impl Fn() -> SiteView) -> Stri
     render_with_body_end(metadata, view, "")
 }
 
+pub fn render_with_dynamic(
+    title: &str,
+    description: &str,
+    canonical_url: &str,
+    view: impl Fn() -> SiteView,
+) -> String {
+    render_body(title, description, canonical_url, view, "")
+}
+
 pub fn render_with_body_end(
     metadata: &PageMetadata,
+    view: impl Fn() -> SiteView,
+    body_end: &str,
+) -> String {
+    render_body(
+        metadata.title,
+        metadata.description,
+        metadata.canonical_url,
+        view,
+        body_end,
+    )
+}
+
+fn render_body(
+    title: &str,
+    description: &str,
+    canonical_url: &str,
     view: impl Fn() -> SiteView,
     body_end: &str,
 ) -> String {
@@ -217,10 +259,10 @@ pub fn render_with_body_end(
     } else {
         body_markup.replacen("</body>", &format!("{body_end}\n</body>"), 1)
     };
-    render_shell(metadata, &body_markup)
+    render_shell(title, description, canonical_url, &body_markup)
 }
 
-fn render_shell(metadata: &PageMetadata, body_markup: &str) -> String {
+fn render_shell(title: &str, description: &str, canonical_url: &str, body_markup: &str) -> String {
     format!(
         "<!doctype html>\n\
 <html lang=\"en\">\n\
@@ -246,9 +288,9 @@ fn render_shell(metadata: &PageMetadata, body_markup: &str) -> String {
 </head>\n\
 {body}\n\
 </html>\n",
-        title = escape_text(metadata.title),
-        description = escape_attr(metadata.description),
-        canonical = escape_attr(metadata.canonical_url),
+        title = escape_text(title),
+        description = escape_attr(description),
+        canonical = escape_attr(canonical_url),
         json_ld = ORGANIZATION_JSON_LD,
         body = body_markup,
     )

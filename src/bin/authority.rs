@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use mer3ly_site::artifact::validate_public_artifact;
-use mer3ly_site::repositories::{Authority, PublicMetadataCache};
+use mer3ly_site::repositories::{Authority, PublicMetadataCache, PublicSiteData};
 
 fn main() -> ExitCode {
     match run() {
@@ -108,16 +108,18 @@ fn run() -> Result<(), String> {
         "validate-artifact" => {
             let artifact_path = path_argument.unwrap_or_else(|| root.join(".tmp/pages-artifact"));
             let metadata_path = root.join("content/github-metadata.json");
-            let metadata =
-                PublicMetadataCache::load(&metadata_path).map_err(|error| error.to_string())?;
-            metadata.validate(&authority).map_err(|errors| {
-                format!("public metadata validation failed:\n{}", errors.join("\n"))
+            let data = PublicSiteData::load(&root).map_err(|error| error.to_string())?;
+            let receipt = validate_public_artifact(
+                &artifact_path,
+                &root,
+                &data.authority,
+                &data.metadata,
+                &data.showcases,
+                &metadata_path,
+            )
+            .map_err(|errors| {
+                format!("public artifact validation failed:\n{}", errors.join("\n"))
             })?;
-            let receipt =
-                validate_public_artifact(&artifact_path, &authority, &metadata, &metadata_path)
-                    .map_err(|errors| {
-                        format!("public artifact validation failed:\n{}", errors.join("\n"))
-                    })?;
             println!(
                 "{}",
                 serde_json::to_string_pretty(&receipt)

@@ -8,7 +8,7 @@ use crate::repositories::{
     RelationRecord, RepositoryClass, RepositoryRecord, RepositoryStatus,
 };
 use crate::site::{
-    ActivePage, PageMetadata, SiteView, element, external_link, render_with_body_end,
+    ActivePage, PageMetadata, SiteView, element, external_link, link, render_with_body_end,
     section_heading, shell, txt,
 };
 
@@ -20,12 +20,12 @@ pub const METADATA: PageMetadata = PageMetadata {
 
 pub fn document(root: &Path) -> Result<String, AuthorityError> {
     let data = PublicSiteData::load(root)?;
-    let bootstrap = graph_bootstrap(&data);
-    Ok(render_with_body_end(
-        &METADATA,
-        move || view(&data),
-        &bootstrap,
-    ))
+    Ok(document_for(&data))
+}
+
+pub fn document_for(data: &PublicSiteData) -> String {
+    let bootstrap = graph_bootstrap(data);
+    render_with_body_end(&METADATA, move || view(data), &bootstrap)
 }
 
 pub fn view(data: &PublicSiteData) -> SiteView {
@@ -226,7 +226,7 @@ fn graph_toolbar() -> SiteView {
                     graph_button("pan-right", "Pan right", "→"),
                 ],
             ),
-            graph_button("open", "Open selected repository entry", "open selected"),
+            graph_button("open", "Open selected project profile", "open selected"),
         ],
     )
 }
@@ -558,6 +558,7 @@ fn repository_card(
         repository.status.slug()
     );
     let github_url = format!("https://github.com/{}", repository.github_slug);
+    let profile_href = format!("/projects/{}/", repository.id);
     let outgoing: Vec<_> = relations
         .iter()
         .filter(|relation| relation.source == repository.id)
@@ -573,6 +574,7 @@ fn repository_card(
             ("id", article_id.as_str()),
             ("class", class.as_str()),
             ("data-repository-id", repository.id.as_str()),
+            ("data-project-href", profile_href.as_str()),
             ("data-class", repository.class.slug()),
             ("data-status", repository.status.slug()),
         ],
@@ -590,7 +592,15 @@ fn repository_card(
                                 &[("class", "repository-slug")],
                                 vec![txt(&repository.github_slug)],
                             ),
-                            element("h2", &[], vec![txt(&repository.name)]),
+                            element(
+                                "h2",
+                                &[],
+                                vec![link(
+                                    &profile_href,
+                                    &repository.name,
+                                    "repository-profile-link",
+                                )],
+                            ),
                         ],
                     ),
                     element(
@@ -709,18 +719,18 @@ fn repository_topics(metadata: &PublicRepositoryMetadata) -> SiteView {
 }
 
 fn repository_links(repository: &RepositoryRecord, github_url: &str) -> SiteView {
-    let links = if repository.homepage == github_url {
-        vec![external_link(
-            github_url,
-            "GitHub and project page ↗",
+    let profile_href = format!("/projects/{}/", repository.id);
+    let mut links = vec![
+        link(&profile_href, "Merely profile", "repository-link"),
+        external_link(github_url, "GitHub ↗", "repository-link"),
+    ];
+    if repository.homepage != github_url {
+        links.push(external_link(
+            &repository.homepage,
+            "Project site ↗",
             "repository-link",
-        )]
-    } else {
-        vec![
-            external_link(github_url, "GitHub ↗", "repository-link"),
-            external_link(&repository.homepage, "Project page ↗", "repository-link"),
-        ]
-    };
+        ));
+    }
     element(
         "nav",
         &[

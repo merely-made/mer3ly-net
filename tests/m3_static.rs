@@ -14,9 +14,20 @@ const FORBIDDEN_PUBLIC_MARKERS: &[&str] = &[
     "webpack",
 ];
 
+fn workspace_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf()
+}
+
 #[test]
 fn pages_are_static_genet_documents() {
-    for (name, document) in [("home", home::document()), ("radio", radio::document())] {
+    let root = workspace_root();
+    for (name, document) in [
+        (
+            "home",
+            home::document(&root).expect("render authority-backed home page"),
+        ),
+        ("radio", radio::document()),
+    ] {
         assert!(
             document.starts_with("<!doctype html>"),
             "{name} has an HTML doctype"
@@ -69,7 +80,12 @@ fn pages_are_static_genet_documents() {
 
 #[test]
 fn static_baseline_stays_below_the_m3_budget() {
-    let bytes = home::document().len() + radio::document().len() + SITE_CSS.len();
+    let root = workspace_root();
+    let bytes = home::document(&root)
+        .expect("render authority-backed home page")
+        .len()
+        + radio::document().len()
+        + SITE_CSS.len();
     assert!(
         bytes < 200 * 1024,
         "base HTML and CSS use {bytes} bytes, over the 200 KiB M3 budget"
@@ -91,3 +107,4 @@ fn stylesheet_has_responsive_and_accessibility_contracts() {
         );
     }
 }
+use std::path::{Path, PathBuf};

@@ -24,7 +24,7 @@ jobs:
       CARGO_TERM_COLOR: always
       GH_TOKEN: ${{ github.token }}
       MER3LY_SITE_DIR: .tmp/pages-artifact
-      MER3LY_RECEIPT_DIR: .tmp/m6-headed
+      MER3LY_RECEIPT_DIR: .tmp/m7-headed
       MER3LY_HEADLESS: "false"
     steps:
       - name: Check out the pinned source revision
@@ -89,23 +89,23 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             throw "public artifact validation failed"
           }
-          Set-Content -LiteralPath ".tmp/m6-static-receipt.json" -Value $receipt -Encoding utf8
+          Set-Content -LiteralPath ".tmp/m7-static-receipt.json" -Value $receipt -Encoding utf8
 
       - name: Install headed-smoke browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run headed desktop, mobile, and fallback smoke
+      - name: Run headed showcase, project, graph, mobile, and fallback smoke
         run: xvfb-run --auto-servernum npm run smoke
 
       - name: Upload acceptance receipts
         if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: m6-acceptance-${{ github.sha }}
+          name: m7-acceptance-${{ github.sha }}
           path: |
             content/github-metadata.json
-            .tmp/m6-static-receipt.json
-            .tmp/m6-headed/
+            .tmp/m7-static-receipt.json
+            .tmp/m7-headed/
           if-no-files-found: warn
           retention-days: 30
 

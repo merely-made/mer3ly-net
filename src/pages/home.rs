@@ -1,6 +1,9 @@
+use std::collections::BTreeMap;
+use std::path::Path;
+
+use crate::repositories::{AuthorityError, PublicSiteData, RepositoryRecord, ShowcaseRecord};
 use crate::site::{
-    ActivePage, PageMetadata, SiteView, element, external_link, link, render_with, section_heading,
-    shell, txt,
+    ActivePage, PageMetadata, SiteView, element, link, render_with, section_heading, shell, txt,
 };
 
 pub const METADATA: PageMetadata = PageMetadata {
@@ -9,17 +12,27 @@ pub const METADATA: PageMetadata = PageMetadata {
     canonical_url: "https://mer3ly.net/",
 };
 
-pub fn document() -> String {
-    render_with(&METADATA, view)
+pub fn document(root: &Path) -> Result<String, AuthorityError> {
+    let data = PublicSiteData::load(root)?;
+    Ok(document_for(&data))
 }
 
-pub fn view() -> SiteView {
+pub fn document_for(data: &PublicSiteData) -> String {
+    render_with(&METADATA, || view(data))
+}
+
+pub fn view(data: &PublicSiteData) -> SiteView {
     shell(
         ActivePage::Home,
         element(
             "main",
             &[("id", "main")],
-            vec![hero(), radio_feature(), projects(), principle()],
+            vec![
+                hero(),
+                radio_feature(),
+                project_showcases(data),
+                principle(),
+            ],
         ),
     )
 }
@@ -135,50 +148,89 @@ fn status(term: &str, value: &str) -> SiteView {
     )
 }
 
-fn projects() -> SiteView {
+fn project_showcases(data: &PublicSiteData) -> SiteView {
+    let repositories = data
+        .authority
+        .repositories
+        .repository
+        .iter()
+        .filter(|repository| repository.public)
+        .map(|repository| (repository.id.as_str(), repository))
+        .collect::<BTreeMap<_, _>>();
+    let showcases = data
+        .showcases
+        .ordered()
+        .into_iter()
+        .map(|showcase| {
+            let repository = repositories
+                .get(showcase.repository.as_str())
+                .expect("validated showcase repository");
+            project_showcase(showcase, repository)
+        })
+        .collect();
+
     element(
         "section",
-        &[("class", "content-section")],
+        &[("class", "content-section home-showcase-section")],
         vec![
-            section_heading("02", "what we build"),
+            section_heading("02", "software in view"),
             element(
-                "div",
-                &[("class", "project-grid")],
-                vec![
-                    project(
-                        "Retinue",
-                        "Digital-radio transport: mesh wireless standards today, with a broad hardware base as the destination.",
-                        "https://github.com/merely-made/retinue",
-                    ),
-                    project(
-                        "Turnstone",
-                        "A graph-shaped browser: pages, media, and notes live as nodes you can relate, arrange, and revisit.",
-                        "https://github.com/merely-made/turnstone",
-                    ),
-                    project(
-                        "Mere",
-                        "The modular graph-browser library for graph truth, arrangement, memory, retrieval, identity, and peer layers.",
-                        "https://github.com/merely-made/mere",
-                    ),
-                    project(
-                        "Genet",
-                        "A Servo-derived, data-oriented web engine family for rendering web content inside Merely applications.",
-                        "https://github.com/merely-made/genet",
-                    ),
-                ],
+                "p",
+                &[("class", "section-intro")],
+                vec![txt(
+                    "A few current surfaces from the same public repository family. Each profile names the working boundary, its state, and the projects around it.",
+                )],
+            ),
+            element("div", &[("class", "home-showcase-list")], showcases),
+            link(
+                "/repos/",
+                "Explore every repository and relationship",
+                "button button-quiet showcase-index-link",
             ),
         ],
     )
 }
 
-fn project(name: &str, description: &str, href: &str) -> SiteView {
+fn project_showcase(showcase: &ShowcaseRecord, repository: &RepositoryRecord) -> SiteView {
+    let image_src = format!("/{}", showcase.image);
+    let profile_href = format!("/projects/{}/", repository.id);
     element(
         "article",
-        &[("class", "project-card")],
+        &[("class", "home-showcase-card")],
         vec![
-            element("h3", &[], vec![txt(name)]),
-            element("p", &[], vec![txt(description)]),
-            external_link(href, "repository ↗", "text-link"),
+            element(
+                "figure",
+                &[("class", "home-showcase-figure")],
+                vec![element(
+                    "img",
+                    &[
+                        ("src", image_src.as_str()),
+                        ("alt", showcase.alt.as_str()),
+                        ("loading", "lazy"),
+                        ("decoding", "async"),
+                    ],
+                    vec![],
+                )],
+            ),
+            element(
+                "div",
+                &[("class", "home-showcase-copy")],
+                vec![
+                    element(
+                        "p",
+                        &[("class", "card-kicker")],
+                        vec![txt(format!(
+                            "{} · {} · {}",
+                            repository.name,
+                            repository.class.label(),
+                            repository.status.label()
+                        ))],
+                    ),
+                    element("h3", &[], vec![txt(&showcase.headline)]),
+                    element("p", &[], vec![txt(&showcase.copy)]),
+                    link(&profile_href, "Read the project profile", "text-link"),
+                ],
+            ),
         ],
     )
 }
