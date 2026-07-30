@@ -121,44 +121,44 @@ public = true
 
 [[repository]]
 id = "turnstone"
-github_slug = "mark-ik/turnstone"
+github_slug = "merely-made/turnstone"
 name = "Turnstone"
 summary = "A graph-shaped browser host for relating, curating, and cooperatively browsing the web."
 class = "product"
 status = "prototype"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/mark-ik/turnstone"
+homepage = "https://github.com/merely-made/turnstone"
 public = true
 
 [[repository]]
 id = "woodshed"
-github_slug = "mark-ik/woodshed"
+github_slug = "merely-made/woodshed"
 name = "Woodshed"
 summary = "An open-source practice toolkit for musicians."
 class = "product"
 status = "active"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/mark-ik/woodshed"
+homepage = "https://github.com/merely-made/woodshed"
 public = true
 
 [[repository]]
 id = "hocket"
-github_slug = "mark-ik/hocket"
+github_slug = "merely-made/hocket"
 name = "Hocket"
 summary = "A turn-based, cooperative, peer-to-peer audio looper."
 class = "product"
 status = "prototype"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/mark-ik/hocket"
+homepage = "https://github.com/merely-made/hocket"
 public = true
 
 [[repository]]
 id = "isometry"
-github_slug = "mark-ik/isometry"
+github_slug = "merely-made/isometry"
 name = "Isometry"
 summary = "A pixel-art isometric virtual tabletop with peer-to-peer play."
 class = "product"
 status = "prototype"
 license = "MIT OR Apache-2.0"
-homepage = "https://github.com/mark-ik/isometry"
+homepage = "https://github.com/merely-made/isometry"
 public = true

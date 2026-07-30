@@ -1,6 +1,6 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M2 platform batch complete; stopped before product transfer
+**Status:** M2 product batch complete; stopped before maintained-fork review
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -396,6 +396,34 @@ The platform batch transferred `genet`, `mere`, and `retinue` to
 The three platform receipts under `docs/receipts/org-transfer/` record heads,
 settings, redirects, source pins, commits, and verification. Stop before the
 product ownership batch so this boundary remains reviewable.
+
+#### M2 product receipt: 2026-07-30
+
+The product batch transferred `woodshed`, `hocket`, `turnstone`, and
+`isometry` to `merely-made`.
+
+- Woodshed transferred first because Hocket consumes its `audio-primitives`
+  package. Hocket's tracked lock now resolves that package from Woodshed
+  commit `5011b91a`.
+- All four local origins use the canonical organization URL. Their former
+  web, API, and Git URLs redirect to the transferred repositories and resolve
+  the same `main` head.
+- Package metadata, documentation links, release-feed identities, and active
+  lock sources use `merely-made` for all four products.
+- Mere's luggage tests exposed a stale owner expectation in its GitHub feed
+  fixtures. Commit `d18cfdf7` updates both the active Hocket feed references
+  and their expected owner values.
+- Tracked repositories outside the historical Mer3ly receipts contain zero
+  `mark-ik/woodshed`, `mark-ik/hocket`, `mark-ik/turnstone`, or
+  `mark-ik/isometry` references.
+- Focused verification passed for all affected products and Mere. This
+  includes Hocket's 38 model tests, Turnstone's 158 library tests with 4
+  ignored, Isometry's workspace-wide all-features/all-targets check, and all
+  34 luggage library tests plus its binary test and doctest.
+
+The four product receipts under `docs/receipts/org-transfer/` record heads,
+settings, redirects, commits, and verification. The transfer sequence stops
+before the maintained-fork review; none of the fork-review holds moved.
 
 ### M3: Replace the generated site bundle with a static Cambium build
 
