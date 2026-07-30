@@ -1,7 +1,7 @@
 # Live repository graph and Merely Made organization migration
 
-**Status:** M4 semantic repository page and repository-topic pass complete;
-HTTP-to-HTTPS enforcement held at the Cloudflare boundary; stopped before M5
+**Status:** M4 semantic repository page, repository-topic pass, and
+HTTP-to-HTTPS enforcement complete; stopped before M5
 **Date:** 2026-07-29
 **Authority:** This is the canonical plan for the public repository graph on
 Mer3ly and for moving Merely-owned repositories into the `merely-made`
@@ -491,10 +491,11 @@ and HTTPS enforced after domain verification.
 - Pages serves the custom domain over enforced HTTPS.
 
 **M3 result, 2026-07-30:** The source, size, privacy, Genet layout, headed
-browser, and public-deployment gates passed. The last condition is only partly
-met: the custom domain serves correctly over HTTPS, but HTTP does not redirect
-and GitHub cannot enable its certificate while Cloudflare fronts the domain.
-The exact receipt is
+browser, and public-deployment gates passed. At initial acceptance, the last
+condition was only partly met because HTTP did not redirect and GitHub could
+not enable its certificate while Cloudflare fronted the domain. Cloudflare's
+`Always Use HTTPS` setting closed that gate later the same day. The exact
+receipt is
 [`docs/receipts/site/2026-07-30_m3_static_site.md`](receipts/site/2026-07-30_m3_static_site.md).
 M4 was not started.
 
@@ -666,11 +667,13 @@ source without changing its locked commit.
 
 M3 was implemented and accepted on 2026-07-30. Commit `b3e99e4` replaced the
 generated runtime site with the static Cambium/Genet build. The public domain
-serves the result through Cloudflare; HTTP-to-HTTPS enforcement remains an
-external configuration gate.
+serves the result through Cloudflare. Enabling Cloudflare's `Always Use HTTPS`
+setting later that day closed the remaining deployment gate with direct 301
+redirects at the edge.
 
 M4 was implemented and accepted on 2026-07-30. Commit `0b1ddff` published the
 semantic repository index and validated public metadata cache. All 16 public
 organization repositories received bounded, project-specific GitHub topics.
 Pages run `30518337035` deployed the page successfully. Work stopped before
-the optional live Mere graph in M5.
+the optional live Mere graph in M5. The HTTPS redirect closure was verified
+against the repository page as well as the home and community-radio routes.

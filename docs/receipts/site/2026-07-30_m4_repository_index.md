@@ -163,7 +163,8 @@ browser.
 ## Deployment
 
 GitHub's Pages build for `0b1ddff` completed successfully in run
-`30518337035`. The Cloudflare-fronted public page returned:
+`30518337035`. At initial M4 acceptance, the Cloudflare-fronted public page
+returned:
 
 | URL | Result |
 | --- | --- |
@@ -171,10 +172,21 @@ GitHub's Pages build for `0b1ddff` completed successfully in run
 | `http://mer3ly.net/repos/` | 200, no redirect |
 
 The live headed page loaded all fonts and reported equal 885-pixel client and
-scroll widths in a 900-pixel viewport. HTTP-to-HTTPS enforcement remains the
-same external Cloudflare configuration gate recorded at M3.
+scroll widths in a 900-pixel viewport.
+
+## HTTPS gate closure
+
+Cloudflare's `Always Use HTTPS` setting was enabled later on 2026-07-30.
+Independent edge requests then returned:
+
+| URL | Result |
+| --- | --- |
+| `http://mer3ly.net/` | 301 to `https://mer3ly.net/` |
+| `http://mer3ly.net/radio` | 301 to `https://mer3ly.net/radio` |
+| `http://mer3ly.net/repos/` | 301 to `https://mer3ly.net/repos/` |
+| All three HTTPS destinations | 200 |
 
 ## Stop
 
-M4 source, repository topics, and public deployment are accepted. The live
-Mere graph in M5 was not started.
+M4 source, repository topics, HTTPS enforcement, and public deployment are
+accepted. The live Mere graph in M5 was not started.

@@ -3,8 +3,8 @@
 **Date:** 2026-07-30 UTC
 **Implementation commit:** `b3e99e4`
 **Result:** code, static-output, privacy, layout, headed-browser, and public
-deployment checks accepted. HTTP-to-HTTPS enforcement remains an external
-Cloudflare gate. M4 was not started.
+deployment checks accepted. The Cloudflare HTTPS redirect gate was closed
+later the same day. M4 was not started within this milestone.
 
 ## What changed
 
@@ -123,13 +123,26 @@ GitHub's legacy Pages build for `b3e99e4` completed successfully in run
 | `https://mer3ly.net/site.css` | 200, 14,546-byte stylesheet |
 | `https://mer3ly.net/og.jpg` | 200, 177,124-byte JPEG |
 
-HTTPS transport works, but it is not enforced: `http://mer3ly.net/` also
-returns 200. GitHub reports `https_enforced: false`, and its Pages API rejects
-enforcement because the GitHub-side certificate does not exist while the
-domain resolves through Cloudflare. Finishing this gate requires the
-Cloudflare account or DNS configuration, not another repository change.
+At initial deployment, HTTPS transport worked but was not enforced:
+`http://mer3ly.net/` also returned 200. GitHub reported
+`https_enforced: false`, and its Pages API rejected enforcement because the
+GitHub-side certificate did not exist while the domain resolved through
+Cloudflare. The remaining gate therefore belonged to Cloudflare rather than
+the repository.
+
+## HTTPS gate closure
+
+Cloudflare's `Always Use HTTPS` setting was enabled later on 2026-07-30.
+Independent edge requests then returned:
+
+| URL | Result |
+| --- | --- |
+| `http://mer3ly.net/` | 301 to `https://mer3ly.net/` |
+| `http://mer3ly.net/radio` | 301 to `https://mer3ly.net/radio` |
+| `http://mer3ly.net/repos/` | 301 to `https://mer3ly.net/repos/` |
+| All three HTTPS destinations | 200 |
 
 ## Stop
 
-M3 source and public deployment are accepted with the HTTPS redirect gate
-recorded above. M4, the semantic repository page, was not started.
+M3 source and public deployment are fully accepted. M4, the semantic
+repository page, was not started within this milestone.
