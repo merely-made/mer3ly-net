@@ -1,7 +1,9 @@
 # M8 discovery and sharing
 
-**Accepted:** 2026-07-30  
-**Source:** `cdd7a04385061f282b5b878f4c49961f6ae690e8`  
+**Accepted:** 2026-07-30
+
+**Source:** `cdd7a04385061f282b5b878f4c49961f6ae690e8`
+
 **Deployment run:** [30587753072](https://github.com/merely-made/mer3ly-net/actions/runs/30587753072)
 
 ## Result
