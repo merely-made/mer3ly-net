@@ -64,11 +64,18 @@ jobs:
           cargo clippy --locked --all-targets -- -D warnings
           cargo clippy --manifest-path crates/repo-graph/Cargo.toml --locked --all-targets -- -D warnings
 
-      - name: Build the pinned Mere graph runtime
+      - name: Build the reproducible pinned Mere graph runtime
         shell: pwsh
         run: |
+          ./scripts/build-repo-graph.ps1 -KeepTarget
+          $firstJs = (Get-FileHash assets/mer3ly_repo_graph.js -Algorithm SHA256).Hash
+          $firstWasm = (Get-FileHash assets/mer3ly_repo_graph_bg.wasm -Algorithm SHA256).Hash
           ./scripts/build-repo-graph.ps1
-          git diff --exit-code -- assets/mer3ly_repo_graph.js assets/mer3ly_repo_graph_bg.wasm
+          $secondJs = (Get-FileHash assets/mer3ly_repo_graph.js -Algorithm SHA256).Hash
+          $secondWasm = (Get-FileHash assets/mer3ly_repo_graph_bg.wasm -Algorithm SHA256).Hash
+          if ($firstJs -ne $secondJs -or $firstWasm -ne $secondWasm) {
+            throw "repository graph output is not reproducible on the deployment host"
+          }
 
       - name: Build and validate the exact Pages artifact
         shell: pwsh

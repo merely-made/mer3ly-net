@@ -77,7 +77,8 @@ metadata cache, rebuilds and validates the exact static artifact, runs a
 headed Chromium smoke under a virtual display, and deploys that artifact to
 GitHub Pages. It runs on manual dispatch and a daily schedule. The build has
 read-only repository permission; only the separate deployment job receives
-the Pages and identity grants.
+the Pages and identity grants. The graph runtime is built twice and must have
+identical hashes on the deployment host before either output can be published.
 
 ## Plans
 
