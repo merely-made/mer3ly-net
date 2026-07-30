@@ -26,6 +26,7 @@ const ORGANIZATION_JSON_LD: &str = r#"{
 pub enum ActivePage {
     Home,
     Radio,
+    Repositories,
 }
 
 pub struct PageMetadata {
@@ -92,6 +93,15 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
     } else {
         vec![("href", "/radio.html"), ("class", "nav-link")]
     };
+    let repositories_attrs = if active == ActivePage::Repositories {
+        vec![
+            ("href", "/repos/"),
+            ("aria-current", "page"),
+            ("class", "nav-link is-current"),
+        ]
+    } else {
+        vec![("href", "/repos/"), ("class", "nav-link")]
+    };
 
     let header = element(
         "header",
@@ -120,6 +130,11 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
                             "li",
                             &[],
                             vec![element("a", &home_attrs, vec![txt("home")])],
+                        ),
+                        element(
+                            "li",
+                            &[],
+                            vec![element("a", &repositories_attrs, vec![txt("repositories")])],
                         ),
                         element(
                             "li",

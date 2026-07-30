@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 const REPOSITORIES_PATH: &str = "content/repositories.toml";
 const RELATIONS_PATH: &str = "content/relations.toml";
 const MIGRATION_PATH: &str = "ops/org-migration.toml";
+const PUBLIC_METADATA_PATH: &str = "content/github-metadata.json";
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct RepositoryManifest {
@@ -26,6 +27,29 @@ pub struct RepositoryRecord {
     pub license: String,
     pub homepage: String,
     pub public: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PublicMetadataCache {
+    pub schema: String,
+    pub generated_at_utc: String,
+    #[serde(default)]
+    pub repository: Vec<PublicRepositoryMetadata>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PublicRepositoryMetadata {
+    pub id: String,
+    pub github_slug: String,
+    pub updated_at: String,
+    pub pushed_at: String,
+    #[serde(default)]
+    pub primary_language: Option<String>,
+    pub stargazer_count: u64,
+    pub archived: bool,
+    pub fork: bool,
+    #[serde(default)]
+    pub topics: Vec<String>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -186,6 +210,12 @@ pub struct Authority {
     pub repositories: RepositoryManifest,
     pub relations: RelationManifest,
     pub migration: MigrationManifest,
+}
+
+#[derive(Clone, Debug)]
+pub struct PublicSiteData {
+    pub authority: Authority,
+    pub metadata: PublicMetadataCache,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -605,6 +635,210 @@ impl Authority {
     }
 }
 
+impl PublicSiteData {
+    pub fn load(root: impl AsRef<Path>) -> Result<Self, AuthorityError> {
+        let root = root.as_ref();
+        let authority = Authority::load(root)?;
+        authority.validate().map_err(|errors| {
+            AuthorityError::new(format!(
+                "authority validation failed:\n{}",
+                errors.join("\n")
+            ))
+        })?;
+        let metadata: PublicMetadataCache = read_json(root.join(PUBLIC_METADATA_PATH))?;
+        metadata.validate(&authority).map_err(|errors| {
+            AuthorityError::new(format!(
+                "public metadata validation failed:\n{}",
+                errors.join("\n")
+            ))
+        })?;
+        Ok(Self {
+            authority,
+            metadata,
+        })
+    }
+}
+
+impl PublicMetadataCache {
+    pub fn load(path: impl AsRef<Path>) -> Result<Self, AuthorityError> {
+        read_json(path.as_ref().to_path_buf())
+    }
+
+    pub fn validate(&self, authority: &Authority) -> Result<(), Vec<String>> {
+        let mut errors = Vec::new();
+        if self.schema != "mer3ly.github-metadata/v1" {
+            errors.push(format!("unexpected public metadata schema {}", self.schema));
+        }
+        check_timestamp(
+            "public metadata generated_at_utc",
+            &self.generated_at_utc,
+            &mut errors,
+        );
+
+        let expected: BTreeMap<_, _> = authority
+            .repositories
+            .repository
+            .iter()
+            .filter(|repository| repository.public)
+            .map(|repository| (repository.id.as_str(), repository))
+            .collect();
+        let mut seen_ids = BTreeSet::new();
+        let mut seen_slugs = BTreeSet::new();
+
+        for metadata in &self.repository {
+            if !seen_ids.insert(metadata.id.as_str()) {
+                errors.push(format!("duplicate public metadata id {}", metadata.id));
+            }
+            if !seen_slugs.insert(metadata.github_slug.as_str()) {
+                errors.push(format!(
+                    "duplicate public metadata github_slug {}",
+                    metadata.github_slug
+                ));
+            }
+            let Some(repository) = expected.get(metadata.id.as_str()) else {
+                errors.push(format!(
+                    "public metadata contains unknown or non-public repository {}",
+                    metadata.id
+                ));
+                continue;
+            };
+            if metadata.github_slug != repository.github_slug {
+                errors.push(format!(
+                    "public metadata {} slug {} disagrees with authority {}",
+                    metadata.id, metadata.github_slug, repository.github_slug
+                ));
+            }
+            check_timestamp(
+                &format!("public metadata {} updated_at", metadata.id),
+                &metadata.updated_at,
+                &mut errors,
+            );
+            check_timestamp(
+                &format!("public metadata {} pushed_at", metadata.id),
+                &metadata.pushed_at,
+                &mut errors,
+            );
+            let mut topics = BTreeSet::new();
+            for topic in &metadata.topics {
+                let valid = !topic.is_empty()
+                    && !topic.starts_with('-')
+                    && !topic.ends_with('-')
+                    && topic.chars().all(|character| {
+                        character.is_ascii_lowercase()
+                            || character.is_ascii_digit()
+                            || character == '-'
+                    });
+                if !valid {
+                    errors.push(format!(
+                        "public metadata {} has invalid topic {}",
+                        metadata.id, topic
+                    ));
+                }
+                if !topics.insert(topic) {
+                    errors.push(format!(
+                        "public metadata {} repeats topic {}",
+                        metadata.id, topic
+                    ));
+                }
+            }
+            if metadata.topics.len() > 20 {
+                errors.push(format!(
+                    "public metadata {} has more than 20 topics",
+                    metadata.id
+                ));
+            }
+        }
+
+        for repository_id in expected.keys() {
+            if !seen_ids.contains(repository_id) {
+                errors.push(format!(
+                    "public metadata is missing repository {repository_id}"
+                ));
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            errors.sort();
+            Err(errors)
+        }
+    }
+}
+
+impl RepositoryClass {
+    pub const fn slug(self) -> &'static str {
+        match self {
+            Self::Foundation => "foundation",
+            Self::Platform => "platform",
+            Self::Product => "product",
+            Self::Tool => "tool",
+            Self::MaintainedFork => "maintained-fork",
+        }
+    }
+
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Foundation => "foundation",
+            Self::Platform => "platform",
+            Self::Product => "product",
+            Self::Tool => "tool",
+            Self::MaintainedFork => "maintained fork",
+        }
+    }
+}
+
+impl RepositoryStatus {
+    pub const fn slug(self) -> &'static str {
+        match self {
+            Self::Active => "active",
+            Self::Prototype => "prototype",
+            Self::Reference => "reference",
+            Self::Research => "research",
+            Self::Archived => "archived",
+        }
+    }
+
+    pub const fn label(self) -> &'static str {
+        self.slug()
+    }
+}
+
+impl RelationKind {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::DependsOn => "depends on",
+            Self::Contains => "contains",
+            Self::ReferenceAppFor => "is a reference app for",
+            Self::HostFor => "hosts",
+            Self::UsesUiFrom => "uses UI from",
+            Self::RendersWith => "renders with",
+            Self::ForkOf => "is a fork of",
+        }
+    }
+
+    pub const fn incoming_label(self) -> &'static str {
+        match self {
+            Self::DependsOn => "depends on this repository",
+            Self::Contains => "contains this repository",
+            Self::ReferenceAppFor => "is a reference app for this repository",
+            Self::HostFor => "hosts this repository",
+            Self::UsesUiFrom => "uses UI from this repository",
+            Self::RendersWith => "renders with this repository",
+            Self::ForkOf => "is a fork of this repository",
+        }
+    }
+}
+
+impl RelationProvenance {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Derived => "derived",
+            Self::Curated => "curated",
+        }
+    }
+}
+
 fn read_toml<T>(path: PathBuf) -> Result<T, AuthorityError>
 where
     T: for<'de> Deserialize<'de>,
@@ -612,6 +846,16 @@ where
     let source = fs::read_to_string(&path)
         .map_err(|error| AuthorityError::new(format!("read {}: {error}", path.display())))?;
     toml::from_str(&source)
+        .map_err(|error| AuthorityError::new(format!("parse {}: {error}", path.display())))
+}
+
+fn read_json<T>(path: PathBuf) -> Result<T, AuthorityError>
+where
+    T: for<'de> Deserialize<'de>,
+{
+    let source = fs::read_to_string(&path)
+        .map_err(|error| AuthorityError::new(format!("read {}: {error}", path.display())))?;
+    serde_json::from_str(&source)
         .map_err(|error| AuthorityError::new(format!("parse {}: {error}", path.display())))
 }
 
@@ -654,6 +898,15 @@ fn check_date(label: &str, value: &str, errors: &mut Vec<String>) {
     if !valid {
         errors.push(format!("{label} is not YYYY-MM-DD: {value}"));
     }
+}
+
+fn check_timestamp(label: &str, value: &str, errors: &mut Vec<String>) {
+    let date = value.get(..10).unwrap_or_default();
+    if value.len() < 20 || !value.ends_with('Z') {
+        errors.push(format!("{label} is not a UTC timestamp: {value}"));
+        return;
+    }
+    check_date(label, date, errors);
 }
 
 fn check_branch(id: &str, branch: &str, errors: &mut Vec<String>) {

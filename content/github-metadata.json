@@ -1,0 +1,298 @@
+{
+  "schema": "mer3ly.github-metadata/v1",
+  "generated_at_utc": "2026-07-30T05:44:43Z",
+  "repository": [
+    {
+      "id": "org-profile",
+      "github_slug": "merely-made/.github",
+      "updated_at": "2026-07-30T05:42:36Z",
+      "pushed_at": "2026-07-30T05:40:05Z",
+      "primary_language": null,
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "merely-made",
+        "open-source",
+        "organization-profile"
+      ]
+    },
+    {
+      "id": "mer3ly",
+      "github_slug": "merely-made/mer3ly-net",
+      "updated_at": "2026-07-30T05:44:23Z",
+      "pushed_at": "2026-07-30T03:10:48Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "cambium",
+        "genet",
+        "local-first",
+        "open-source",
+        "rust",
+        "static-site"
+      ]
+    },
+    {
+      "id": "genet",
+      "github_slug": "merely-made/genet",
+      "updated_at": "2026-07-30T05:44:24Z",
+      "pushed_at": "2026-07-30T02:13:09Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": true,
+      "topics": [
+        "browser-engine",
+        "rust",
+        "servo",
+        "vello",
+        "web-engine",
+        "web-platform-tests",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "mere",
+      "github_slug": "merely-made/mere",
+      "updated_at": "2026-07-30T05:44:23Z",
+      "pushed_at": "2026-07-30T00:21:34Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "browser",
+        "graph",
+        "graph-gui",
+        "knowledge-graph",
+        "local-first",
+        "peer-to-peer",
+        "rust",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "retinue",
+      "github_slug": "merely-made/retinue",
+      "updated_at": "2026-07-30T05:42:41Z",
+      "pushed_at": "2026-07-29T22:26:00Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "embedded",
+        "lora",
+        "mesh-networking",
+        "offline-first",
+        "peer-to-peer",
+        "reticulum",
+        "rust"
+      ]
+    },
+    {
+      "id": "netrender",
+      "github_slug": "merely-made/netrender",
+      "updated_at": "2026-07-30T05:42:41Z",
+      "pushed_at": "2026-07-29T20:48:47Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": true,
+      "topics": [
+        "renderer",
+        "rust",
+        "servo",
+        "vello",
+        "web-rendering",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "smolweb",
+      "github_slug": "merely-made/smolweb",
+      "updated_at": "2026-07-30T05:42:42Z",
+      "pushed_at": "2026-07-29T23:22:01Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "guppy-protocol",
+        "misfin",
+        "nex-protocol",
+        "protocols",
+        "rust",
+        "small-web",
+        "spartan-protocol"
+      ]
+    },
+    {
+      "id": "wavicle",
+      "github_slug": "merely-made/wavicle",
+      "updated_at": "2026-07-30T05:42:45Z",
+      "pushed_at": "2026-07-29T20:48:50Z",
+      "primary_language": "Rust",
+      "stargazer_count": 1,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "audio-codec",
+        "codec",
+        "lossless-audio",
+        "rust",
+        "wavpack"
+      ]
+    },
+    {
+      "id": "wgpu-graft",
+      "github_slug": "merely-made/wgpu-graft",
+      "updated_at": "2026-07-30T05:42:45Z",
+      "pushed_at": "2026-07-29T20:48:52Z",
+      "primary_language": "Rust",
+      "stargazer_count": 16,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "embedding",
+        "gpu",
+        "graphics",
+        "rust",
+        "texture",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "wgpu-scry",
+      "github_slug": "merely-made/wgpu-scry",
+      "updated_at": "2026-07-30T05:42:46Z",
+      "pushed_at": "2026-07-29T23:22:05Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "embedding",
+        "gpu",
+        "rust",
+        "texture",
+        "webview",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "wgpu-weld",
+      "github_slug": "merely-made/wgpu-weld",
+      "updated_at": "2026-07-30T05:42:47Z",
+      "pushed_at": "2026-07-29T20:51:37Z",
+      "primary_language": "Rust",
+      "stargazer_count": 1,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "cef",
+        "chromium-embedded-framework",
+        "embedding",
+        "gpu",
+        "rust",
+        "texture",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "turnstone",
+      "github_slug": "merely-made/turnstone",
+      "updated_at": "2026-07-30T05:42:43Z",
+      "pushed_at": "2026-07-30T00:19:59Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "browser",
+        "cooperative-browsing",
+        "graph-browser",
+        "local-first",
+        "peer-to-peer",
+        "rust",
+        "wgpu"
+      ]
+    },
+    {
+      "id": "woodshed",
+      "github_slug": "merely-made/woodshed",
+      "updated_at": "2026-07-30T05:42:48Z",
+      "pushed_at": "2026-07-30T00:17:33Z",
+      "primary_language": "Rust",
+      "stargazer_count": 1,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "local-first",
+        "metronome",
+        "music-practice",
+        "music-theory",
+        "musicians",
+        "rust",
+        "tuner"
+      ]
+    },
+    {
+      "id": "hocket",
+      "github_slug": "merely-made/hocket",
+      "updated_at": "2026-07-30T05:42:38Z",
+      "pushed_at": "2026-07-30T00:18:39Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "audio",
+        "audio-looper",
+        "cooperative",
+        "local-first",
+        "peer-to-peer",
+        "rust"
+      ]
+    },
+    {
+      "id": "isometry",
+      "github_slug": "merely-made/isometry",
+      "updated_at": "2026-07-30T05:42:39Z",
+      "pushed_at": "2026-07-30T00:20:01Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "isometric",
+        "local-first",
+        "peer-to-peer",
+        "pixel-art",
+        "rust",
+        "virtual-tabletop"
+      ]
+    },
+    {
+      "id": "vano",
+      "github_slug": "merely-made/vano",
+      "updated_at": "2026-07-30T05:42:44Z",
+      "pushed_at": "2026-07-30T02:08:19Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": true,
+      "topics": [
+        "data-oriented-design",
+        "ecmascript",
+        "genet",
+        "javascript-engine",
+        "nova",
+        "rust"
+      ]
+    }
+  ]
+}

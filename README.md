@@ -9,6 +9,18 @@ live under `assets/`; generated deployment files live under `html/`.
 
 ## Build
 
+Refresh the committed public GitHub metadata cache when authenticated `gh`
+access is available:
+
+```powershell
+.\scripts\refresh-public-metadata.ps1
+```
+
+The refresh validates a complete temporary snapshot before replacing the
+cache. A failed refresh leaves the last valid public snapshot in place.
+
+Generate the static home, community-radio, and repository pages with:
+
 ```powershell
 cargo run --locked --bin site
 ```
@@ -25,6 +37,7 @@ cargo run --locked --bin site -- --output path/to/output
 cargo test --locked
 cargo clippy --locked --all-targets -- -D warnings
 cargo run --locked --bin authority -- validate
+cargo run --locked --bin authority -- validate-metadata
 ```
 
 ## Plans

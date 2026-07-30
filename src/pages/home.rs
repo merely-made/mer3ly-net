@@ -58,9 +58,9 @@ fn hero() -> SiteView {
                         "Read about community radio",
                         "button button-primary",
                     ),
-                    external_link(
-                        "https://github.com/merely-made",
-                        "Browse the code ↗",
+                    link(
+                        "/repos/",
+                        "Explore the repository map",
                         "button button-quiet",
                     ),
                 ],
