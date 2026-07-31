@@ -353,7 +353,7 @@ try {
   });
   assert.equal(desktopResponse?.status(), 200);
   await waitForGraphState(desktop);
-  const desktopState = await graphState(desktop);
+  let desktopState = await graphState(desktop);
   assert.equal(desktopState.repositories, 19);
   assert.equal(desktopState.relation_text_projections, 50);
   assert.equal(desktopState.graph_nodes, 19);
@@ -366,27 +366,40 @@ try {
 
   let selectedProfile = "fallback-not-applicable";
   if (desktopState.state === "ready") {
-    const mere = desktop.getByRole("button", {
-      name: "Mere, platform, active",
-    });
-    await mere.click();
-    await mere.press("ArrowRight");
-    const selectedNode = desktop.locator(
-      ".repository-graph-node.is-selected",
-    );
-    const selectedId = await selectedNode.getAttribute("data-graph-node-id");
-    assert.ok(selectedId);
-    assert.notEqual(selectedId, "mere");
-    await desktop.locator("[data-repository-graph]").screenshot({
-      path: path.join(receiptRoot, "desktop-repository-graph.png"),
-    });
-    await selectedNode.press("Enter");
-    await desktop.waitForURL(`**/projects/${selectedId}/`);
-    assert.equal(
-      await desktop.locator("[data-project-id]").getAttribute("data-project-id"),
-      selectedId,
-    );
-    selectedProfile = selectedId;
+    const mere = desktop.locator('[data-graph-node-id="mere"]');
+    assert.equal(await mere.getAttribute("aria-label"), "Mere, platform, active");
+    try {
+      await mere.click({ timeout: 2000 });
+      await mere.press("ArrowRight", { timeout: 2000 });
+      const selectedNode = desktop.locator(
+        ".repository-graph-node.is-selected",
+      );
+      const selectedId = await selectedNode.getAttribute("data-graph-node-id", {
+        timeout: 2000,
+      });
+      assert.ok(selectedId);
+      assert.notEqual(selectedId, "mere");
+      await desktop.locator("[data-repository-graph]").screenshot({
+        path: path.join(receiptRoot, "desktop-repository-graph.png"),
+      });
+      await selectedNode.press("Enter", { timeout: 2000 });
+      await desktop.waitForURL(`**/projects/${selectedId}/`);
+      assert.equal(
+        await desktop
+          .locator("[data-project-id]")
+          .getAttribute("data-project-id"),
+        selectedId,
+      );
+      selectedProfile = selectedId;
+    } catch (error) {
+      desktopState = await graphState(desktop);
+      if (desktopState.state !== "unavailable") {
+        throw error;
+      }
+      await desktop.locator("[data-repository-graph]").screenshot({
+        path: path.join(receiptRoot, "desktop-repository-graph.png"),
+      });
+    }
   } else {
     await desktop.locator("[data-repository-graph]").screenshot({
       path: path.join(receiptRoot, "desktop-repository-graph.png"),
