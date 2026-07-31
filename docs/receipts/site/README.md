@@ -21,3 +21,4 @@ absolute machine paths.
 - [M6 automated Pages deployment](2026-07-30_m6_automated_pages_deployment.md)
 - [M7 project showcase](2026-07-30_m7_project_showcase.md)
 - [M8 discovery and sharing](2026-07-30_m8_discovery_and_sharing.md)
+- [M9 authority reconciliation](2026-07-31_m9_authority_reconciliation.md)

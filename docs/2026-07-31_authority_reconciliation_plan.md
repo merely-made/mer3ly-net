@@ -1,6 +1,7 @@
 # Merely authority reconciliation
 
-**Status:** M9 in progress
+**Status:** M9 complete; accepted by the
+[authority reconciliation receipt](receipts/site/2026-07-31_m9_authority_reconciliation.md)
 
 **Authority:** This is the canonical plan for reconciling the public Mer3ly
 catalog with the live `merely-made` organization after the accepted
