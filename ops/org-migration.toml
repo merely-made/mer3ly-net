@@ -356,6 +356,75 @@ local_locator = "repos/isometry"
 source_aliases = ["mark-ik/isometry"]
 
 [[migration]]
+id = "mesocosm"
+current_slug = "merely-made/mesocosm"
+target_slug = "merely-made/mesocosm"
+classification = "product"
+batch = "product"
+disposition = "already-in-org"
+visibility = "public"
+default_branch = "main"
+head = "5b41f1a242a830382d8767cf9a8eaac3f55c530b"
+license_status = "MIT-OR-Apache-2.0"
+provenance_status = "reviewed-original"
+sensitive_information_status = "current-and-history-detector-clean"
+public_scope = "Mesocosm name-reservation package, design record, and project documentation."
+publication_gate_status = "ready"
+history_remediation = "No remediation required."
+pages_status = "none"
+packages_status = "none-detected"
+actions_workflows = 0
+old_owner_files = 0
+old_owner_manifests = 0
+local_locator = "repos/mesocosm"
+
+[[migration]]
+id = "paredros"
+current_slug = "merely-made/paredros"
+target_slug = "merely-made/paredros"
+classification = "product"
+batch = "product"
+disposition = "already-in-org"
+visibility = "public"
+default_branch = "main"
+head = "009221555dc9ecfb516a61a3b785c0f3b3a7fb34"
+license_status = "MIT-OR-Apache-2.0"
+provenance_status = "reviewed-original"
+sensitive_information_status = "current-and-history-detector-clean"
+public_scope = "Paredros name-reservation package, design record, and project documentation."
+publication_gate_status = "ready"
+history_remediation = "No remediation required."
+pages_status = "none"
+packages_status = "none-detected"
+actions_workflows = 0
+old_owner_files = 0
+old_owner_manifests = 0
+local_locator = "repos/paredros"
+
+[[migration]]
+id = "tulpa"
+current_slug = "merely-made/tulpa"
+target_slug = "merely-made/tulpa"
+classification = "foundation"
+batch = "foundation"
+disposition = "already-in-org"
+visibility = "public"
+default_branch = "main"
+head = "9551a9d552f25e1690a665a66d6c674bbecd0664"
+license_status = "MIT-OR-Apache-2.0"
+provenance_status = "reviewed-original"
+sensitive_information_status = "current-and-history-detector-clean"
+public_scope = "Tulpa name-reservation package and public memorial-layer description."
+publication_gate_status = "ready"
+history_remediation = "No remediation required."
+pages_status = "none"
+packages_status = "none-detected"
+actions_workflows = 0
+old_owner_files = 0
+old_owner_manifests = 0
+local_locator = "repos/tulpa"
+
+[[migration]]
 id = "arboard-fork"
 current_slug = "mark-ik/arboard"
 classification = "maintained-fork"
@@ -562,13 +631,3 @@ actions_workflows = 1
 old_owner_files = 0
 old_owner_manifests = 0
 local_locator = "crates/xilem"
-
-[[unresolved_product]]
-name = "Merecat"
-state = "unresolved-repository"
-evidence = "Current product language names Merecat, but no authoritative Code/repos Git checkout was found on 2026-07-29."
-
-[[unresolved_product]]
-name = "Strophe"
-state = "unresolved-repository"
-evidence = "Local testing material names Strophe, but no authoritative Code/repos Git checkout was found on 2026-07-29."

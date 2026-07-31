@@ -164,6 +164,39 @@ homepage = "https://github.com/merely-made/isometry"
 public = true
 
 [[repository]]
+id = "mesocosm"
+github_slug = "merely-made/mesocosm"
+name = "Mesocosm"
+summary = "A first-person game of lineages set in an enclosed ecosystem shaped across generations."
+class = "product"
+status = "prototype"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/merely-made/mesocosm"
+public = true
+
+[[repository]]
+id = "paredros"
+github_slug = "merely-made/paredros"
+name = "Paredros"
+summary = "A second-person action RPG about companions who remain peers, outlive you, and can take your place."
+class = "product"
+status = "prototype"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/merely-made/paredros"
+public = true
+
+[[repository]]
+id = "tulpa"
+github_slug = "merely-made/tulpa"
+name = "Tulpa"
+summary = "The legend and memorial layer: a view of what memory makes of history, sustained by continued attention."
+class = "foundation"
+status = "research"
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/merely-made/tulpa"
+public = true
+
+[[repository]]
 id = "vano"
 github_slug = "merely-made/vano"
 name = "Vano"

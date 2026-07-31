@@ -1,12 +1,12 @@
 {
   "schema": "mer3ly.github-metadata/v1",
-  "generated_at_utc": "2026-07-30T05:44:43Z",
+  "generated_at_utc": "2026-07-31T05:09:19Z",
   "repository": [
     {
       "id": "org-profile",
       "github_slug": "merely-made/.github",
-      "updated_at": "2026-07-30T05:42:36Z",
-      "pushed_at": "2026-07-30T05:40:05Z",
+      "updated_at": "2026-07-30T16:21:16Z",
+      "pushed_at": "2026-07-30T16:20:29Z",
       "primary_language": null,
       "stargazer_count": 0,
       "archived": false,
@@ -20,8 +20,8 @@
     {
       "id": "mer3ly",
       "github_slug": "merely-made/mer3ly-net",
-      "updated_at": "2026-07-30T05:44:23Z",
-      "pushed_at": "2026-07-30T03:10:48Z",
+      "updated_at": "2026-07-30T22:46:56Z",
+      "pushed_at": "2026-07-30T22:46:51Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -274,6 +274,57 @@
         "pixel-art",
         "rust",
         "virtual-tabletop"
+      ]
+    },
+    {
+      "id": "mesocosm",
+      "github_slug": "merely-made/mesocosm",
+      "updated_at": "2026-07-31T05:07:42Z",
+      "pushed_at": "2026-07-31T04:05:27Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "ecosystem-simulation",
+        "evolution",
+        "game-design",
+        "rust",
+        "voxel"
+      ]
+    },
+    {
+      "id": "paredros",
+      "github_slug": "merely-made/paredros",
+      "updated_at": "2026-07-31T05:07:43Z",
+      "pushed_at": "2026-07-30T22:14:21Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "action-rpg",
+        "companions",
+        "game-design",
+        "rust",
+        "second-person"
+      ]
+    },
+    {
+      "id": "tulpa",
+      "github_slug": "merely-made/tulpa",
+      "updated_at": "2026-07-31T05:07:44Z",
+      "pushed_at": "2026-07-30T17:52:53Z",
+      "primary_language": "Rust",
+      "stargazer_count": 0,
+      "archived": false,
+      "fork": false,
+      "topics": [
+        "data-structures",
+        "history",
+        "memory",
+        "provenance",
+        "rust"
       ]
     },
     {

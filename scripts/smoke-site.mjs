@@ -7,7 +7,7 @@ import { chromium } from "playwright";
 
 const siteRoot = path.resolve(process.env.MER3LY_SITE_DIR ?? "html");
 const receiptRoot = path.resolve(
-  process.env.MER3LY_RECEIPT_DIR ?? ".tmp/m8-headed",
+  process.env.MER3LY_RECEIPT_DIR ?? ".tmp/browser-smoke",
 );
 const headless = process.env.MER3LY_HEADLESS !== "false";
 const mimeTypes = {
@@ -97,8 +97,8 @@ try {
   const sitemapUrls = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
     (match) => match[1],
   );
-  assert.equal(sitemapUrls.length, 19);
-  assert.equal(new Set(sitemapUrls).size, 19);
+  assert.equal(sitemapUrls.length, 22);
+  assert.equal(new Set(sitemapUrls).size, 22);
   assert.equal(
     sitemapUrls.every((url) => url.startsWith("https://mer3ly.net/")),
     true,
@@ -135,7 +135,7 @@ try {
     "/",
     "/radio.html",
     "/projects/mere/",
-    "/projects/retinue/",
+    "/projects/mesocosm/",
   ]) {
     const page = await browser.newPage({ viewport: { width: 900, height: 900 } });
     const diagnostics = collectDiagnostics(page);
@@ -294,14 +294,14 @@ try {
     viewport: { width: 375, height: 812 },
   });
   const textProjectDiagnostics = collectDiagnostics(textProject);
-  await textProject.goto(`${baseUrl}/projects/retinue/`, {
+  await textProject.goto(`${baseUrl}/projects/mesocosm/`, {
     waitUntil: "networkidle",
   });
   assert.equal(
     await textProject.locator("[data-project-id]").getAttribute(
       "data-project-id",
     ),
-    "retinue",
+    "mesocosm",
   );
   assert.equal(
     await textProject.locator(".project-showcase-figure").count(),
@@ -323,7 +323,7 @@ try {
   assert.equal(textMetadata.structured_type, "SoftwareSourceCode");
   assert.equal(
     textMetadata.code_repository,
-    "https://github.com/merely-made/retinue",
+    "https://github.com/merely-made/mesocosm",
   );
   assert.equal(await horizontalOverflow(textProject), 0);
   assert.deepEqual(
@@ -332,11 +332,11 @@ try {
     "text-only project profile emitted browser errors",
   );
   await textProject.screenshot({
-    path: path.join(receiptRoot, "project-retinue-mobile.png"),
+    path: path.join(receiptRoot, "project-mesocosm-mobile.png"),
     fullPage: true,
   });
   receipt.projects.text_only = {
-    repository: "retinue",
+    repository: "mesocosm",
     showcase_images: 0,
     social_image: textMetadata.social_image,
     structured_type: textMetadata.structured_type,
@@ -354,9 +354,9 @@ try {
   assert.equal(desktopResponse?.status(), 200);
   await waitForGraphState(desktop);
   const desktopState = await graphState(desktop);
-  assert.equal(desktopState.repositories, 16);
+  assert.equal(desktopState.repositories, 19);
   assert.equal(desktopState.relation_text_projections, 50);
-  assert.equal(desktopState.graph_nodes, 16);
+  assert.equal(desktopState.graph_nodes, 19);
   assert.equal(desktopState.graph_edges, 25);
   assert.equal(desktopState.horizontal_overflow, 0);
   assert.ok(
@@ -371,24 +371,22 @@ try {
     });
     await mere.click();
     await mere.press("ArrowRight");
-    assert.equal(
-      await desktop
-        .locator(".repository-graph-node.is-selected")
-        .getAttribute("data-graph-node-id"),
-      "retinue",
+    const selectedNode = desktop.locator(
+      ".repository-graph-node.is-selected",
     );
+    const selectedId = await selectedNode.getAttribute("data-graph-node-id");
+    assert.ok(selectedId);
+    assert.notEqual(selectedId, "mere");
     await desktop.locator("[data-repository-graph]").screenshot({
       path: path.join(receiptRoot, "desktop-repository-graph.png"),
     });
-    await desktop
-      .getByRole("button", { name: "Retinue, platform, active" })
-      .press("Enter");
-    await desktop.waitForURL("**/projects/retinue/");
+    await selectedNode.press("Enter");
+    await desktop.waitForURL(`**/projects/${selectedId}/`);
     assert.equal(
       await desktop.locator("[data-project-id]").getAttribute("data-project-id"),
-      "retinue",
+      selectedId,
     );
-    selectedProfile = "retinue";
+    selectedProfile = selectedId;
   } else {
     await desktop.locator("[data-repository-graph]").screenshot({
       path: path.join(receiptRoot, "desktop-repository-graph.png"),
@@ -405,7 +403,7 @@ try {
   await mobile.goto(`${baseUrl}/repos/`, { waitUntil: "networkidle" });
   await waitForGraphState(mobile);
   const mobileState = await graphState(mobile);
-  assert.equal(mobileState.repositories, 16);
+  assert.equal(mobileState.repositories, 19);
   assert.equal(mobileState.horizontal_overflow, 0);
   assert.deepEqual(mobileDiagnostics, [], "mobile emitted browser errors");
   await mobile.locator("[data-repository-graph]").screenshot({
@@ -459,7 +457,7 @@ try {
   await waitForGraphState(fallback);
   const fallbackState = await graphState(fallback);
   assert.equal(fallbackState.state, "unavailable");
-  assert.equal(fallbackState.repositories, 16);
+  assert.equal(fallbackState.repositories, 19);
   assert.equal(fallbackState.horizontal_overflow, 0);
   assert.equal(
     await fallback

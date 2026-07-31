@@ -41,7 +41,7 @@ fn sitemap_projects_exact_canonical_authority_without_fake_freshness() {
         .filter_map(|line| line.strip_suffix("</loc></url>"))
         .collect::<Vec<_>>();
 
-    assert_eq!(expected.len(), 19);
+    assert_eq!(expected.len(), 22);
     assert_eq!(actual, expected);
     assert_eq!(actual.iter().collect::<BTreeSet<_>>().len(), actual.len());
     assert!(
@@ -76,7 +76,7 @@ fn every_html_document_links_the_discovery_identity() {
             .map(|(_, document)| document),
     );
 
-    assert_eq!(documents.len(), 19);
+    assert_eq!(documents.len(), 22);
     for document in documents {
         assert_eq!(
             document
