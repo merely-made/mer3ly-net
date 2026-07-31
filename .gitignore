@@ -2,6 +2,7 @@
 /.tmp/
 /.receipts/
 /node_modules/
+/html/
 /.env
 /.env.*
 !/.env.example

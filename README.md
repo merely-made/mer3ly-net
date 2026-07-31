@@ -3,11 +3,13 @@
 The public site for [Merely](https://mer3ly.net/). It is a small static Rust
 build: Cambium views construct Genet `ScriptedDom` documents, which are
 serialized into ordinary HTML. The repository page progressively adds a small
-Mere-arranged WebGPU graph over the same committed public records.
+Mere-arranged WebGPU graph over the same validated repository and relation
+authority.
 
 The complete site remains readable without JavaScript, WebAssembly, or WebGPU.
 Source CSS, graph runtime, social previews, and site identity live under
-`assets/`; generated deployment files live under `html/`.
+`assets/`. Local generated previews live under ignored `html/`; production
+writes and validates an exact temporary artifact.
 
 Source code is licensed under MPL-2.0. Original Mer3ly prose and site artwork
 are available under CC BY 4.0; imported project screenshots retain their source
@@ -16,8 +18,8 @@ repository licenses. See [`LICENSE`](LICENSE) and
 
 ## Build
 
-Refresh the committed public GitHub metadata cache when authenticated `gh`
-access is available:
+Refresh the committed baseline of reduced public GitHub metadata when
+authenticated `gh` access is available:
 
 ```powershell
 .\scripts\refresh-public-metadata.ps1
@@ -62,7 +64,7 @@ npx playwright install chromium
 npm run smoke
 ```
 
-The browser smoke serves committed `html/` locally and checks discovery files,
+The browser smoke serves generated `html/` locally and checks discovery files,
 project social metadata and structured data, the home and community-radio
 pages, and desktop, mobile, reduced-motion, and WebGPU-fallback paths. Set
 `MER3LY_SITE_DIR` to check another generated site directory.
@@ -89,16 +91,19 @@ cargo run --locked --bin authority -- validate-artifact . .tmp/pages-artifact
 [`pages.yml`](.github/workflows/pages.yml) refreshes the reduced public
 metadata cache, rebuilds and validates the exact static artifact, runs a
 headed Chromium smoke under a virtual display, and deploys that artifact to
-GitHub Pages. It runs on manual dispatch and a daily schedule. The build has
-read-only repository permission; only the separate deployment job receives
-the Pages and identity grants. The graph runtime is built twice and must have
-identical hashes on the deployment host before either output can be published.
-GitHub Pages is the sole deployment origin. Cloudflare may proxy the custom
-domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
+GitHub Pages. It runs after relevant changes reach `main`, on manual dispatch,
+and on a daily schedule. The committed metadata file is a reviewable baseline;
+each deployment refreshes a complete temporary snapshot before rendering. The
+build has read-only repository permission; only the separate deployment job
+receives the Pages and identity grants. The graph runtime is built twice and
+must have identical hashes on the deployment host before either output can be
+published. GitHub Pages is the sole deployment origin. Cloudflare may proxy the
+custom domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
 
 ## Plans
 
 - [Live repository graph and Merely organization migration](docs/2026-07-29_live_repos_graph_and_org_migration_plan.md)
 - [Merely project showcase](docs/2026-07-30_project_showcase_plan.md)
 - [Discovery and sharing](docs/2026-07-30_discovery_and_sharing_plan.md)
+- [Authority reconciliation](docs/2026-07-31_authority_reconciliation_plan.md)
 - [Site acceptance receipts](docs/receipts/site/README.md)
