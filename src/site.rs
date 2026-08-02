@@ -4,6 +4,7 @@ use std::rc::Rc;
 use cambium::{AnyView, GenetAppRunner, GenetCtx, GenetElement, el, text};
 use genet_scripted_dom::ScriptedDom;
 use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
 
 pub type SiteView = Box<dyn AnyView<(), (), GenetCtx, GenetElement>>;
 
@@ -309,6 +310,7 @@ fn render_body(
 }
 
 fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
+    let stylesheet_href = stylesheet_href();
     format!(
         "<!doctype html>\n\
 <html lang=\"en\">\n\
@@ -337,7 +339,7 @@ fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
   <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n\
   <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n\
   <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Young+Serif&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap\">\n\
-  <link rel=\"stylesheet\" href=\"/site.css\">\n\
+  <link rel=\"stylesheet\" href=\"{stylesheet_href}\">\n\
   <script type=\"application/ld+json\">{json_ld}</script>\n\
 </head>\n\
 {body}\n\
@@ -348,9 +350,15 @@ fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
         image_url = escape_attr(metadata.social_image.url),
         image_type = escape_attr(metadata.social_image.mime_type),
         image_alt = escape_attr(metadata.social_image.alt),
+        stylesheet_href = escape_attr(&stylesheet_href),
         json_ld = metadata.json_ld,
         body = body_markup,
     )
+}
+
+fn stylesheet_href() -> String {
+    let digest = format!("{:x}", Sha256::digest(SITE_CSS.as_bytes()));
+    format!("/site.css?v={}", &digest[..12])
 }
 
 fn escape_text(value: &str) -> String {
@@ -380,5 +388,12 @@ mod tests {
         let encoded = json_ld_for_script(&value);
         assert!(!encoded.contains("</script>"));
         assert!(encoded.contains("\\u003c/script\\u003e"));
+    }
+
+    #[test]
+    fn stylesheet_href_is_content_addressed() {
+        let href = stylesheet_href();
+        assert!(href.starts_with("/site.css?v="));
+        assert_eq!(href.len(), "/site.css?v=".len() + 12);
     }
 }

@@ -104,23 +104,7 @@ fn mesh() -> SiteView {
                 &[("class", "mesh-card")],
                 vec![
                     mesh_diagram(),
-                    element(
-                        "ol",
-                        &[
-                            ("class", "mesh-route mesh-route-mobile"),
-                            (
-                                "aria-label",
-                                "A message hops from a fire station through community relay sites",
-                            ),
-                        ],
-                        vec![
-                            relay("fire station", "origin"),
-                            relay("church steeple", "relay"),
-                            relay("water tower", "relay"),
-                            relay("ridgeline", "relay"),
-                            relay("county garage", "destination"),
-                        ],
-                    ),
+                    mesh_diagram_mobile(),
                     element(
                         "figcaption",
                         &[],
@@ -145,7 +129,7 @@ fn mesh_diagram() -> SiteView {
     element(
         "svg",
         &[
-            ("class", "mesh-diagram"),
+            ("class", "mesh-diagram mesh-diagram-desktop"),
             ("viewBox", "0 0 800 240"),
             ("role", "img"),
             (
@@ -190,18 +174,55 @@ fn mesh_diagram() -> SiteView {
     )
 }
 
-fn relay(label: &str, role: &str) -> SiteView {
+fn mesh_diagram_mobile() -> SiteView {
     element(
-        "li",
-        &[("class", "relay-node")],
+        "svg",
+        &[
+            ("class", "mesh-diagram mesh-diagram-mobile"),
+            ("viewBox", "0 0 300 480"),
+            ("role", "img"),
+            (
+                "aria-labelledby",
+                "mesh-mobile-title mesh-mobile-description",
+            ),
+        ],
         vec![
             element(
-                "span",
-                &[("class", "relay-dot"), ("aria-hidden", "true")],
-                vec![],
+                "title",
+                &[("id", "mesh-mobile-title")],
+                vec![txt("A message relayed around a blocked direct path")],
             ),
-            element("span", &[("class", "relay-label")], vec![txt(label)]),
-            element("span", &[("class", "sr-only")], vec![txt(role)]),
+            element(
+                "desc",
+                &[("id", "mesh-mobile-description")],
+                vec![txt(
+                    "Five radios form a zigzag relay path from a fire station through a church and water tower, then branch to a ridgeline and county garage.",
+                )],
+            ),
+            svg_line("55", "420", "215", "350", "mesh-link"),
+            svg_line("215", "350", "90", "250", "mesh-link"),
+            svg_line("90", "250", "220", "140", "mesh-link"),
+            svg_line("90", "250", "230", "300", "mesh-link"),
+            svg_line("55", "420", "90", "250", "mesh-link mesh-link-blocked"),
+            svg_circle("55", "420", "10", "mesh-site mesh-site-mobile"),
+            svg_circle("215", "350", "10", "mesh-site mesh-site-mobile"),
+            svg_circle("90", "250", "10", "mesh-site mesh-site-mobile"),
+            svg_circle("220", "140", "10", "mesh-site mesh-site-mobile"),
+            svg_circle("230", "300", "10", "mesh-site mesh-site-mobile"),
+            svg_text("55", "450", "mesh-label", "fire station"),
+            svg_text("215", "380", "mesh-label", "church steeple"),
+            svg_text("90", "225", "mesh-label", "water tower"),
+            svg_text("220", "115", "mesh-label", "ridgeline"),
+            svg_text("230", "330", "mesh-label", "county garage"),
+            element(
+                "text",
+                &[
+                    ("x", "18"),
+                    ("y", "335"),
+                    ("class", "mesh-note mesh-note-mobile"),
+                ],
+                vec![txt("direct path blocked")],
+            ),
         ],
     )
 }

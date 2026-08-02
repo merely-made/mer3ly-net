@@ -1129,6 +1129,10 @@ h1 {
   display: block;
 }
 
+.mesh-diagram-mobile {
+  display: none;
+}
+
 .mesh-link,
 .county-link {
   fill: none;
@@ -1165,57 +1169,11 @@ h1 {
   font-style: italic;
 }
 
-.mesh-route {
-  position: relative;
-  min-height: 170px;
-  display: none;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  align-items: center;
-  gap: 8px;
-  list-style: none;
-}
-
-.mesh-route::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  top: 50%;
-  left: 8%;
-  right: 8%;
-  height: 2px;
-  background: var(--lake-edge);
-}
-
-.relay-node {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  display: grid;
-  justify-items: center;
-  gap: 14px;
-  text-align: center;
-}
-
-.relay-node:nth-child(even) {
-  transform: translateY(-25px);
-}
-
-.relay-node:nth-child(odd) {
-  transform: translateY(25px);
-}
-
-.relay-dot {
-  width: 18px;
-  height: 18px;
-  border: 4px solid var(--paper);
-  border-radius: 50%;
-  background: var(--oxblood);
-  box-shadow: 0 0 0 1px var(--oxblood);
-}
-
-.relay-label {
-  color: var(--muted);
-  font: 0.62rem/1.35 var(--font-mono);
+.mesh-note-mobile {
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
 }
 
 .mesh-card figcaption {
@@ -1821,35 +1779,14 @@ tbody tr:last-child td {
     padding: 20px 4px 0;
   }
 
-  .mesh-route {
-    min-height: 390px;
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .mesh-diagram {
+  .mesh-diagram-desktop {
     display: none;
   }
 
-  .mesh-route::before {
-    top: 8%;
-    bottom: 8%;
-    left: 50%;
-    right: auto;
-    width: 2px;
-    height: auto;
-  }
-
-  .relay-node {
-    grid-template-columns: 18px minmax(0, 1fr);
-    justify-items: start;
-    align-items: center;
-    text-align: left;
-  }
-
-  .relay-node:nth-child(even),
-  .relay-node:nth-child(odd) {
-    transform: none;
+  .mesh-diagram-mobile {
+    width: min(100%, 360px);
+    margin: 0 auto;
+    display: block;
   }
 
   .site-footer {

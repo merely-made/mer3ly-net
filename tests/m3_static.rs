@@ -58,6 +58,10 @@ fn pages_are_static_genet_documents() {
             document.contains("https://mer3ly.net/og.jpg"),
             "{name} names the generated social preview"
         );
+        assert!(
+            document.contains("href=\"/site.css?v="),
+            "{name} cache-busts the shared stylesheet"
+        );
 
         for marker in FORBIDDEN_PUBLIC_MARKERS {
             assert!(
@@ -114,10 +118,12 @@ fn radio_diagrams_preserve_the_mesh_and_pilot_topology() {
     let document = radio::document();
 
     assert_eq!(document.matches("class=\"mesh-site\"").count(), 5);
+    assert_eq!(document.matches("mesh-site-mobile").count(), 5);
     assert_eq!(document.matches("class=\"county-shape").count(), 5);
     assert_eq!(document.matches("class=\"county-site\"").count(), 10);
     assert!(document.contains("direct path blocked, message hops around"));
     assert!(document.contains("ten proposed sites · stylized, not to scale"));
     assert!(document.contains("aria-labelledby=\"mesh-diagram-title mesh-diagram-description\""));
+    assert!(document.contains("aria-labelledby=\"mesh-mobile-title mesh-mobile-description\""));
     assert!(document.contains("aria-labelledby=\"county-map-title county-map-description\""));
 }
