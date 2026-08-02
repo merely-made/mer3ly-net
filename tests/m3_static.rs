@@ -2,6 +2,7 @@ use genet_scripted_dom::ScriptedDom;
 use layout_dom_api::LayoutDom;
 use mer3ly_site::pages::{home, radio};
 use mer3ly_site::site::SITE_CSS;
+use std::path::{Path, PathBuf};
 
 const FORBIDDEN_PUBLIC_MARKERS: &[&str] = &[
     "tel:",
@@ -107,4 +108,16 @@ fn stylesheet_has_responsive_and_accessibility_contracts() {
         );
     }
 }
-use std::path::{Path, PathBuf};
+
+#[test]
+fn radio_diagrams_preserve_the_mesh_and_pilot_topology() {
+    let document = radio::document();
+
+    assert_eq!(document.matches("class=\"mesh-site\"").count(), 5);
+    assert_eq!(document.matches("class=\"county-shape").count(), 5);
+    assert_eq!(document.matches("class=\"county-site\"").count(), 10);
+    assert!(document.contains("direct path blocked, message hops around"));
+    assert!(document.contains("ten proposed sites · stylized, not to scale"));
+    assert!(document.contains("aria-labelledby=\"mesh-diagram-title mesh-diagram-description\""));
+    assert!(document.contains("aria-labelledby=\"county-map-title county-map-description\""));
+}

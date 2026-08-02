@@ -103,10 +103,11 @@ fn mesh() -> SiteView {
                 "figure",
                 &[("class", "mesh-card")],
                 vec![
+                    mesh_diagram(),
                     element(
                         "ol",
                         &[
-                            ("class", "mesh-route"),
+                            ("class", "mesh-route mesh-route-mobile"),
                             (
                                 "aria-label",
                                 "A message hops from a fire station through community relay sites",
@@ -135,6 +136,55 @@ fn mesh() -> SiteView {
                         )],
                     ),
                 ],
+            ),
+        ],
+    )
+}
+
+fn mesh_diagram() -> SiteView {
+    element(
+        "svg",
+        &[
+            ("class", "mesh-diagram"),
+            ("viewBox", "0 0 800 240"),
+            ("role", "img"),
+            (
+                "aria-labelledby",
+                "mesh-diagram-title mesh-diagram-description",
+            ),
+        ],
+        vec![
+            element(
+                "title",
+                &[("id", "mesh-diagram-title")],
+                vec![txt("A message relayed around a blocked direct path")],
+            ),
+            element(
+                "desc",
+                &[("id", "mesh-diagram-description")],
+                vec![txt(
+                    "Five radios at a fire station, church steeple, water tower, ridgeline, and county garage form alternate routes through the mesh.",
+                )],
+            ),
+            svg_line("110", "170", "270", "80", "mesh-link"),
+            svg_line("270", "80", "450", "140", "mesh-link"),
+            svg_line("450", "140", "620", "70", "mesh-link"),
+            svg_line("450", "140", "690", "180", "mesh-link"),
+            svg_line("110", "170", "450", "140", "mesh-link mesh-link-blocked"),
+            svg_circle("110", "170", "10", "mesh-site"),
+            svg_circle("270", "80", "10", "mesh-site"),
+            svg_circle("450", "140", "10", "mesh-site"),
+            svg_circle("620", "70", "10", "mesh-site"),
+            svg_circle("690", "180", "10", "mesh-site"),
+            svg_text("110", "200", "mesh-label", "fire station"),
+            svg_text("270", "60", "mesh-label", "church steeple"),
+            svg_text("450", "170", "mesh-label", "water tower"),
+            svg_text("620", "50", "mesh-label", "ridgeline"),
+            svg_text("690", "210", "mesh-label", "county garage"),
+            element(
+                "text",
+                &[("x", "278"), ("y", "132"), ("class", "mesh-note")],
+                vec![txt("direct path blocked, message hops around")],
             ),
         ],
     )
@@ -170,24 +220,11 @@ fn pilot() -> SiteView {
                         "figure",
                         &[("class", "county-card")],
                         vec![
-                            element(
-                                "ul",
-                                &[
-                                    ("class", "county-grid"),
-                                    ("aria-label", "Five FIVCO counties"),
-                                ],
-                                vec![
-                                    county("Greenup", "01"),
-                                    county("Boyd", "02"),
-                                    county("Carter", "03"),
-                                    county("Elliott", "04"),
-                                    county("Lawrence", "05"),
-                                ],
-                            ),
+                            county_map(),
                             element(
                                 "figcaption",
                                 &[],
-                                vec![txt("five counties · ten proposed sites")],
+                                vec![txt("ten proposed sites · stylized, not to scale")],
                             ),
                         ],
                     ),
@@ -243,14 +280,106 @@ fn pilot() -> SiteView {
     )
 }
 
-fn county(name: &str, number: &str) -> SiteView {
+fn county_map() -> SiteView {
     element(
-        "li",
-        &[],
-        vec![
-            element("span", &[("class", "county-number")], vec![txt(number)]),
-            element("span", &[], vec![txt(name)]),
+        "svg",
+        &[
+            ("class", "county-map"),
+            ("viewBox", "0 0 300 320"),
+            ("role", "img"),
+            ("aria-labelledby", "county-map-title county-map-description"),
         ],
+        vec![
+            element(
+                "title",
+                &[("id", "county-map-title")],
+                vec![txt("FIVCO pilot network")],
+            ),
+            element(
+                "desc",
+                &[("id", "county-map-description")],
+                vec![txt(
+                    "A stylized map of Boyd, Carter, Elliott, Greenup, and Lawrence counties connected by ten proposed radio sites.",
+                )],
+            ),
+            county_shape(
+                "M60 18 L150 10 L172 52 L150 108 L74 116 L48 60 Z",
+                "county-shape county-shape-sage",
+            ),
+            county_shape("M150 10 L236 24 L252 96 L172 52 Z", "county-shape"),
+            county_shape("M172 52 L252 96 L244 178 L150 108 Z", "county-shape"),
+            county_shape(
+                "M74 116 L150 108 L244 178 L200 260 L96 244 Z",
+                "county-shape county-shape-sage",
+            ),
+            county_shape("M96 244 L200 260 L212 308 L108 312 Z", "county-shape"),
+            svg_text("104", "66", "county-label county-label-sage", "GREENUP"),
+            svg_text("204", "52", "county-label", "BOYD"),
+            svg_text("206", "122", "county-label", "CARTER"),
+            svg_text("152", "196", "county-label county-label-sage", "ELLIOTT"),
+            svg_text("158", "290", "county-label", "LAWRENCE"),
+            svg_line("110", "44", "206", "36", "county-link"),
+            svg_line("206", "36", "216", "100", "county-link"),
+            svg_line("110", "44", "126", "90", "county-link"),
+            svg_line("126", "90", "216", "100", "county-link"),
+            svg_line("126", "90", "140", "170", "county-link"),
+            svg_line("216", "100", "196", "150", "county-link"),
+            svg_line("140", "170", "196", "150", "county-link"),
+            svg_line("140", "170", "128", "228", "county-link"),
+            svg_line("128", "228", "176", "276", "county-link"),
+            svg_line("196", "150", "176", "276", "county-link"),
+            svg_line("90", "140", "126", "90", "county-link"),
+            svg_line("232", "210", "196", "150", "county-link"),
+            svg_circle("110", "44", "6", "county-site"),
+            svg_circle("206", "36", "6", "county-site"),
+            svg_circle("216", "100", "6", "county-site"),
+            svg_circle("126", "90", "6", "county-site"),
+            svg_circle("140", "170", "6", "county-site"),
+            svg_circle("196", "150", "6", "county-site"),
+            svg_circle("128", "228", "6", "county-site"),
+            svg_circle("176", "276", "6", "county-site"),
+            svg_circle("90", "140", "6", "county-site"),
+            svg_circle("232", "210", "6", "county-site"),
+        ],
+    )
+}
+
+fn county_shape(path: &str, class: &str) -> SiteView {
+    element("path", &[("d", path), ("class", class)], vec![])
+}
+
+fn svg_line(x1: &str, y1: &str, x2: &str, y2: &str, class: &str) -> SiteView {
+    element(
+        "line",
+        &[
+            ("x1", x1),
+            ("y1", y1),
+            ("x2", x2),
+            ("y2", y2),
+            ("class", class),
+        ],
+        vec![],
+    )
+}
+
+fn svg_circle(cx: &str, cy: &str, radius: &str, class: &str) -> SiteView {
+    element(
+        "circle",
+        &[("cx", cx), ("cy", cy), ("r", radius), ("class", class)],
+        vec![],
+    )
+}
+
+fn svg_text(x: &str, y: &str, class: &str, label: &str) -> SiteView {
+    element(
+        "text",
+        &[
+            ("x", x),
+            ("y", y),
+            ("text-anchor", "middle"),
+            ("class", class),
+        ],
+        vec![txt(label)],
     )
 }
 

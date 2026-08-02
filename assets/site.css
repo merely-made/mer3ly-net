@@ -1123,10 +1123,52 @@ h1 {
   padding: 34px;
 }
 
+.mesh-diagram {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mesh-link,
+.county-link {
+  fill: none;
+  stroke: var(--lake-edge);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.mesh-link-blocked {
+  stroke: var(--line);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+
+.mesh-site,
+.county-site {
+  fill: var(--oxblood);
+}
+
+.mesh-label,
+.mesh-note,
+.county-label {
+  fill: var(--muted);
+  font-family: var(--font-mono);
+}
+
+.mesh-label {
+  font-size: 11px;
+}
+
+.mesh-note {
+  fill: var(--faint);
+  font-size: 10px;
+  font-style: italic;
+}
+
 .mesh-route {
   position: relative;
   min-height: 170px;
-  display: grid;
+  display: none;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   gap: 8px;
@@ -1201,38 +1243,46 @@ h1 {
   align-content: center;
 }
 
-.county-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  list-style: none;
+.county-map {
+  width: min(100%, 320px);
+  height: auto;
+  margin: 0 auto;
+  display: block;
 }
 
-.county-grid li {
-  min-height: 94px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid var(--line);
-  background: var(--cream);
-  color: var(--muted);
-  font: 500 0.67rem/1.3 var(--font-mono);
-  text-transform: uppercase;
+.county-shape {
+  fill: var(--cream);
+  stroke: var(--line);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
 
-.county-grid li:nth-child(1),
-.county-grid li:nth-child(4) {
-  background: var(--sage);
+.county-shape-sage {
+  fill: var(--sage);
 }
 
-.county-grid li:last-child {
-  grid-column: 1 / -1;
+.county-link {
+  stroke-width: 1.5;
 }
 
-.county-number {
-  color: var(--oxblood);
-  font-size: 0.58rem;
+.county-label {
+  font-size: 10px;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.county-label-sage {
+  fill: #5f6b4e;
+  stroke: var(--sage);
+}
+
+.county-site {
+  stroke: var(--paper);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
 }
 
 .county-card figcaption {
@@ -1773,7 +1823,12 @@ tbody tr:last-child td {
 
   .mesh-route {
     min-height: 390px;
+    display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .mesh-diagram {
+    display: none;
   }
 
   .mesh-route::before {
@@ -1961,14 +2016,6 @@ tbody tr:last-child td {
 
   .content-section {
     padding-bottom: 68px;
-  }
-
-  .county-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .county-grid li:last-child {
-    grid-column: auto;
   }
 
   th,
