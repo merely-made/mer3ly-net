@@ -1,6 +1,6 @@
 {
   "schema": "mer3ly.github-metadata/v1",
-  "generated_at_utc": "2026-07-31T05:09:19Z",
+  "generated_at_utc": "2026-08-03T05:33:46Z",
   "repository": [
     {
       "id": "org-profile",
@@ -20,8 +20,8 @@
     {
       "id": "mer3ly",
       "github_slug": "merely-made/mer3ly-net",
-      "updated_at": "2026-07-30T22:46:56Z",
-      "pushed_at": "2026-07-30T22:46:51Z",
+      "updated_at": "2026-08-03T05:12:08Z",
+      "pushed_at": "2026-08-03T05:11:53Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -38,8 +38,8 @@
     {
       "id": "genet",
       "github_slug": "merely-made/genet",
-      "updated_at": "2026-07-30T05:44:24Z",
-      "pushed_at": "2026-07-30T02:13:09Z",
+      "updated_at": "2026-08-02T23:49:30Z",
+      "pushed_at": "2026-08-02T23:49:24Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -57,8 +57,8 @@
     {
       "id": "mere",
       "github_slug": "merely-made/mere",
-      "updated_at": "2026-07-30T05:44:23Z",
-      "pushed_at": "2026-07-30T00:21:34Z",
+      "updated_at": "2026-08-02T23:18:41Z",
+      "pushed_at": "2026-08-02T23:18:37Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -77,8 +77,8 @@
     {
       "id": "retinue",
       "github_slug": "merely-made/retinue",
-      "updated_at": "2026-07-30T05:42:41Z",
-      "pushed_at": "2026-07-29T22:26:00Z",
+      "updated_at": "2026-08-01T21:22:33Z",
+      "pushed_at": "2026-08-01T21:22:28Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -205,8 +205,8 @@
     {
       "id": "turnstone",
       "github_slug": "merely-made/turnstone",
-      "updated_at": "2026-07-30T05:42:43Z",
-      "pushed_at": "2026-07-30T00:19:59Z",
+      "updated_at": "2026-08-01T21:19:49Z",
+      "pushed_at": "2026-08-01T21:19:45Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -261,8 +261,8 @@
     {
       "id": "isometry",
       "github_slug": "merely-made/isometry",
-      "updated_at": "2026-07-30T05:42:39Z",
-      "pushed_at": "2026-07-30T00:20:01Z",
+      "updated_at": "2026-08-01T11:51:23Z",
+      "pushed_at": "2026-08-01T11:51:05Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -279,8 +279,8 @@
     {
       "id": "mesocosm",
       "github_slug": "merely-made/mesocosm",
-      "updated_at": "2026-07-31T05:07:42Z",
-      "pushed_at": "2026-07-31T04:05:27Z",
+      "updated_at": "2026-08-02T22:57:58Z",
+      "pushed_at": "2026-08-02T22:57:52Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,
@@ -296,8 +296,8 @@
     {
       "id": "paredros",
       "github_slug": "merely-made/paredros",
-      "updated_at": "2026-07-31T05:07:43Z",
-      "pushed_at": "2026-07-30T22:14:21Z",
+      "updated_at": "2026-07-31T22:53:15Z",
+      "pushed_at": "2026-07-31T22:53:09Z",
       "primary_language": "Rust",
       "stargazer_count": 0,
       "archived": false,

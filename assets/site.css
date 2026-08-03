@@ -637,6 +637,10 @@ h1 {
   background: var(--parchment);
 }
 
+[data-graph-node-form="flag"] .repository-graph-stage {
+  height: 760px;
+}
+
 [data-graph-node-form="facet"] .repository-graph-stage {
   background:
     radial-gradient(circle at center, rgba(122, 41, 34, 0.065), transparent 58%),
@@ -690,6 +694,22 @@ h1 {
   background: rgba(41, 72, 107, 0.34);
 }
 
+.repository-graph-timeline-stem {
+  position: absolute;
+  background: rgba(41, 72, 107, 0.24);
+}
+
+.repository-graph-timeline-anchor {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--parchment);
+  border-radius: 50%;
+  background: var(--lake);
+  box-shadow: 0 0 0 1px rgba(41, 72, 107, 0.42);
+}
+
 .repository-graph-scene-label {
   position: absolute;
   padding: 3px 5px;
@@ -699,14 +719,6 @@ h1 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.repository-graph-scene[data-orientation="vertical"]
-  .repository-graph-timeline-rail
-  .repository-graph-scene-label {
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .repository-graph-scene[data-orientation="horizontal"]
@@ -907,33 +919,39 @@ h1 {
 }
 
 [data-graph-node-form="flag"] .repository-graph-node {
-  min-width: 104px;
-  min-height: 46px;
-  padding: 4px 6px;
-  grid-template-columns: 13px minmax(0, 1fr);
+  width: 76px;
+  min-width: 76px;
+  min-height: 64px;
+  padding: 4px;
+  box-sizing: border-box;
+  grid-template-columns: 30px minmax(0, 1fr);
   grid-template-rows: auto auto;
   justify-items: start;
-  gap: 2px 7px;
+  gap: 2px 6px;
   text-align: left;
 }
 
 [data-graph-node-form="flag"] .repository-graph-node-mark {
-  width: 11px;
-  height: 38px;
+  width: 28px;
+  height: 56px;
   grid-row: 1 / 3;
-  border-radius: 2px 2px 8px 8px;
+  border-radius: 4px 4px 12px 12px;
 }
 
 [data-graph-node-form="flag"] .repository-graph-node-initial {
-  font-size: 0.39rem;
+  font-size: 0.5rem;
 }
 
 [data-graph-node-form="flag"] .repository-graph-node-label {
+  width: 100%;
   max-width: 92px;
   padding: 0;
+  overflow: hidden;
   border-color: transparent;
   background: transparent;
   box-shadow: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-graph-node-form="flag"] .repository-graph-node-date {
@@ -2280,6 +2298,10 @@ tbody tr:last-child td {
     height: 500px;
   }
 
+  [data-graph-node-form="flag"] .repository-graph-stage {
+    height: 640px;
+  }
+
   .repository-graph-node-label {
     display: none;
   }
@@ -2327,7 +2349,7 @@ tbody tr:last-child td {
     width: 44px;
     min-width: 44px;
     min-height: 44px;
-    padding: 7px 16px;
+    padding: 1px 7px;
     box-sizing: border-box;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
@@ -2335,8 +2357,8 @@ tbody tr:last-child td {
   }
 
   [data-graph-node-form="flag"] .repository-graph-node-mark {
-    width: 10px;
-    height: 30px;
+    width: 28px;
+    height: 40px;
     grid-row: 1;
   }
 

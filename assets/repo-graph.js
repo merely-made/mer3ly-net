@@ -6,7 +6,7 @@ const { default: initWasm, layout_graph: layoutGraph } = await import(
 class GraphUnavailable extends Error {}
 
 const MORPH_DURATION_MS = 640;
-const TIMELINE_TRACK_SIZE = 5;
+const TIMELINE_ARRANGEMENT = "graph_layout:timeline";
 const SCENE_PROFILES = new Map([
   [
     "graph_layout:radial",
@@ -49,7 +49,7 @@ const SCENE_PROFILES = new Map([
       edgeOpacity: 0.08,
       selectedEdgeOpacity: 0.74,
       canvasNodes: false,
-      caption: "Dated flags · chronological rails keep recent work from stacking",
+      caption: "Repository strips · exact push times anchored to one chronological rail",
     },
   ],
   [
@@ -350,21 +350,29 @@ class RepositoryGraphRenderer {
         (left, right) =>
           left.pushed_at.localeCompare(right.pushed_at) || left.id.localeCompare(right.id),
       );
-      for (let index = 0; index < datedNodes.length; index += TIMELINE_TRACK_SIZE) {
-        const nodes = datedNodes.slice(index, index + TIMELINE_TRACK_SIZE);
-        const firstDate = nodes[0].pushed_at.slice(0, 10);
-        const lastDate = nodes.at(-1).pushed_at.slice(0, 10);
-        const label = sceneElement(
-          "repository-graph-scene-label",
-          formatGraphDateRange(firstDate, lastDate),
-        );
-        const element = sceneElement("repository-graph-timeline-rail");
-        element.append(label);
-        this.sceneLayer.append(element);
+      const firstDate = datedNodes[0].pushed_at.slice(0, 10);
+      const lastDate = datedNodes.at(-1).pushed_at.slice(0, 10);
+      const rail = sceneElement("repository-graph-timeline-rail");
+      const label = sceneElement(
+        "repository-graph-scene-label",
+        formatGraphDateRange(firstDate, lastDate),
+      );
+      rail.append(label);
+      this.sceneLayer.append(rail);
+      this.scaffoldItems.push({
+        kind: "timeline-rail",
+        element: rail,
+        nodeIds: datedNodes.map(({ id }) => id),
+      });
+      for (const node of datedNodes) {
+        const stem = sceneElement("repository-graph-timeline-stem");
+        const anchor = sceneElement("repository-graph-timeline-anchor");
+        this.sceneLayer.append(stem, anchor);
         this.scaffoldItems.push({
-          element,
-          label,
-          nodeIds: nodes.map(({ id }) => id),
+          kind: "timeline-anchor",
+          element: stem,
+          anchor,
+          nodeId: node.id,
         });
       }
       return;
@@ -435,31 +443,30 @@ class RepositoryGraphRenderer {
       return;
     }
     if (scaffold === "timeline") {
-      const vertical = this.stage.clientWidth >= 480;
-      this.sceneLayer.dataset.orientation = vertical ? "vertical" : "horizontal";
+      this.sceneLayer.dataset.orientation = "horizontal";
+      const rail = this.scaffoldItems.find(({ kind }) => kind === "timeline-rail");
+      const points = rail.nodeIds.map(screenFor).filter(Boolean);
+      const xs = points.map(({ x }) => x);
+      const railY = this.panY;
+      const left = Math.max(Math.min(...xs) - 18, 12);
+      positionBox(rail.element, {
+        left,
+        top: railY,
+        width: Math.max(...xs) + 18 - left,
+        height: 2,
+      });
       for (const item of this.scaffoldItems) {
-        const points = item.nodeIds.map(screenFor).filter(Boolean);
-        const xs = points.map(({ x }) => x);
-        const ys = points.map(({ y }) => y);
-        if (vertical) {
-          const x = average(xs);
-          const top = Math.max(Math.min(...ys) - 36, 24);
-          positionBox(item.element, {
-            left: x,
-            top,
-            width: 1,
-            height: Math.max(...ys) + 36 - top,
-          });
-        } else {
-          const y = average(ys);
-          const left = Math.max(Math.min(...xs) - 30, 12);
-          positionBox(item.element, {
-            left,
-            top: y,
-            width: Math.max(...xs) + 30 - left,
-            height: 1,
-          });
-        }
+        if (item.kind !== "timeline-anchor") continue;
+        const point = screenFor(item.nodeId);
+        if (!point) continue;
+        positionBox(item.element, {
+          left: point.x,
+          top: Math.min(point.y, railY),
+          width: 1,
+          height: Math.max(Math.abs(point.y - railY), 1),
+        });
+        item.anchor.style.left = `${point.x}px`;
+        item.anchor.style.top = `${railY}px`;
       }
       return;
     }
@@ -772,6 +779,7 @@ class RepositoryGraphRenderer {
     if (this.morph) {
       this.advanceMorph(performance.now());
     }
+    this.alignMobileOrientation(this.currentArrangement, arrangementId);
     const target = new Map(
       arrangement.nodes.map(({ id, x, y }) => [id, { x, y }]),
     );
@@ -783,6 +791,7 @@ class RepositoryGraphRenderer {
     if (this.reducedMotion) {
       this.positions = target;
       this.morph = null;
+      this.fit();
       this.graphRoot.dataset.graphMorphing = "false";
       this.schedule();
       announce(
@@ -828,6 +837,7 @@ class RepositoryGraphRenderer {
     const { arrangement, target } = this.morph;
     this.positions = target;
     this.morph = null;
+    this.fit();
     this.graphRoot.dataset.graphMorphing = "false";
     announce(
       this.graphRoot,
@@ -908,10 +918,28 @@ class RepositoryGraphRenderer {
 
   layoutPosition(node) {
     const position = this.positions.get(node.id) ?? node;
-    if (this.stage.clientWidth < 480) {
+    if (
+      this.stage.clientWidth < 480 &&
+      this.currentArrangement !== TIMELINE_ARRANGEMENT
+    ) {
       return { x: position.y, y: -position.x };
     }
     return position;
+  }
+
+  alignMobileOrientation(previousArrangement, nextArrangement) {
+    if (this.stage.clientWidth >= 480) return;
+    const previousIsTimeline = previousArrangement === TIMELINE_ARRANGEMENT;
+    const nextIsTimeline = nextArrangement === TIMELINE_ARRANGEMENT;
+    if (previousIsTimeline === nextIsTimeline) return;
+    this.positions = new Map(
+      [...this.positions].map(([id, position]) => [
+        id,
+        nextIsTimeline
+          ? { x: position.y, y: -position.x }
+          : { x: -position.y, y: position.x },
+      ]),
+    );
   }
 
   draw() {

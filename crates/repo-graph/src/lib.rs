@@ -12,9 +12,10 @@ use wasm_bindgen::prelude::*;
 
 const FOCUS_REPOSITORY: &str = "mere";
 const DEFAULT_ARRANGEMENT: &str = "graph_layout:radial";
-const TIMELINE_TRACK_SIZE: usize = 5;
-const TIMELINE_BAND_GAP: f32 = 210.0;
-const TIMELINE_LANE_GAP: f32 = 85.0;
+const TIMELINE_AXIS_LENGTH: f32 = 620.0;
+const TIMELINE_LANE_COUNT: usize = 9;
+const TIMELINE_LANE_GAP: f32 = 110.0;
+const TIMELINE_MIN_X_GAP: f32 = 110.0;
 const ARRANGEMENT_ORDER: &[&str] = &[
     "graph_layout:radial",
     "graph_layout:grid",
@@ -288,32 +289,53 @@ fn arrangement_positions(
         })
         .collect::<Vec<_>>();
     let raw_positions = if arrangement_id == "graph_layout:timeline" {
-        wrap_timeline_tracks(raw_positions)
+        place_timeline_strips(raw_positions)
     } else {
         raw_positions
     };
     normalize_positions(arrangement_id, raw_positions)
 }
 
-fn wrap_timeline_tracks(mut positions: Vec<(String, Point2D<f32>)>) -> Vec<(String, Point2D<f32>)> {
+fn place_timeline_strips(
+    mut positions: Vec<(String, Point2D<f32>)>,
+) -> Vec<(String, Point2D<f32>)> {
     positions.sort_by(|(left_id, left), (right_id, right)| {
         left.x
             .total_cmp(&right.x)
             .then_with(|| left.y.total_cmp(&right.y))
             .then_with(|| left_id.cmp(right_id))
     });
+    let min_x = positions.first().map_or(0.0, |(_, position)| position.x);
+    let max_x = positions.last().map_or(min_x, |(_, position)| position.x);
+    let span = (max_x - min_x).max(f32::EPSILON);
+    let mut last_x_by_lane = [f32::NEG_INFINITY; TIMELINE_LANE_COUNT];
+
     positions
         .into_iter()
-        .enumerate()
-        .map(|(index, (id, _))| {
-            let band = (index / TIMELINE_TRACK_SIZE) as f32;
-            let lane = (index % TIMELINE_TRACK_SIZE) as f32;
-            (
-                id,
-                Point2D::new(band * TIMELINE_BAND_GAP, lane * TIMELINE_LANE_GAP),
-            )
+        .map(|(id, position)| {
+            let x = ((position.x - min_x) / span - 0.5) * TIMELINE_AXIS_LENGTH;
+            let lane = last_x_by_lane
+                .iter()
+                .position(|last_x| x - *last_x >= TIMELINE_MIN_X_GAP)
+                .unwrap_or_else(|| {
+                    last_x_by_lane
+                        .iter()
+                        .enumerate()
+                        .min_by(|(_, left), (_, right)| left.total_cmp(right))
+                        .map_or(0, |(index, _)| index)
+                });
+            last_x_by_lane[lane] = x;
+            (id, Point2D::new(x, timeline_lane_offset(lane)))
         })
         .collect()
+}
+
+fn timeline_lane_offset(lane: usize) -> f32 {
+    if lane == 0 {
+        return 0.0;
+    }
+    let distance = lane.div_ceil(2) as f32 * TIMELINE_LANE_GAP;
+    if lane % 2 == 1 { -distance } else { distance }
 }
 
 fn normalize_positions(
@@ -343,7 +365,7 @@ fn normalize_positions(
         ));
     }
     let height_limit = if arrangement_id == "graph_layout:timeline" {
-        650.0
+        720.0
     } else {
         520.0
     };
@@ -364,16 +386,46 @@ fn timestamp_coordinate(value: &str) -> Result<f64, String> {
     let digits = value
         .chars()
         .filter(char::is_ascii_digit)
-        .take(8)
         .collect::<String>();
-    if digits.len() != 8 {
+    if digits.len() < 14 {
         return Err(format!(
             "repository push timestamp is not sortable: {value}"
         ));
     }
-    digits
-        .parse::<f64>()
-        .map_err(|error| format!("repository push timestamp is not sortable: {error}"))
+    let component = |range: std::ops::Range<usize>| -> Result<i64, String> {
+        digits[range]
+            .parse::<i64>()
+            .map_err(|error| format!("repository push timestamp is not sortable: {error}"))
+    };
+    let year = component(0..4)?;
+    let month = component(4..6)?;
+    let day = component(6..8)?;
+    let hour = component(8..10)?;
+    let minute = component(10..12)?;
+    let second = component(12..14)?;
+    if !(1..=12).contains(&month)
+        || !(1..=31).contains(&day)
+        || !(0..=23).contains(&hour)
+        || !(0..=59).contains(&minute)
+        || !(0..=60).contains(&second)
+    {
+        return Err(format!(
+            "repository push timestamp is not sortable: {value}"
+        ));
+    }
+
+    let adjusted_year = year - i64::from(month <= 2);
+    let era = if adjusted_year >= 0 {
+        adjusted_year
+    } else {
+        adjusted_year - 399
+    } / 400;
+    let year_of_era = adjusted_year - era * 400;
+    let adjusted_month = month + if month > 2 { -3 } else { 9 };
+    let day_of_year = (153 * adjusted_month + 2) / 5 + day - 1;
+    let day_of_era = year_of_era * 365 + year_of_era / 4 - year_of_era / 100 + day_of_year;
+    let days_since_epoch = era * 146_097 + day_of_era - 719_468;
+    Ok((days_since_epoch * 86_400 + hour * 3_600 + minute * 60 + second) as f64)
 }
 
 fn arrangement_description(id: &str, registry_description: Option<String>) -> String {
@@ -538,30 +590,29 @@ mod tests {
     }
 
     #[test]
-    fn timeline_tracks_wrap_dense_dates_without_collisions() {
-        let positions = (0..19)
-            .rev()
-            .map(|index| {
-                (
-                    format!("node-{index:02}"),
-                    Point2D::new(index as f32 * 0.01, 0.0),
-                )
-            })
-            .collect();
-        let wrapped = wrap_timeline_tracks(positions);
-        let points = wrapped
+    fn timeline_uses_one_proportional_axis_with_collision_free_strips() {
+        let placed = place_timeline_strips(vec![
+            ("oldest".to_owned(), Point2D::new(0.0, 0.0)),
+            ("quarter".to_owned(), Point2D::new(25.0, 0.0)),
+            ("newest".to_owned(), Point2D::new(100.0, 0.0)),
+        ]);
+        let points = placed
             .iter()
             .map(|(_, point)| (point.x.round() as i32, point.y.round() as i32))
             .collect::<HashSet<_>>();
-        let bands = wrapped
-            .iter()
-            .map(|(_, point)| point.x.round() as i32)
-            .collect::<HashSet<_>>();
 
-        assert_eq!(wrapped.len(), 19);
-        assert_eq!(points.len(), 19);
-        assert_eq!(bands.len(), 4);
-        assert_eq!(wrapped.first().expect("first node").0, "node-00");
-        assert_eq!(wrapped.last().expect("last node").0, "node-18");
+        assert_eq!(points.len(), 3);
+        assert_eq!(placed[0].0, "oldest");
+        assert_eq!(placed[0].1.x, -310.0);
+        assert_eq!(placed[1].1.x, -155.0);
+        assert_eq!(placed[2].0, "newest");
+        assert_eq!(placed[2].1.x, 310.0);
+    }
+
+    #[test]
+    fn timestamp_coordinate_preserves_time_of_day_and_midnight_distance() {
+        let before = timestamp_coordinate("2026-07-30T23:59:59Z").expect("before midnight");
+        let after = timestamp_coordinate("2026-07-31T00:00:01Z").expect("after midnight");
+        assert_eq!(after - before, 2.0);
     }
 }
