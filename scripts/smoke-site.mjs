@@ -401,6 +401,16 @@ try {
         true,
         "arrangement selection did not move repository nodes",
       );
+      assert.equal(
+        await desktop
+          .locator("[data-repository-graph]")
+          .getAttribute("data-graph-node-form"),
+        "tile",
+      );
+      assert.match(
+        await desktop.locator("[data-graph-scene-caption]").textContent(),
+        /Index tiles/,
+      );
       assert.equal(await mere.getAttribute("aria-pressed"), "true");
       desktopState.arrangements = 7;
       desktopState.morphed_to = "graph_layout:grid";
@@ -455,17 +465,17 @@ try {
   assert.equal(mobileState.horizontal_overflow, 0);
   if (mobileState.state === "ready") {
     const arrangementPicker = mobile.locator("[data-graph-arrangement]");
-    const arrangementIds = [
-      "graph_layout:radial",
-      "graph_layout:grid",
-      "graph_layout:phyllotaxis",
-      "graph_layout:timeline",
-      "graph_layout:kanban",
-      "graph_layout:penrose",
-      "graph_layout:lsystem",
+    const arrangementScenes = [
+      ["graph_layout:radial", "medallion", "orbits"],
+      ["graph_layout:grid", "tile", "index"],
+      ["graph_layout:phyllotaxis", "seed", "field"],
+      ["graph_layout:timeline", "flag", "timeline"],
+      ["graph_layout:kanban", "card", "lanes"],
+      ["graph_layout:penrose", "facet", "tessellation"],
+      ["graph_layout:lsystem", "leaf", "branches"],
     ];
     const sceneReceipts = [];
-    for (const arrangementId of arrangementIds) {
+    for (const [arrangementId, nodeForm, scaffold] of arrangementScenes) {
       await arrangementPicker.selectOption(arrangementId);
       await mobile.waitForFunction(
         (expected) => {
@@ -480,7 +490,13 @@ try {
       const scene = await graphSceneState(mobile);
       assert.equal(scene.nodes, 19);
       assert.equal(scene.outside_stage, 0);
+      assert.equal(scene.outside_node_bounds, 0);
       assert.equal(scene.selected, "mere");
+      assert.equal(scene.node_form, nodeForm);
+      assert.equal(scene.scaffold, scaffold);
+      if (["orbits", "timeline", "lanes", "tessellation", "branches"].includes(scaffold)) {
+        assert.ok(scene.scaffold_items > 0, `${arrangementId} has no scene scaffold`);
+      }
       assert.ok(
         scene.minimum_distance >= 28,
         `${arrangementId} crowded repository nodes on mobile`,
@@ -657,7 +673,11 @@ async function graphSceneState(page) {
         y: Number.parseFloat(node.style.top),
       }),
     );
+    const nodeRects = [...document.querySelectorAll("[data-graph-node-id]")].map(
+      (node) => node.getBoundingClientRect(),
+    );
     let minimumDistance = Number.POSITIVE_INFINITY;
+    let overlappingNodes = 0;
     for (let index = 0; index < points.length; index += 1) {
       for (let other = index + 1; other < points.length; other += 1) {
         minimumDistance = Math.min(
@@ -667,18 +687,37 @@ async function graphSceneState(page) {
             points[index].y - points[other].y,
           ),
         );
+        const a = nodeRects[index];
+        const b = nodeRects[other];
+        if (
+          Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 &&
+          Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1
+        ) {
+          overlappingNodes += 1;
+        }
       }
     }
     return {
       arrangement: root.dataset.graphArrangement,
+      node_form: root.dataset.graphNodeForm,
+      scaffold: root.dataset.graphScaffold,
+      scaffold_items: document.querySelector("[data-graph-scene]").children.length,
       nodes: points.length,
       minimum_distance: Math.round(minimumDistance),
+      overlapping_nodes: overlappingNodes,
       outside_stage: points.filter(
         (point) =>
           point.x < 0 ||
           point.y < 0 ||
           point.x > stageRect.width ||
           point.y > stageRect.height,
+      ).length,
+      outside_node_bounds: nodeRects.filter(
+        (rect) =>
+          rect.left < stageRect.left ||
+          rect.top < stageRect.top ||
+          rect.right > stageRect.right ||
+          rect.bottom > stageRect.bottom,
       ).length,
       selected: document.querySelector(".repository-graph-node.is-selected")
         ?.dataset.graphNodeId,

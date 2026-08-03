@@ -6,6 +6,85 @@ const { default: initWasm, layout_graph: layoutGraph } = await import(
 class GraphUnavailable extends Error {}
 
 const MORPH_DURATION_MS = 640;
+const SCENE_PROFILES = new Map([
+  [
+    "graph_layout:radial",
+    {
+      form: "medallion",
+      scaffold: "orbits",
+      edgeOpacity: 1,
+      selectedEdgeOpacity: 1,
+      canvasNodes: true,
+      caption: "Constellation medallions · relationships remain fully drawn",
+    },
+  ],
+  [
+    "graph_layout:grid",
+    {
+      form: "tile",
+      scaffold: "index",
+      edgeOpacity: 0.14,
+      selectedEdgeOpacity: 0.72,
+      canvasNodes: false,
+      caption: "Index tiles · relationships surface around the selected repository",
+    },
+  ],
+  [
+    "graph_layout:phyllotaxis",
+    {
+      form: "seed",
+      scaffold: "field",
+      edgeOpacity: 0.34,
+      selectedEdgeOpacity: 0.86,
+      canvasNodes: false,
+      caption: "Seeds in a phyllotactic field · labels open on attention",
+    },
+  ],
+  [
+    "graph_layout:timeline",
+    {
+      form: "flag",
+      scaffold: "timeline",
+      edgeOpacity: 0.08,
+      selectedEdgeOpacity: 0.74,
+      canvasNodes: false,
+      caption: "Dated flags · rails group repositories by last public push",
+    },
+  ],
+  [
+    "graph_layout:kanban",
+    {
+      form: "card",
+      scaffold: "lanes",
+      edgeOpacity: 0.05,
+      selectedEdgeOpacity: 0.68,
+      canvasNodes: false,
+      caption: "Repository cards · lanes follow public project status",
+    },
+  ],
+  [
+    "graph_layout:penrose",
+    {
+      form: "facet",
+      scaffold: "tessellation",
+      edgeOpacity: 0.16,
+      selectedEdgeOpacity: 0.76,
+      canvasNodes: false,
+      caption: "Faceted repositories · the field reads as a tessellation",
+    },
+  ],
+  [
+    "graph_layout:lsystem",
+    {
+      form: "leaf",
+      scaffold: "branches",
+      edgeOpacity: 0.1,
+      selectedEdgeOpacity: 0.78,
+      canvasNodes: false,
+      caption: "Leaves on a generated path · semantic links remain available on focus",
+    },
+  ],
+]);
 const root = document.querySelector("[data-repository-graph]");
 
 if (root) {
@@ -102,6 +181,9 @@ function validateProjection(authority, layout) {
     throw new Error("repository graph has no default arrangement");
   }
   for (const arrangement of layout.arrangements) {
+    if (!SCENE_PROFILES.has(arrangement.id)) {
+      throw new Error(`repository arrangement ${arrangement.id} has no scene profile`);
+    }
     const arrangementNodes = arrangement.nodes.map(({ id }) => id).sort();
     if (JSON.stringify(authorityNodes) !== JSON.stringify(arrangementNodes)) {
       throw new Error(`repository arrangement ${arrangement.id} lost nodes`);
@@ -180,6 +262,13 @@ class RepositoryGraphRenderer {
       layout.arrangements.map((arrangement) => [arrangement.id, arrangement]),
     );
     this.currentArrangement = layout.default_arrangement;
+    this.sceneProfile = SCENE_PROFILES.get(this.currentArrangement);
+    this.sceneLayer = document.createElement("div");
+    this.sceneLayer.className = "repository-graph-scene";
+    this.sceneLayer.dataset.graphScene = "";
+    this.sceneLayer.setAttribute("aria-hidden", "true");
+    this.stage.prepend(this.sceneLayer);
+    this.scaffoldItems = [];
     this.positions = new Map(
       this.arrangements
         .get(this.currentArrangement)
@@ -205,6 +294,7 @@ class RepositoryGraphRenderer {
       alphaMode: "premultiplied",
     });
     this.installNodeButtons();
+    this.applySceneProfile(this.currentArrangement);
     this.installPointerControls();
     this.resizeObserver = new ResizeObserver(() => {
       if (!this.userAdjusted) {
@@ -224,6 +314,179 @@ class RepositoryGraphRenderer {
         "The WebGPU device was lost. The complete repository index remains available below.",
       );
     });
+  }
+
+  applySceneProfile(arrangementId) {
+    const profile = SCENE_PROFILES.get(arrangementId);
+    if (!profile) {
+      throw new Error(`repository arrangement ${arrangementId} has no scene profile`);
+    }
+    this.sceneProfile = profile;
+    this.graphRoot.dataset.graphNodeForm = profile.form;
+    this.graphRoot.dataset.graphScaffold = profile.scaffold;
+    this.sceneLayer.dataset.graphScene = profile.scaffold;
+    const caption = this.graphRoot.querySelector("[data-graph-scene-caption]");
+    if (caption) {
+      caption.textContent = profile.caption;
+    }
+    this.rebuildSceneScaffold();
+  }
+
+  rebuildSceneScaffold() {
+    this.sceneLayer.replaceChildren();
+    this.scaffoldItems = [];
+    const scaffold = this.sceneProfile.scaffold;
+    if (scaffold === "orbits") {
+      for (const scale of [0.38, 0.68, 1]) {
+        const element = sceneElement("repository-graph-orbit");
+        this.sceneLayer.append(element);
+        this.scaffoldItems.push({ element, scale });
+      }
+      return;
+    }
+    if (scaffold === "timeline") {
+      const dates = new Map();
+      for (const node of this.layout.nodes) {
+        const date = node.pushed_at.slice(0, 10);
+        if (!dates.has(date)) dates.set(date, []);
+        dates.get(date).push(node.id);
+      }
+      for (const [date, nodeIds] of [...dates].sort(([a], [b]) => a.localeCompare(b))) {
+        const label = sceneElement("repository-graph-scene-label", formatGraphDate(date));
+        const element = sceneElement("repository-graph-timeline-rail");
+        element.append(label);
+        this.sceneLayer.append(element);
+        this.scaffoldItems.push({ element, label, nodeIds });
+      }
+      return;
+    }
+    if (scaffold === "lanes") {
+      const statuses = new Map();
+      for (const node of this.layout.nodes) {
+        if (!statuses.has(node.status)) statuses.set(node.status, []);
+        statuses.get(node.status).push(node.id);
+      }
+      for (const [status, nodeIds] of statuses) {
+        const label = sceneElement("repository-graph-scene-label", humanize(status));
+        const element = sceneElement("repository-graph-kanban-lane");
+        element.dataset.status = status;
+        element.append(label);
+        this.sceneLayer.append(element);
+        this.scaffoldItems.push({ element, nodeIds });
+      }
+      return;
+    }
+    if (scaffold === "tessellation") {
+      for (const node of this.layout.nodes) {
+        const element = sceneElement("repository-graph-facet-cell");
+        this.sceneLayer.append(element);
+        this.scaffoldItems.push({ element, nodeId: node.id });
+      }
+      return;
+    }
+    if (scaffold === "branches") {
+      for (let index = 1; index < this.layout.nodes.length; index += 1) {
+        const element = sceneElement("repository-graph-branch");
+        this.sceneLayer.append(element);
+        this.scaffoldItems.push({
+          element,
+          sourceId: this.layout.nodes[index - 1].id,
+          targetId: this.layout.nodes[index].id,
+        });
+      }
+    }
+  }
+
+  updateSceneScaffold() {
+    const scaffold = this.sceneProfile.scaffold;
+    const nodeById = new Map(this.layout.nodes.map((node) => [node.id, node]));
+    const screenFor = (id) => {
+      const node = nodeById.get(id);
+      return node ? this.screenPosition(node) : null;
+    };
+    if (scaffold === "orbits") {
+      const center = screenFor(this.layout.focus);
+      if (!center) return;
+      const radius = Math.max(
+        ...this.layout.nodes.map((node) => {
+          const point = this.screenPosition(node);
+          return Math.hypot(point.x - center.x, point.y - center.y);
+        }),
+        1,
+      );
+      for (const item of this.scaffoldItems) {
+        const diameter = radius * item.scale * 2;
+        positionBox(item.element, {
+          left: center.x - diameter * 0.5,
+          top: center.y - diameter * 0.5,
+          width: diameter,
+          height: diameter,
+        });
+      }
+      return;
+    }
+    if (scaffold === "timeline") {
+      const vertical = this.stage.clientWidth >= 480;
+      this.sceneLayer.dataset.orientation = vertical ? "vertical" : "horizontal";
+      for (const item of this.scaffoldItems) {
+        const points = item.nodeIds.map(screenFor).filter(Boolean);
+        const xs = points.map(({ x }) => x);
+        const ys = points.map(({ y }) => y);
+        if (vertical) {
+          const x = average(xs);
+          const top = Math.max(Math.min(...ys) - 36, 24);
+          positionBox(item.element, {
+            left: x,
+            top,
+            width: 1,
+            height: Math.max(...ys) + 36 - top,
+          });
+        } else {
+          const y = average(ys);
+          const left = Math.max(Math.min(...xs) - 30, 12);
+          positionBox(item.element, {
+            left,
+            top: y,
+            width: Math.max(...xs) + 30 - left,
+            height: 1,
+          });
+        }
+      }
+      return;
+    }
+    if (scaffold === "lanes") {
+      for (const item of this.scaffoldItems) {
+        const points = item.nodeIds.map(screenFor).filter(Boolean);
+        const xs = points.map(({ x }) => x);
+        const ys = points.map(({ y }) => y);
+        const horizontal = this.stage.clientWidth < 480;
+        const paddingX = horizontal ? 22 : 58;
+        const paddingY = horizontal ? 34 : 48;
+        positionBox(item.element, {
+          left: Math.min(...xs) - paddingX,
+          top: Math.min(...ys) - paddingY,
+          width: Math.max(...xs) - Math.min(...xs) + paddingX * 2,
+          height: Math.max(...ys) - Math.min(...ys) + paddingY * 2,
+        });
+      }
+      return;
+    }
+    if (scaffold === "tessellation") {
+      for (const item of this.scaffoldItems) {
+        const point = screenFor(item.nodeId);
+        if (!point) continue;
+        item.element.style.left = `${point.x}px`;
+        item.element.style.top = `${point.y}px`;
+      }
+      return;
+    }
+    if (scaffold === "branches") {
+      for (const item of this.scaffoldItems) {
+        const source = screenFor(item.sourceId);
+        const target = screenFor(item.targetId);
+        if (source && target) positionLine(item.element, source, target);
+      }
+    }
   }
 
   createEdgePipeline() {
@@ -374,8 +637,10 @@ class RepositoryGraphRenderer {
       button.setAttribute("aria-label", `${node.name}, ${node.class}, ${node.status}`);
       button.setAttribute("aria-pressed", "false");
       button.innerHTML = `
-        <span class="repository-graph-node-mark" aria-hidden="true">${escapeMarkup(shortName(node.name))}</span>
+        <span class="repository-graph-node-mark" aria-hidden="true"><span class="repository-graph-node-initial">${escapeMarkup(shortName(node.name))}</span></span>
         <span class="repository-graph-node-label" aria-hidden="true">${escapeMarkup(node.name)}</span>
+        <span class="repository-graph-node-meta repository-graph-node-date" aria-hidden="true">${escapeMarkup(formatGraphDate(node.pushed_at.slice(0, 10)))}</span>
+        <span class="repository-graph-node-meta repository-graph-node-status" aria-hidden="true">${escapeMarkup(humanize(node.status))}</span>
       `;
       button.addEventListener("click", () => this.select(node.id));
       button.addEventListener("dblclick", () => this.open(node.id));
@@ -504,6 +769,7 @@ class RepositoryGraphRenderer {
     this.currentArrangement = arrangementId;
     this.graphRoot.dataset.graphArrangement = arrangementId;
     this.graphRoot.dataset.graphEngine = arrangement.engine;
+    this.applySceneProfile(arrangementId);
 
     if (this.reducedMotion) {
       this.positions = target;
@@ -662,7 +928,11 @@ class RepositoryGraphRenderer {
       if (!source || !target) {
         continue;
       }
-      const color = edgeColor(edge);
+      const connected = edge.source === this.selectedId || edge.target === this.selectedId;
+      const opacity = connected
+        ? this.sceneProfile.selectedEdgeOpacity
+        : this.sceneProfile.edgeOpacity;
+      const color = edgeColor(edge, opacity);
       const sourceClip = toClip(this.screenPosition(source));
       const targetClip = toClip(this.screenPosition(target));
       edgeVertices.push(sourceClip.x, sourceClip.y, ...color);
@@ -672,28 +942,31 @@ class RepositoryGraphRenderer {
     const nodeVertices = [];
     for (const node of this.layout.nodes) {
       const screen = this.screenPosition(node);
-      const selected = node.id === this.selectedId;
-      const radius = selected ? 14 : 10;
-      const color = nodeColor(node.class, selected);
-      const corners = [
-        [-1, -1],
-        [1, -1],
-        [1, 1],
-        [-1, -1],
-        [1, 1],
-        [-1, 1],
-      ];
-      for (const [localX, localY] of corners) {
-        const clip = toClip({
-          x: screen.x + localX * radius,
-          y: screen.y + localY * radius,
-        });
-        nodeVertices.push(clip.x, clip.y, localX, localY, ...color);
+      if (this.sceneProfile.canvasNodes) {
+        const selected = node.id === this.selectedId;
+        const radius = selected ? 14 : 10;
+        const color = nodeColor(node.class, selected);
+        const corners = [
+          [-1, -1],
+          [1, -1],
+          [1, 1],
+          [-1, -1],
+          [1, 1],
+          [-1, 1],
+        ];
+        for (const [localX, localY] of corners) {
+          const clip = toClip({
+            x: screen.x + localX * radius,
+            y: screen.y + localY * radius,
+          });
+          nodeVertices.push(clip.x, clip.y, localX, localY, ...color);
+        }
       }
       const button = this.nodeButtons.get(node.id);
       button.style.left = `${screen.x}px`;
       button.style.top = `${screen.y}px`;
     }
+    this.updateSceneScaffold();
 
     this.edgeBuffer?.destroy();
     this.nodeBuffer?.destroy();
@@ -795,11 +1068,11 @@ function createVertexBuffer(device, data, label) {
   return buffer;
 }
 
-function edgeColor(edge) {
-  if (edge.kind === "host_for") return [0.55, 0.1, 0.08, 0.82];
-  if (edge.kind === "renders_with") return [0.76, 0.44, 0.12, 0.82];
-  if (edge.provenance === "curated") return [0.7, 0.42, 0.13, 0.78];
-  return [0.22, 0.4, 0.5, 0.52];
+function edgeColor(edge, opacity = 1) {
+  if (edge.kind === "host_for") return [0.55, 0.1, 0.08, 0.82 * opacity];
+  if (edge.kind === "renders_with") return [0.76, 0.44, 0.12, 0.82 * opacity];
+  if (edge.provenance === "curated") return [0.7, 0.42, 0.13, 0.78 * opacity];
+  return [0.22, 0.4, 0.5, 0.52 * opacity];
 }
 
 function nodeColor(repositoryClass, selected) {
@@ -837,6 +1110,48 @@ function escapeMarkup(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function sceneElement(className, text = "") {
+  const element = document.createElement("div");
+  element.className = className;
+  element.textContent = text;
+  return element;
+}
+
+function positionBox(element, { left, top, width, height }) {
+  element.style.left = `${left}px`;
+  element.style.top = `${top}px`;
+  element.style.width = `${Math.max(width, 1)}px`;
+  element.style.height = `${Math.max(height, 1)}px`;
+}
+
+function positionLine(element, source, target) {
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  element.style.left = `${source.x}px`;
+  element.style.top = `${source.y}px`;
+  element.style.width = `${Math.hypot(dx, dy)}px`;
+  element.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+}
+
+function average(values) {
+  return values.reduce((sum, value) => sum + value, 0) / Math.max(values.length, 1);
+}
+
+function humanize(value) {
+  return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatGraphDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 function prefersReducedMotion() {

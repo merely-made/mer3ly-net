@@ -220,6 +220,17 @@ fn graph_toolbar() -> SiteView {
                 ],
             ),
             element(
+                "p",
+                &[
+                    ("class", "repository-graph-scene-caption"),
+                    ("data-graph-scene-caption", ""),
+                    ("aria-live", "polite"),
+                ],
+                vec![txt(
+                    "Constellation medallions · relationships remain fully drawn",
+                )],
+            ),
+            element(
                 "div",
                 &[
                     ("class", "repository-graph-control-group"),

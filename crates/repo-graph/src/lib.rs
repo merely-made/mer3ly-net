@@ -70,6 +70,7 @@ struct GraphNodeLayout {
     name: String,
     class: String,
     status: String,
+    pushed_at: String,
     x: f32,
     y: f32,
 }
@@ -175,6 +176,7 @@ fn layout_graph_json(input: &str) -> Result<String, String> {
                 name: node.name.clone(),
                 class: node.class.clone(),
                 status: node.status.clone(),
+                pushed_at: node.pushed_at.clone(),
                 x: position.x,
                 y: position.y,
             })
@@ -448,6 +450,7 @@ mod tests {
             1
         );
         assert_eq!(value["nodes"][0]["id"], "mere");
+        assert_eq!(value["nodes"][0]["pushed_at"], "2026-07-30T05:44:23Z");
         assert_eq!(value["edges"][1]["id"], "turnstone-hosts-mere");
         for arrangement in value["arrangements"].as_array().expect("arrangements") {
             assert_eq!(

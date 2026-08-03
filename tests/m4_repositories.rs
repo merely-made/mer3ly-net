@@ -62,6 +62,8 @@ fn repository_page_is_static_semantic_and_filterable() {
     assert!(document.contains("provenance-derived"));
     assert!(document.contains("provenance-curated"));
     assert!(document.contains("<script type=\"module\" src=\"/repo-graph.js?v="));
+    assert!(document.contains("data-graph-scene-caption=\"\""));
+    assert!(document.contains("Constellation medallions"));
     assert!(document.contains("href=\"mailto:markik@mer3ly.net\""));
     assert!(document.contains(">Merely organization profile</a></h2>"));
     assert!(document.contains("data-project-href=\"/projects/mere/\""));
