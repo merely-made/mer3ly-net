@@ -369,7 +369,7 @@ try {
     const mere = desktop.locator('[data-graph-node-id="mere"]');
     assert.equal(await mere.getAttribute("aria-label"), "Mere, platform, active");
     try {
-      const arrangementPicker = desktop.locator("[data-graph-arrangement]");
+      const arrangementPicker = desktop.locator("select[data-graph-arrangement]");
       assert.equal(await arrangementPicker.locator("option").count(), 8);
       assert.equal(
         await arrangementPicker.locator("option:not(:disabled)").count(),
@@ -464,7 +464,7 @@ try {
   assert.equal(mobileState.repositories, 19);
   assert.equal(mobileState.horizontal_overflow, 0);
   if (mobileState.state === "ready") {
-    const arrangementPicker = mobile.locator("[data-graph-arrangement]");
+    const arrangementPicker = mobile.locator("select[data-graph-arrangement]");
     const arrangementScenes = [
       ["graph_layout:radial", "medallion", "orbits"],
       ["graph_layout:grid", "tile", "index"],
@@ -545,7 +545,7 @@ try {
       "true",
     );
     await reduced
-      .locator("[data-graph-arrangement]")
+      .locator("select[data-graph-arrangement]")
       .selectOption("graph_layout:penrose");
     assert.equal(
       await reduced
