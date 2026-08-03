@@ -130,6 +130,7 @@ fn graph_runtime_covers_interaction_and_failure_contracts() {
         "visibilitychange",
         "requestAnimationFrame",
         "MORPH_DURATION_MS",
+        "TIMELINE_TRACK_SIZE",
         "SCENE_PROFILES",
         "dataset.graphArrangement",
         "dataset.graphMorphing",

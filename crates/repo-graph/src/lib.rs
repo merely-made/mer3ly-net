@@ -12,6 +12,9 @@ use wasm_bindgen::prelude::*;
 
 const FOCUS_REPOSITORY: &str = "mere";
 const DEFAULT_ARRANGEMENT: &str = "graph_layout:radial";
+const TIMELINE_TRACK_SIZE: usize = 5;
+const TIMELINE_BAND_GAP: f32 = 210.0;
+const TIMELINE_LANE_GAP: f32 = 85.0;
 const ARRANGEMENT_ORDER: &[&str] = &[
     "graph_layout:radial",
     "graph_layout:grid",
@@ -284,7 +287,33 @@ fn arrangement_positions(
             (node.id.clone(), point)
         })
         .collect::<Vec<_>>();
+    let raw_positions = if arrangement_id == "graph_layout:timeline" {
+        wrap_timeline_tracks(raw_positions)
+    } else {
+        raw_positions
+    };
     normalize_positions(arrangement_id, raw_positions)
+}
+
+fn wrap_timeline_tracks(mut positions: Vec<(String, Point2D<f32>)>) -> Vec<(String, Point2D<f32>)> {
+    positions.sort_by(|(left_id, left), (right_id, right)| {
+        left.x
+            .total_cmp(&right.x)
+            .then_with(|| left.y.total_cmp(&right.y))
+            .then_with(|| left_id.cmp(right_id))
+    });
+    positions
+        .into_iter()
+        .enumerate()
+        .map(|(index, (id, _))| {
+            let band = (index / TIMELINE_TRACK_SIZE) as f32;
+            let lane = (index % TIMELINE_TRACK_SIZE) as f32;
+            (
+                id,
+                Point2D::new(band * TIMELINE_BAND_GAP, lane * TIMELINE_LANE_GAP),
+            )
+        })
+        .collect()
 }
 
 fn normalize_positions(
@@ -506,5 +535,33 @@ mod tests {
                 "graph_layout:timeline",
             ]
         );
+    }
+
+    #[test]
+    fn timeline_tracks_wrap_dense_dates_without_collisions() {
+        let positions = (0..19)
+            .rev()
+            .map(|index| {
+                (
+                    format!("node-{index:02}"),
+                    Point2D::new(index as f32 * 0.01, 0.0),
+                )
+            })
+            .collect();
+        let wrapped = wrap_timeline_tracks(positions);
+        let points = wrapped
+            .iter()
+            .map(|(_, point)| (point.x.round() as i32, point.y.round() as i32))
+            .collect::<HashSet<_>>();
+        let bands = wrapped
+            .iter()
+            .map(|(_, point)| point.x.round() as i32)
+            .collect::<HashSet<_>>();
+
+        assert_eq!(wrapped.len(), 19);
+        assert_eq!(points.len(), 19);
+        assert_eq!(bands.len(), 4);
+        assert_eq!(wrapped.first().expect("first node").0, "node-00");
+        assert_eq!(wrapped.last().expect("last node").0, "node-18");
     }
 }

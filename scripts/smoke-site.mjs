@@ -502,6 +502,7 @@ try {
         `${arrangementId} crowded repository nodes on mobile`,
       );
       if (arrangementId === "graph_layout:timeline") {
+        assert.equal(scene.scaffold_items, 4, "timeline track count changed");
         assert.ok(scene.minimum_hit_width >= 34, "timeline targets are too narrow");
         assert.ok(scene.minimum_hit_height >= 44, "timeline targets are too short");
         assert.equal(scene.overlapping_nodes, 0, "timeline targets overlap");

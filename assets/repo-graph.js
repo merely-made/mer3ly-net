@@ -6,6 +6,7 @@ const { default: initWasm, layout_graph: layoutGraph } = await import(
 class GraphUnavailable extends Error {}
 
 const MORPH_DURATION_MS = 640;
+const TIMELINE_TRACK_SIZE = 5;
 const SCENE_PROFILES = new Map([
   [
     "graph_layout:radial",
@@ -48,7 +49,7 @@ const SCENE_PROFILES = new Map([
       edgeOpacity: 0.08,
       selectedEdgeOpacity: 0.74,
       canvasNodes: false,
-      caption: "Dated flags · rails group repositories by last public push",
+      caption: "Dated flags · chronological rails keep recent work from stacking",
     },
   ],
   [
@@ -345,18 +346,26 @@ class RepositoryGraphRenderer {
       return;
     }
     if (scaffold === "timeline") {
-      const dates = new Map();
-      for (const node of this.layout.nodes) {
-        const date = node.pushed_at.slice(0, 10);
-        if (!dates.has(date)) dates.set(date, []);
-        dates.get(date).push(node.id);
-      }
-      for (const [date, nodeIds] of [...dates].sort(([a], [b]) => a.localeCompare(b))) {
-        const label = sceneElement("repository-graph-scene-label", formatGraphDate(date));
+      const datedNodes = [...this.layout.nodes].sort(
+        (left, right) =>
+          left.pushed_at.localeCompare(right.pushed_at) || left.id.localeCompare(right.id),
+      );
+      for (let index = 0; index < datedNodes.length; index += TIMELINE_TRACK_SIZE) {
+        const nodes = datedNodes.slice(index, index + TIMELINE_TRACK_SIZE);
+        const firstDate = nodes[0].pushed_at.slice(0, 10);
+        const lastDate = nodes.at(-1).pushed_at.slice(0, 10);
+        const label = sceneElement(
+          "repository-graph-scene-label",
+          formatGraphDateRange(firstDate, lastDate),
+        );
         const element = sceneElement("repository-graph-timeline-rail");
         element.append(label);
         this.sceneLayer.append(element);
-        this.scaffoldItems.push({ element, label, nodeIds });
+        this.scaffoldItems.push({
+          element,
+          label,
+          nodeIds: nodes.map(({ id }) => id),
+        });
       }
       return;
     }
@@ -1152,6 +1161,16 @@ function formatGraphDate(value) {
     day: "numeric",
     timeZone: "UTC",
   });
+}
+
+function formatGraphDateRange(first, last) {
+  if (first === last) return formatGraphDate(first);
+  const firstYear = first.slice(0, 4);
+  const lastYear = last.slice(0, 4);
+  if (firstYear === lastYear) {
+    return `${formatGraphDate(first)}–${formatGraphDate(last)} ${lastYear}`;
+  }
+  return `${formatGraphDate(first)} ${firstYear}–${formatGraphDate(last)} ${lastYear}`;
 }
 
 function prefersReducedMotion() {
