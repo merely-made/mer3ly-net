@@ -768,6 +768,7 @@ h1 {
   color: var(--ink);
   cursor: pointer;
   pointer-events: auto;
+  touch-action: manipulation;
   font: 500 0.55rem/1.2 var(--font-mono);
   transition:
     width 360ms ease,
@@ -907,6 +908,8 @@ h1 {
 
 [data-graph-node-form="flag"] .repository-graph-node {
   min-width: 104px;
+  min-height: 46px;
+  padding: 4px 6px;
   grid-template-columns: 13px minmax(0, 1fr);
   grid-template-rows: auto auto;
   justify-items: start;
@@ -2321,7 +2324,11 @@ tbody tr:last-child td {
   }
 
   [data-graph-node-form="flag"] .repository-graph-node {
-    min-width: 24px;
+    width: 34px;
+    min-width: 34px;
+    min-height: 44px;
+    padding: 7px 11px;
+    box-sizing: border-box;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     justify-items: center;

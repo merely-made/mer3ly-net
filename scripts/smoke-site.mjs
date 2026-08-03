@@ -501,6 +501,19 @@ try {
         scene.minimum_distance >= 28,
         `${arrangementId} crowded repository nodes on mobile`,
       );
+      if (arrangementId === "graph_layout:timeline") {
+        assert.ok(scene.minimum_hit_width >= 34, "timeline targets are too narrow");
+        assert.ok(scene.minimum_hit_height >= 44, "timeline targets are too short");
+        assert.equal(scene.overlapping_nodes, 0, "timeline targets overlap");
+
+        const genet = mobile.locator('[data-graph-node-id="genet"]');
+        await genet.click({ position: { x: 2, y: 2 } });
+        await expectSelectedNode(mobile, "genet");
+
+        const mere = mobile.locator('[data-graph-node-id="mere"]');
+        await mere.click({ position: { x: 2, y: 2 } });
+        await expectSelectedNode(mobile, "mere");
+      }
       sceneReceipts.push(scene);
     }
     mobileState.arrangements = sceneReceipts;
@@ -653,6 +666,15 @@ async function graphState(page) {
   });
 }
 
+async function expectSelectedNode(page, expectedId) {
+  await page.waitForFunction(
+    (id) =>
+      document.querySelector(".repository-graph-node.is-selected")?.dataset
+        .graphNodeId === id,
+    expectedId,
+  );
+}
+
 async function graphNodePositions(page) {
   return page.locator("[data-graph-node-id]").evaluateAll((nodes) =>
     nodes.map((node) => ({
@@ -704,6 +726,12 @@ async function graphSceneState(page) {
       scaffold_items: document.querySelector("[data-graph-scene]").children.length,
       nodes: points.length,
       minimum_distance: Math.round(minimumDistance),
+      minimum_hit_width: Math.round(
+        Math.min(...nodeRects.map((rect) => rect.width)),
+      ),
+      minimum_hit_height: Math.round(
+        Math.min(...nodeRects.map((rect) => rect.height)),
+      ),
       overlapping_nodes: overlappingNodes,
       outside_stage: points.filter(
         (point) =>
