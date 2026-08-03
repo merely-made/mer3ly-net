@@ -369,6 +369,41 @@ try {
     const mere = desktop.locator('[data-graph-node-id="mere"]');
     assert.equal(await mere.getAttribute("aria-label"), "Mere, platform, active");
     try {
+      const arrangementPicker = desktop.locator("[data-graph-arrangement]");
+      assert.equal(await arrangementPicker.locator("option").count(), 8);
+      assert.equal(
+        await arrangementPicker.locator("option:not(:disabled)").count(),
+        7,
+      );
+      await desktop.waitForFunction(() =>
+        [...document.querySelectorAll("[data-graph-node-id]")].every(
+          (node) => node.style.left && node.style.top,
+        ),
+      );
+      const beforeArrangement = await graphNodePositions(desktop);
+      await arrangementPicker.selectOption("graph_layout:grid");
+      await desktop.waitForFunction(
+        () =>
+          document.querySelector("[data-repository-graph]").dataset
+            .graphMorphing === "false" &&
+          document.querySelector("[data-repository-graph]").dataset
+            .graphArrangement === "graph_layout:grid",
+      );
+      const afterArrangement = await graphNodePositions(desktop);
+      assert.equal(
+        beforeArrangement.some(
+          (before, index) =>
+            Math.hypot(
+              before.x - afterArrangement[index].x,
+              before.y - afterArrangement[index].y,
+            ) > 8,
+        ),
+        true,
+        "arrangement selection did not move repository nodes",
+      );
+      assert.equal(await mere.getAttribute("aria-pressed"), "true");
+      desktopState.arrangements = 7;
+      desktopState.morphed_to = "graph_layout:grid";
       await mere.click({ timeout: 2000 });
       await mere.press("ArrowRight", { timeout: 2000 });
       const selectedNode = desktop.locator(
@@ -418,6 +453,42 @@ try {
   const mobileState = await graphState(mobile);
   assert.equal(mobileState.repositories, 19);
   assert.equal(mobileState.horizontal_overflow, 0);
+  if (mobileState.state === "ready") {
+    const arrangementPicker = mobile.locator("[data-graph-arrangement]");
+    const arrangementIds = [
+      "graph_layout:radial",
+      "graph_layout:grid",
+      "graph_layout:phyllotaxis",
+      "graph_layout:timeline",
+      "graph_layout:kanban",
+      "graph_layout:penrose",
+      "graph_layout:lsystem",
+    ];
+    const sceneReceipts = [];
+    for (const arrangementId of arrangementIds) {
+      await arrangementPicker.selectOption(arrangementId);
+      await mobile.waitForFunction(
+        (expected) => {
+          const root = document.querySelector("[data-repository-graph]");
+          return (
+            root.dataset.graphArrangement === expected &&
+            root.dataset.graphMorphing === "false"
+          );
+        },
+        arrangementId,
+      );
+      const scene = await graphSceneState(mobile);
+      assert.equal(scene.nodes, 19);
+      assert.equal(scene.outside_stage, 0);
+      assert.equal(scene.selected, "mere");
+      assert.ok(
+        scene.minimum_distance >= 28,
+        `${arrangementId} crowded repository nodes on mobile`,
+      );
+      sceneReceipts.push(scene);
+    }
+    mobileState.arrangements = sceneReceipts;
+  }
   assert.deepEqual(mobileDiagnostics, [], "mobile emitted browser errors");
   await mobile.locator("[data-repository-graph]").screenshot({
     path: path.join(receiptRoot, "mobile-repository-graph.png"),
@@ -443,6 +514,21 @@ try {
         .locator("[data-repository-graph]")
         .getAttribute("data-reduced-motion"),
       "true",
+    );
+    await reduced
+      .locator("[data-graph-arrangement]")
+      .selectOption("graph_layout:penrose");
+    assert.equal(
+      await reduced
+        .locator("[data-repository-graph]")
+        .getAttribute("data-graph-morphing"),
+      "false",
+    );
+    assert.equal(
+      await reduced
+        .locator("[data-repository-graph]")
+        .getAttribute("data-graph-arrangement"),
+      "graph_layout:penrose",
     );
   }
   assert.equal(reducedState.horizontal_overflow, 0);
@@ -547,6 +633,55 @@ async function graphState(page) {
       horizontal_overflow:
         document.documentElement.scrollWidth -
         document.documentElement.clientWidth,
+    };
+  });
+}
+
+async function graphNodePositions(page) {
+  return page.locator("[data-graph-node-id]").evaluateAll((nodes) =>
+    nodes.map((node) => ({
+      x: Number.parseFloat(node.style.left),
+      y: Number.parseFloat(node.style.top),
+    })),
+  );
+}
+
+async function graphSceneState(page) {
+  return page.evaluate(() => {
+    const root = document.querySelector("[data-repository-graph]");
+    const stage = document.querySelector("[data-graph-stage]");
+    const stageRect = stage.getBoundingClientRect();
+    const points = [...document.querySelectorAll("[data-graph-node-id]")].map(
+      (node) => ({
+        x: Number.parseFloat(node.style.left),
+        y: Number.parseFloat(node.style.top),
+      }),
+    );
+    let minimumDistance = Number.POSITIVE_INFINITY;
+    for (let index = 0; index < points.length; index += 1) {
+      for (let other = index + 1; other < points.length; other += 1) {
+        minimumDistance = Math.min(
+          minimumDistance,
+          Math.hypot(
+            points[index].x - points[other].x,
+            points[index].y - points[other].y,
+          ),
+        );
+      }
+    }
+    return {
+      arrangement: root.dataset.graphArrangement,
+      nodes: points.length,
+      minimum_distance: Math.round(minimumDistance),
+      outside_stage: points.filter(
+        (point) =>
+          point.x < 0 ||
+          point.y < 0 ||
+          point.x > stageRect.width ||
+          point.y > stageRect.height,
+      ).length,
+      selected: document.querySelector(".repository-graph-node.is-selected")
+        ?.dataset.graphNodeId,
     };
   });
 }

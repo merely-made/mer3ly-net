@@ -544,6 +544,33 @@ h1 {
   gap: 4px;
 }
 
+.repository-graph-arrangement-picker {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--faint);
+  font: 500 0.58rem/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-graph-arrangement-picker select {
+  min-height: 34px;
+  padding: 7px 30px 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--cream);
+  color: var(--oxblood);
+  cursor: pointer;
+  font: 500 0.64rem/1 var(--font-mono);
+}
+
+.repository-graph-arrangement-picker select:focus-visible {
+  outline: 3px solid var(--ember);
+  outline-offset: 2px;
+}
+
 .repository-graph-control {
   min-width: 36px;
   min-height: 34px;
@@ -1922,6 +1949,15 @@ tbody tr:last-child td {
 
   .repository-graph-control-group {
     flex: 1 1 auto;
+  }
+
+  .repository-graph-arrangement-picker {
+    width: 100%;
+  }
+
+  .repository-graph-arrangement-picker select {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .repository-graph-control {

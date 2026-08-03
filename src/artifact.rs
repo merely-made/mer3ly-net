@@ -214,7 +214,7 @@ pub fn validate_public_artifact(
     validate_static_authority(&repository_ids, &relation_ids, authority, &mut errors);
     let repository_count = repository_ids.len();
     let relation_text_projections = relation_ids.len();
-    if !repositories.contains("<script type=\"module\" src=\"/repo-graph.js\"></script>") {
+    if !repositories.contains("<script type=\"module\" src=\"/repo-graph.js?v=") {
         errors.push("repository page is missing the optional graph module".to_owned());
     }
 

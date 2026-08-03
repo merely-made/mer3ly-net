@@ -1,7 +1,11 @@
-import initWasm, { layout_graph as layoutGraph } from "./mer3ly_repo_graph.js";
+const runtimeVersion = new URL(import.meta.url).search;
+const { default: initWasm, layout_graph: layoutGraph } = await import(
+  `./mer3ly_repo_graph.js${runtimeVersion}`
+);
 
 class GraphUnavailable extends Error {}
 
+const MORPH_DURATION_MS = 640;
 const root = document.querySelector("[data-repository-graph]");
 
 if (root) {
@@ -42,7 +46,12 @@ async function startRepositoryGraph(graphRoot) {
       "WebAssembly is unavailable in this browser. The complete repository index remains available below.",
     );
   }
-  await initWasm();
+  await initWasm({
+    module_or_path: new URL(
+      `./mer3ly_repo_graph_bg.wasm${runtimeVersion}`,
+      import.meta.url,
+    ),
+  });
   const layout = JSON.parse(layoutGraph(JSON.stringify(authority)));
   validateProjection(authority, layout);
 
@@ -69,7 +78,7 @@ async function startRepositoryGraph(graphRoot) {
 function validateProjection(authority, layout) {
   if (
     authority.schema !== "mer3ly.repo-graph/v1" ||
-    layout.schema !== "mer3ly.repo-graph-layout/v1"
+    layout.schema !== "mer3ly.repo-graph-layout/v2"
   ) {
     throw new Error("repository graph schema mismatch");
   }
@@ -85,6 +94,25 @@ function validateProjection(authority, layout) {
     JSON.stringify(authorityEdges) !== JSON.stringify(layoutEdges)
   ) {
     throw new Error("repository graph projection lost authority records");
+  }
+  if (
+    !Array.isArray(layout.arrangements) ||
+    !layout.arrangements.some(({ id }) => id === layout.default_arrangement)
+  ) {
+    throw new Error("repository graph has no default arrangement");
+  }
+  for (const arrangement of layout.arrangements) {
+    const arrangementNodes = arrangement.nodes.map(({ id }) => id).sort();
+    if (JSON.stringify(authorityNodes) !== JSON.stringify(arrangementNodes)) {
+      throw new Error(`repository arrangement ${arrangement.id} lost nodes`);
+    }
+    if (
+      arrangement.nodes.some(
+        ({ x, y }) => !Number.isFinite(x) || !Number.isFinite(y),
+      )
+    ) {
+      throw new Error(`repository arrangement ${arrangement.id} has invalid positions`);
+    }
   }
 }
 
@@ -148,6 +176,17 @@ class RepositoryGraphRenderer {
     this.device = device;
     this.context = context;
     this.layout = layout;
+    this.arrangements = new Map(
+      layout.arrangements.map((arrangement) => [arrangement.id, arrangement]),
+    );
+    this.currentArrangement = layout.default_arrangement;
+    this.positions = new Map(
+      this.arrangements
+        .get(this.currentArrangement)
+        .nodes.map(({ id, x, y }) => [id, { x, y }]),
+    );
+    this.morph = null;
+    this.reducedMotion = prefersReducedMotion();
     this.format = navigator.gpu.getPreferredCanvasFormat();
     this.scale = 1;
     this.panX = 0;
@@ -451,6 +490,77 @@ class RepositoryGraphRenderer {
     }
   }
 
+  morphTo(arrangementId) {
+    const arrangement = this.arrangements.get(arrangementId);
+    if (!arrangement || arrangementId === this.currentArrangement) {
+      return;
+    }
+    if (this.morph) {
+      this.advanceMorph(performance.now());
+    }
+    const target = new Map(
+      arrangement.nodes.map(({ id, x, y }) => [id, { x, y }]),
+    );
+    this.currentArrangement = arrangementId;
+    this.graphRoot.dataset.graphArrangement = arrangementId;
+    this.graphRoot.dataset.graphEngine = arrangement.engine;
+
+    if (this.reducedMotion) {
+      this.positions = target;
+      this.morph = null;
+      this.graphRoot.dataset.graphMorphing = "false";
+      this.schedule();
+      announce(
+        this.graphRoot,
+        `${arrangement.name} arrangement. ${arrangement.description}`,
+      );
+      return;
+    }
+
+    this.morph = {
+      arrangement,
+      from: new Map(
+        [...this.positions].map(([id, position]) => [id, { ...position }]),
+      ),
+      target,
+      startedAt: performance.now(),
+    };
+    this.graphRoot.dataset.graphMorphing = "true";
+    announce(this.graphRoot, `Morphing into the ${arrangement.name} arrangement.`);
+    this.schedule();
+  }
+
+  advanceMorph(timestamp) {
+    if (!this.morph) {
+      return false;
+    }
+    const progress = clamp(
+      (timestamp - this.morph.startedAt) / MORPH_DURATION_MS,
+      0,
+      1,
+    );
+    const eased = 1 - (1 - progress) ** 3;
+    for (const [id, target] of this.morph.target) {
+      const start = this.morph.from.get(id) ?? target;
+      this.positions.set(id, {
+        x: start.x + (target.x - start.x) * eased,
+        y: start.y + (target.y - start.y) * eased,
+      });
+    }
+    if (progress < 1) {
+      return true;
+    }
+    const { arrangement, target } = this.morph;
+    this.positions = target;
+    this.morph = null;
+    this.graphRoot.dataset.graphMorphing = "false";
+    announce(
+      this.graphRoot,
+      `${arrangement.name} arrangement. ${arrangement.description}`,
+    );
+    return false;
+  }
+
   fit() {
     const width = Math.max(this.stage.clientWidth, 1);
     const height = Math.max(this.stage.clientHeight, 1);
@@ -503,9 +613,13 @@ class RepositoryGraphRenderer {
     if (document.hidden || this.frame !== null) {
       return;
     }
-    this.frame = requestAnimationFrame(() => {
+    this.frame = requestAnimationFrame((timestamp) => {
       this.frame = null;
+      const morphing = this.advanceMorph(timestamp);
       this.draw();
+      if (morphing) {
+        this.schedule();
+      }
     });
   }
 
@@ -518,10 +632,11 @@ class RepositoryGraphRenderer {
   }
 
   layoutPosition(node) {
+    const position = this.positions.get(node.id) ?? node;
     if (this.stage.clientWidth < 480) {
-      return { x: node.y, y: -node.x };
+      return { x: position.y, y: -position.x };
     }
-    return node;
+    return position;
   }
 
   draw() {
@@ -640,8 +755,32 @@ function installGraphControls(graphRoot, renderer, layout) {
     if (action === "open") renderer.open();
   });
   const reduced = prefersReducedMotion();
+  renderer.reducedMotion = reduced;
   graphRoot.dataset.reducedMotion = String(reduced);
   graphRoot.dataset.graphEngine = layout.engine;
+  graphRoot.dataset.graphArrangement = layout.default_arrangement;
+  graphRoot.dataset.graphMorphing = "false";
+
+  const arrangementPicker = controls.querySelector("[data-graph-arrangement]");
+  for (const arrangement of layout.arrangements) {
+    const option = document.createElement("option");
+    option.value = arrangement.id;
+    option.textContent = arrangement.name;
+    option.title = arrangement.description;
+    arrangementPicker.append(option);
+  }
+  for (const arrangement of layout.unavailable_arrangements) {
+    const option = document.createElement("option");
+    option.value = arrangement.id;
+    option.textContent = `${arrangement.name} · needs data`;
+    option.title = arrangement.reason;
+    option.disabled = true;
+    arrangementPicker.append(option);
+  }
+  arrangementPicker.value = layout.default_arrangement;
+  arrangementPicker.addEventListener("change", () => {
+    renderer.morphTo(arrangementPicker.value);
+  });
 }
 
 function createVertexBuffer(device, data, label) {

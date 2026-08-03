@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 use crate::repositories::{
     AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationKind, RelationProvenance,
@@ -17,6 +18,10 @@ pub const METADATA: PageMetadata = PageMetadata {
     description: "Explore Merely's public repositories, their current status, and the concrete relationships among them.",
     canonical_url: "https://mer3ly.net/repos/",
 };
+
+const REPO_GRAPH_LOADER: &[u8] = include_bytes!("../../assets/repo-graph.js");
+const REPO_GRAPH_WASM_GLUE: &[u8] = include_bytes!("../../assets/mer3ly_repo_graph.js");
+const REPO_GRAPH_WASM: &[u8] = include_bytes!("../../assets/mer3ly_repo_graph_bg.wasm");
 
 pub fn document(root: &Path) -> Result<String, AuthorityError> {
     let data = PublicSiteData::load(root)?;
@@ -199,6 +204,21 @@ fn graph_toolbar() -> SiteView {
             ("aria-label", "Repository map controls"),
         ],
         vec![
+            element(
+                "label",
+                &[("class", "repository-graph-arrangement-picker")],
+                vec![
+                    element("span", &[], vec![txt("Arrangement")]),
+                    element(
+                        "select",
+                        &[
+                            ("data-graph-arrangement", ""),
+                            ("aria-label", "Repository graph arrangement"),
+                        ],
+                        vec![],
+                    ),
+                ],
+            ),
             element(
                 "div",
                 &[
@@ -875,6 +895,7 @@ struct GraphAuthorityNode<'a> {
     name: &'a str,
     class: RepositoryClass,
     status: RepositoryStatus,
+    pushed_at: &'a str,
 }
 
 #[derive(Serialize)]
@@ -887,6 +908,12 @@ struct GraphAuthorityEdge<'a> {
 }
 
 fn graph_bootstrap(data: &PublicSiteData) -> String {
+    let metadata_by_id = data
+        .metadata
+        .repository
+        .iter()
+        .map(|metadata| (metadata.id.as_str(), metadata))
+        .collect::<std::collections::HashMap<_, _>>();
     let authority = GraphAuthority {
         schema: "mer3ly.repo-graph/v1",
         nodes: data
@@ -896,6 +923,10 @@ fn graph_bootstrap(data: &PublicSiteData) -> String {
             .iter()
             .filter(|repository| repository.public)
             .map(|repository| GraphAuthorityNode {
+                pushed_at: &metadata_by_id
+                    .get(repository.id.as_str())
+                    .expect("validated metadata covers every public repository")
+                    .pushed_at,
                 id: &repository.id,
                 name: &repository.name,
                 class: repository.class,
@@ -921,10 +952,20 @@ fn graph_bootstrap(data: &PublicSiteData) -> String {
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")
         .replace('&', "\\u0026");
+    let graph_runtime_href = graph_runtime_href();
     format!(
         "<script id=\"repository-graph-data\" type=\"application/json\">{json}</script>\n\
-<script type=\"module\" src=\"/repo-graph.js\"></script>"
+<script type=\"module\" src=\"{graph_runtime_href}\"></script>"
     )
+}
+
+fn graph_runtime_href() -> String {
+    let mut digest = Sha256::new();
+    digest.update(REPO_GRAPH_LOADER);
+    digest.update(REPO_GRAPH_WASM_GLUE);
+    digest.update(REPO_GRAPH_WASM);
+    let digest = format!("{:x}", digest.finalize());
+    format!("/repo-graph.js?v={}", &digest[..12])
 }
 
 fn format_timestamp(value: &str) -> String {
