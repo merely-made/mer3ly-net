@@ -2324,10 +2324,10 @@ tbody tr:last-child td {
   }
 
   [data-graph-node-form="flag"] .repository-graph-node {
-    width: 34px;
-    min-width: 34px;
+    width: 44px;
+    min-width: 44px;
     min-height: 44px;
-    padding: 7px 11px;
+    padding: 7px 16px;
     box-sizing: border-box;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
