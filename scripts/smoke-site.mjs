@@ -68,7 +68,9 @@ const baseUrl = `http://127.0.0.1:${port}`;
 const browser = await chromium.launch({
   channel: "chromium",
   headless,
-  args: ["--enable-unsafe-webgpu", "--use-angle=swiftshader"],
+  args: headless
+    ? ["--enable-unsafe-webgpu", "--use-angle=swiftshader"]
+    : ["--enable-unsafe-webgpu"],
 });
 
 const receipt = {
@@ -365,6 +367,8 @@ try {
   );
 
   let selectedProfile = "fallback-not-applicable";
+  let sharedSceneUrl = null;
+  let sharedSceneExpectation = null;
   if (desktopState.state === "ready") {
     const mere = desktop.locator('[data-graph-node-id="mere"]');
     assert.equal(await mere.getAttribute("aria-label"), "Mere, platform, active");
@@ -412,6 +416,226 @@ try {
         /Index tiles/,
       );
       assert.equal(await mere.getAttribute("aria-pressed"), "true");
+      const historyControls = desktop.locator("[data-graph-history-controls]");
+      const historyVisible = await historyControls.isVisible();
+      if (historyVisible) {
+        const historyRange = historyControls.locator("[data-graph-history]");
+        const liveValue = Number(await historyRange.getAttribute("max"));
+        assert.ok(liveValue > 0, "history needs a committed checkpoint before live");
+        const historySnapshots = await desktop.evaluate(() =>
+          JSON.parse(document.querySelector("#repository-graph-data").textContent)
+            .history.checkpoints.filter(
+              ({ availability }) => availability === "available",
+            ),
+        );
+        const historicalMereValue = historySnapshots.findIndex(({ graph }) =>
+          graph.nodes.some(({ id }) => id === "mere"),
+        );
+        const graphshellDisappearsAt = historySnapshots.findIndex(
+          ({ graph }, index) =>
+            index > 0 && !graph.nodes.some(({ id }) => id === "graphshell"),
+        );
+        assert.ok(historicalMereValue > 0, "a historical Mere checkpoint is available");
+        assert.ok(
+          graphshellDisappearsAt > historicalMereValue,
+          "Graphshell appears and later closes in public history",
+        );
+        await historyRange.press("Home");
+        await desktop.waitForFunction(
+          () =>
+            document.querySelector("[data-repository-graph]").dataset
+              .graphMorphing === "false" &&
+            document.querySelector('[data-graph-node-id="graphshell"]'),
+        );
+        assert.match(
+          await historyControls.locator("[data-graph-history-status]").textContent(),
+          /^Committed .*merely-made\/mere/,
+        );
+        assert.equal(await historyRange.inputValue(), "0");
+        assert.equal(await desktop.locator('[data-graph-node-id="mere"]').count(), 0);
+        assert.equal(await desktop.locator('[data-graph-node-id="graphshell"]').count(), 1);
+        await historyRange.press("ArrowRight");
+        await desktop.waitForFunction(
+          () =>
+            document.querySelector('[data-graph-node-id="webrender-wgpu"]') &&
+            document.querySelector("[data-repository-graph]").dataset
+              .graphMorphing === "false",
+        );
+        assert.equal(await historyRange.inputValue(), "1");
+        for (let value = 1; value < historicalMereValue; value += 1) {
+          await historyRange.press("ArrowRight");
+        }
+        await desktop.waitForFunction(
+          () =>
+            document.querySelector('[data-graph-node-id="mere"]') &&
+            document.querySelector("[data-repository-graph]").dataset
+              .graphMorphing === "false",
+        );
+        assert.equal(
+          await desktop
+            .locator("[data-repository-graph]")
+            .getAttribute("data-graph-arrangement"),
+          "graph_layout:grid",
+          "source time preserves the current arrangement",
+        );
+        assert.equal(
+          await desktop
+            .locator('[data-graph-node-id="graphshell"]')
+            .getAttribute("aria-pressed"),
+          "true",
+          "the surviving historical selection stays selected",
+        );
+        await mere.click();
+        await expectSelectedNode(desktop, "mere");
+        assert.equal(await mere.getAttribute("aria-pressed"), "true");
+        const historicalArrangementIds = [
+          "graph_layout:radial",
+          "graph_layout:grid",
+          "graph_layout:phyllotaxis",
+          "graph_layout:timeline",
+          "graph_layout:kanban",
+          "graph_layout:penrose",
+          "graph_layout:lsystem",
+        ];
+        for (const arrangementId of historicalArrangementIds) {
+          await arrangementPicker.selectOption(arrangementId);
+          await desktop.waitForFunction(
+            (expected) => {
+              const root = document.querySelector("[data-repository-graph]");
+              return (
+                root.dataset.graphArrangement === expected &&
+                root.dataset.graphMorphing === "false"
+              );
+            },
+            arrangementId,
+          );
+          assert.equal(
+            await historyRange.inputValue(),
+            String(historicalMereValue),
+            `${arrangementId} keeps the committed source cursor`,
+          );
+          assert.match(
+            await historyControls
+              .locator("[data-graph-history-status]")
+              .textContent(),
+            /^Committed /,
+            `${arrangementId} remains on committed source truth`,
+          );
+          assert.equal(
+            await mere.getAttribute("aria-pressed"),
+            "true",
+            `${arrangementId} preserves a selected repository present at the cursor`,
+          );
+        }
+        await desktop.locator('button[data-graph-action="share"]').click();
+        sharedSceneUrl = desktop.url();
+        const sharedScene = new URL(sharedSceneUrl);
+        const sharedParams = new URLSearchParams(sharedScene.hash.slice(1));
+        const expectedCursor = historySnapshots[historicalMereValue].cursor;
+        assert.equal(sharedParams.get("repository-scene"), "v1");
+        assert.equal(sharedParams.get("arrangement"), "graph_layout:lsystem");
+        assert.equal(sharedParams.get("selected"), "mere");
+        assert.equal(sharedParams.get("source"), expectedCursor.source);
+        assert.equal(sharedParams.get("commit"), expectedCursor.commit);
+        assert.doesNotMatch(
+          sharedScene.hash,
+          /C%3A|C:|mark_|private|127\.0\.0\.1/i,
+          "shared public scene contains a private reference",
+        );
+        sharedSceneExpectation = {
+          arrangement: sharedParams.get("arrangement"),
+          cursor: historicalMereValue,
+          selected: sharedParams.get("selected"),
+        };
+        const shared = await browser.newPage({
+          viewport: { width: 1440, height: 900 },
+        });
+        const sharedDiagnostics = collectDiagnostics(shared);
+        await shared.goto(sharedSceneUrl, { waitUntil: "networkidle" });
+        await waitForGraphState(shared);
+        assert.equal(
+          (await graphState(shared)).state,
+          "ready",
+          "shared public scene needs an interactive receiver",
+        );
+        await shared.waitForFunction(
+          () =>
+            document.querySelector("[data-repository-graph]").dataset
+              .graphMorphing === "false",
+        );
+        assert.equal(
+          await shared
+            .locator("[data-repository-graph]")
+            .getAttribute("data-graph-arrangement"),
+          sharedSceneExpectation.arrangement,
+        );
+        assert.equal(
+          await shared.locator("[data-graph-history]").inputValue(),
+          String(sharedSceneExpectation.cursor),
+        );
+        await expectSelectedNode(shared, sharedSceneExpectation.selected);
+        assert.deepEqual(sharedDiagnostics, [], "shared desktop scene emitted browser errors");
+        await shared.close();
+
+        const refused = new URL(sharedSceneUrl);
+        const refusedParams = new URLSearchParams(refused.hash.slice(1));
+        refusedParams.set("source", "public-source-not-present");
+        refusedParams.set("commit", "unavailable-commit");
+        refused.hash = refusedParams.toString();
+        const receiver = await browser.newPage({
+          viewport: { width: 1440, height: 900 },
+        });
+        const receiverDiagnostics = collectDiagnostics(receiver);
+        await receiver.goto(refused.toString(), { waitUntil: "networkidle" });
+        await waitForGraphState(receiver);
+        assert.equal((await graphState(receiver)).state, "ready");
+        assert.match(
+          await receiver.locator("[data-graph-status]").textContent(),
+          /source cursor is unavailable/,
+        );
+        assert.equal(await receiver.locator("[data-graph-node-id]").count(), 19);
+        assert.deepEqual(
+          receiverDiagnostics,
+          [],
+          "refused shared scene emitted browser errors",
+        );
+        await receiver.close();
+        for (
+          let value = historicalMereValue;
+          value < graphshellDisappearsAt;
+          value += 1
+        ) {
+          await historyRange.press("ArrowRight");
+        }
+        await desktop.waitForFunction(
+          () =>
+            !document.querySelector('[data-graph-node-id="graphshell"]') &&
+            document.querySelector("[data-repository-graph]").dataset
+              .graphMorphing === "false",
+        );
+        assert.equal(await historyRange.inputValue(), String(graphshellDisappearsAt));
+        assert.equal(await desktop.locator('[data-graph-node-id="graphshell"]').count(), 0);
+        await historyControls
+          .locator('button[data-graph-action="return-live"]')
+          .click();
+        await desktop.waitForFunction(
+          () =>
+            document.querySelector("[data-repository-graph]").dataset
+              .graphMorphing === "false",
+        );
+        assert.equal(await historyRange.inputValue(), String(liveValue));
+        assert.match(
+          await historyControls.locator("[data-graph-history-status]").textContent(),
+          /^Live authority/,
+        );
+        assert.equal(await desktop.locator("[data-graph-node-id]").count(), 19);
+        desktopState.source_time = "public-lineage-and-live";
+        desktopState.history_checkpoints = historySnapshots.length;
+        desktopState.source_time_arrangement_matrix = historicalArrangementIds;
+        desktopState.shared_scene = sharedSceneExpectation;
+      } else {
+        desktopState.source_time = "no-committed-checkpoints";
+      }
       desktopState.arrangements = 7;
       desktopState.morphed_to = "graph_layout:grid";
       await mere.click({ timeout: 2000 });
@@ -518,6 +742,73 @@ try {
       sceneReceipts.push(scene);
     }
     mobileState.arrangements = sceneReceipts;
+    const historyControls = mobile.locator("[data-graph-history-controls]");
+    if (await historyControls.isVisible()) {
+      const historyRange = historyControls.locator("[data-graph-history]");
+      const historyTarget = await historyRange.evaluate((input) => {
+        const rect = input.getBoundingClientRect();
+        return { width: rect.width, height: rect.height };
+      });
+      assert.ok(historyTarget.height >= 44, "history range is a 44px mobile target");
+      await historyRange.press("Home");
+      await mobile.waitForFunction(
+        () =>
+          document.querySelector('[data-graph-node-id="graphshell"]') &&
+          document.querySelector("[data-repository-graph]").dataset
+            .graphMorphing === "false",
+      );
+      assert.equal(await historyRange.inputValue(), "0");
+      assert.equal(await mobile.locator('[data-graph-node-id="graphshell"]').count(), 1);
+      await historyRange.press("ArrowRight");
+      await mobile.waitForFunction(
+        () =>
+          document.querySelector('[data-graph-node-id="webrender-wgpu"]') &&
+          document.querySelector("[data-repository-graph]").dataset
+            .graphMorphing === "false",
+      );
+      await historyControls
+        .locator('button[data-graph-action="return-live"]')
+        .click();
+      await mobile.waitForFunction(
+        () =>
+          document.querySelector("[data-repository-graph]").dataset
+            .graphMorphing === "false",
+      );
+      assert.match(
+        await historyControls.locator("[data-graph-history-status]").textContent(),
+        /^Live authority/,
+      );
+      mobileState.source_time = "public-lineage-and-live";
+    }
+    if (sharedSceneUrl && sharedSceneExpectation) {
+      const shared = await browser.newPage({
+        viewport: { width: 420, height: 900 },
+      });
+      const sharedDiagnostics = collectDiagnostics(shared);
+      await shared.goto(sharedSceneUrl, { waitUntil: "networkidle" });
+      await waitForGraphState(shared);
+      assert.equal((await graphState(shared)).state, "ready");
+      await shared.waitForFunction(
+        () =>
+          document.querySelector("[data-repository-graph]").dataset
+            .graphMorphing === "false",
+      );
+      assert.equal(
+        await shared
+          .locator("[data-repository-graph]")
+          .getAttribute("data-graph-arrangement"),
+        sharedSceneExpectation.arrangement,
+      );
+      assert.equal(
+        await shared.locator("[data-graph-history]").inputValue(),
+        String(sharedSceneExpectation.cursor),
+      );
+      await expectSelectedNode(shared, sharedSceneExpectation.selected);
+      assert.equal(await horizontalOverflow(shared), 0);
+      assert.deepEqual(sharedDiagnostics, [], "shared mobile scene emitted browser errors");
+      await shared.close();
+      mobileState.shared_scene = sharedSceneExpectation;
+    }
   }
   assert.deepEqual(mobileDiagnostics, [], "mobile emitted browser errors");
   await mobile.locator("[data-repository-graph]").screenshot({

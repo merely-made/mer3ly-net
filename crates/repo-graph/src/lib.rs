@@ -10,7 +10,7 @@ use euclid::default::Point2D;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-const FOCUS_REPOSITORY: &str = "mere";
+const PREFERRED_FOCUS_REPOSITORY: &str = "mere";
 const DEFAULT_ARRANGEMENT: &str = "graph_layout:radial";
 const TIMELINE_AXIS_LENGTH: f32 = 620.0;
 const TIMELINE_LANE_COUNT: usize = 9;
@@ -60,7 +60,7 @@ struct GraphLayout {
     schema: &'static str,
     authority_schema: String,
     engine: String,
-    focus: &'static str,
+    focus: String,
     default_arrangement: &'static str,
     nodes: Vec<GraphNodeLayout>,
     edges: Vec<GraphEdge>,
@@ -111,6 +111,7 @@ fn layout_graph_json(input: &str) -> Result<String, String> {
     let input: GraphInput =
         serde_json::from_str(input).map_err(|error| format!("invalid graph JSON: {error}"))?;
     validate(&input)?;
+    let focus = focal_node(&input);
 
     let scene = CanvasSceneInput {
         nodes: input
@@ -136,7 +137,7 @@ fn layout_graph_json(input: &str) -> Result<String, String> {
             .resolve(arrangement_id)
             .ok_or_else(|| format!("Mere arrangement registry is missing {arrangement_id}"))?;
         let capability = provider.capability();
-        let positions = arrangement_positions(&input, &scene, arrangement_id, &provider)?;
+        let positions = arrangement_positions(&input, &scene, arrangement_id, &provider, focus)?;
         arrangements.push(GraphArrangement {
             id: capability.id.clone(),
             name: capability.display_name,
@@ -190,7 +191,7 @@ fn layout_graph_json(input: &str) -> Result<String, String> {
         schema: "mer3ly.repo-graph-layout/v2",
         authority_schema: input.schema.clone(),
         engine: default_arrangement.engine.clone(),
-        focus: FOCUS_REPOSITORY,
+        focus: focus.to_owned(),
         default_arrangement: DEFAULT_ARRANGEMENT,
         nodes,
         edges: input.edges.clone(),
@@ -205,6 +206,7 @@ fn arrangement_positions(
     scene: &CanvasSceneInput<String>,
     arrangement_id: &str,
     provider: &std::sync::Arc<dyn arrangements::LayoutProvider<String>>,
+    focus: &str,
 ) -> Result<Vec<GraphNodePosition>, String> {
     let mut extras = LayoutExtras::default();
     match arrangement_id {
@@ -228,7 +230,7 @@ fn arrangement_positions(
 
     let deltas = if arrangement_id == DEFAULT_ARRANGEMENT {
         let mut layout = Radial::new(RadialConfig {
-            focus: Some(FOCUS_REPOSITORY.to_owned()),
+            focus: Some(focus.to_owned()),
             center: Point2D::origin(),
             ring_spacing: 190.0,
             angular_policy: RadialAngularPolicy::DegreeWeighted,
@@ -265,7 +267,7 @@ fn arrangement_positions(
         let unreachable = input
             .nodes
             .iter()
-            .filter(|node| node.id != FOCUS_REPOSITORY && !deltas.contains_key(&node.id))
+            .filter(|node| node.id != focus && !deltas.contains_key(&node.id))
             .collect::<Vec<_>>();
         let lane_center = unreachable.len().saturating_sub(1) as f32 * 0.5;
         for (index, node) in unreachable.into_iter().enumerate() {
@@ -294,6 +296,15 @@ fn arrangement_positions(
         raw_positions
     };
     normalize_positions(arrangement_id, raw_positions)
+}
+
+fn focal_node(input: &GraphInput) -> &str {
+    input
+        .nodes
+        .iter()
+        .find(|node| node.id == PREFERRED_FOCUS_REPOSITORY)
+        .map(|node| node.id.as_str())
+        .unwrap_or_else(|| input.nodes[0].id.as_str())
 }
 
 fn place_timeline_strips(
@@ -342,6 +353,13 @@ fn normalize_positions(
     arrangement_id: &str,
     positions: Vec<(String, Point2D<f32>)>,
 ) -> Result<Vec<GraphNodePosition>, String> {
+    if positions.len() == 1 {
+        let (id, _) = positions
+            .into_iter()
+            .next()
+            .expect("one-node graph has one position");
+        return Ok(vec![GraphNodePosition { id, x: 0.0, y: 0.0 }]);
+    }
     let mut min_x = f32::INFINITY;
     let mut max_x = f32::NEG_INFINITY;
     let mut min_y = f32::INFINITY;
@@ -460,12 +478,6 @@ fn validate(input: &GraphInput) -> Result<(), String> {
             return Err(format!("duplicate repository graph node {}", node.id));
         }
     }
-    if !node_ids.contains(FOCUS_REPOSITORY) {
-        return Err(format!(
-            "repository graph is missing focal node {FOCUS_REPOSITORY}"
-        ));
-    }
-
     let mut edge_ids = HashSet::with_capacity(input.edges.len());
     for edge in &input.edges {
         if !edge_ids.insert(edge.id.as_str()) {
@@ -554,6 +566,22 @@ mod tests {
         let invalid = SAMPLE.replace("\"target\":\"genet\"", "\"target\":\"missing\"");
         let error = layout_graph_json(&invalid).expect_err("unknown endpoint should fail");
         assert!(error.contains("unknown endpoint"));
+    }
+
+    #[test]
+    fn archived_graph_without_mere_uses_its_first_public_node_as_focus() {
+        let archived = r#"{
+          "schema":"mer3ly.repo-graph/v1",
+          "nodes":[{"id":"graphshell","name":"Graphshell","class":"product","status":"archived","pushed_at":"2026-02-21T13:32:51-05:00"}],
+          "edges":[]
+        }"#;
+
+        let encoded = layout_graph_json(archived).expect("layout archived graph");
+        let value: serde_json::Value = serde_json::from_str(&encoded).expect("parse layout");
+        assert_eq!(value["focus"], "graphshell");
+        for arrangement in value["arrangements"].as_array().expect("arrangements") {
+            assert_eq!(arrangement["nodes"][0]["id"], "graphshell");
+        }
     }
 
     #[test]

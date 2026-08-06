@@ -7,6 +7,8 @@ class GraphUnavailable extends Error {}
 
 const MORPH_DURATION_MS = 640;
 const TIMELINE_ARRANGEMENT = "graph_layout:timeline";
+const SHARED_SCENE_KEY = "repository-scene";
+const SHARED_SCENE_VERSION = "v1";
 const SCENE_PROFILES = new Map([
   [
     "graph_layout:radial",
@@ -134,6 +136,7 @@ async function startRepositoryGraph(graphRoot) {
   });
   const layout = JSON.parse(layoutGraph(JSON.stringify(authority)));
   validateProjection(authority, layout);
+  const history = validateHistory(authority);
 
   if (forcedMode === "init-failure") {
     throw new GraphUnavailable(
@@ -142,7 +145,7 @@ async function startRepositoryGraph(graphRoot) {
   }
 
   const renderer = await RepositoryGraphRenderer.create(graphRoot, layout);
-  installGraphControls(graphRoot, renderer, layout);
+  const sceneMessage = installGraphControls(graphRoot, renderer, layout, authority, history);
   renderer.fit();
   renderer.schedule();
 
@@ -151,15 +154,14 @@ async function startRepositoryGraph(graphRoot) {
   graphRoot.querySelector("[data-graph-interface]").hidden = false;
   announce(
     graphRoot,
-    `${layout.nodes.length} repositories and ${layout.edges.length} relationships arranged by Mere. Select a repository node to inspect it.`,
+    sceneMessage ??
+      `${layout.nodes.length} repositories and ${layout.edges.length} relationships arranged by Mere. Select a repository node to inspect it.`,
   );
 }
 
 function validateProjection(authority, layout) {
-  if (
-    authority.schema !== "mer3ly.repo-graph/v1" ||
-    layout.schema !== "mer3ly.repo-graph-layout/v2"
-  ) {
+  validateAuthorityGraph(authority);
+  if (layout.schema !== "mer3ly.repo-graph-layout/v2") {
     throw new Error("repository graph schema mismatch");
   }
   if (layout.authority_schema !== authority.schema) {
@@ -197,6 +199,63 @@ function validateProjection(authority, layout) {
       throw new Error(`repository arrangement ${arrangement.id} has invalid positions`);
     }
   }
+}
+
+function validateAuthorityGraph(graph) {
+  if (
+    graph.schema !== "mer3ly.repo-graph/v1" ||
+    !Array.isArray(graph.nodes) ||
+    !Array.isArray(graph.edges)
+  ) {
+    throw new Error("repository graph schema mismatch");
+  }
+  const nodeIds = new Set(graph.nodes.map(({ id }) => id));
+  if (
+    nodeIds.size !== graph.nodes.length ||
+    graph.nodes.some(({ id, pushed_at }) =>
+      typeof id !== "string" || typeof pushed_at !== "string",
+    ) ||
+    graph.edges.some(
+      ({ id, source, target }) =>
+        typeof id !== "string" ||
+        !nodeIds.has(source) ||
+        !nodeIds.has(target),
+    )
+  ) {
+    throw new Error("repository graph contains invalid source records");
+  }
+}
+
+function validateHistory(authority) {
+  if (authority.history === undefined) {
+    return null;
+  }
+  const history = authority.history;
+  if (
+    history.schema !== "mer3ly.repository-git-history/v1" ||
+    !Array.isArray(history.checkpoints)
+  ) {
+    throw new Error("repository graph history schema mismatch");
+  }
+  for (const checkpoint of history.checkpoints) {
+    if (
+      !checkpoint.cursor ||
+      typeof checkpoint.cursor.source !== "string" ||
+      typeof checkpoint.cursor.commit !== "string" ||
+      typeof checkpoint.cursor.committed_at !== "string"
+    ) {
+      throw new Error("repository graph history has an invalid cursor");
+    }
+    if (checkpoint.availability === "available") {
+      validateAuthorityGraph(checkpoint.graph);
+    } else if (
+      checkpoint.availability !== "unavailable" ||
+      typeof checkpoint.reason !== "string"
+    ) {
+      throw new Error("repository graph history has an invalid checkpoint");
+    }
+  }
+  return history;
 }
 
 function showFallback(graphRoot, message) {
@@ -315,6 +374,60 @@ class RepositoryGraphRenderer {
         "The WebGPU device was lost. The complete repository index remains available below.",
       );
     });
+  }
+
+  replaceLayout(layout) {
+    if (this.morph) {
+      this.advanceMorph(performance.now());
+    }
+    const previousArrangement = this.currentArrangement;
+    const previousSelection = this.selectedId;
+    const nextArrangement =
+      layout.arrangements.some(({ id }) => id === previousArrangement)
+        ? previousArrangement
+        : layout.default_arrangement;
+    this.alignMobileOrientation(previousArrangement, nextArrangement);
+    const previousPositions = new Map(this.positions);
+    this.layout = layout;
+    this.arrangements = new Map(
+      layout.arrangements.map((arrangement) => [arrangement.id, arrangement]),
+    );
+    this.currentArrangement = nextArrangement;
+    this.selectedId = layout.nodes.some(({ id }) => id === previousSelection)
+      ? previousSelection
+      : layout.focus;
+    this.graphRoot.dataset.graphArrangement = nextArrangement;
+    this.graphRoot.dataset.graphEngine = this.arrangements.get(nextArrangement).engine;
+    this.nodeLayer.replaceChildren();
+    this.installNodeButtons();
+    this.applySceneProfile(nextArrangement);
+
+    const arrangement = this.arrangements.get(nextArrangement);
+    const target = new Map(
+      arrangement.nodes.map(({ id, x, y }) => [id, { x, y }]),
+    );
+    this.positions = new Map(
+      [...target].map(([id, position]) => [
+        id,
+        previousPositions.get(id) ?? position,
+      ]),
+    );
+    if (this.reducedMotion) {
+      this.positions = target;
+      this.morph = null;
+      this.fit();
+      this.graphRoot.dataset.graphMorphing = "false";
+      return;
+    }
+    this.morph = {
+      arrangement,
+      from: new Map(this.positions),
+      target,
+      startedAt: performance.now(),
+      announcement: "",
+    };
+    this.graphRoot.dataset.graphMorphing = "true";
+    this.schedule();
   }
 
   applySceneProfile(arrangementId) {
@@ -834,15 +947,17 @@ class RepositoryGraphRenderer {
     if (progress < 1) {
       return true;
     }
-    const { arrangement, target } = this.morph;
+    const { arrangement, target, announcement } = this.morph;
     this.positions = target;
     this.morph = null;
     this.fit();
     this.graphRoot.dataset.graphMorphing = "false";
-    announce(
-      this.graphRoot,
-      `${arrangement.name} arrangement. ${arrangement.description}`,
-    );
+    if (announcement !== "") {
+      announce(
+        this.graphRoot,
+        `${arrangement.name} arrangement. ${arrangement.description}`,
+      );
+    }
     return false;
   }
 
@@ -1047,8 +1162,9 @@ class RepositoryGraphRenderer {
   }
 }
 
-function installGraphControls(graphRoot, renderer, layout) {
+function installGraphControls(graphRoot, renderer, layout, authority, history) {
   const controls = graphRoot.querySelector("[data-graph-controls]");
+  let historyScrubber = null;
   controls.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-graph-action]");
     if (!button) {
@@ -1063,6 +1179,8 @@ function installGraphControls(graphRoot, renderer, layout) {
     if (action === "pan-up") renderer.panBy(0, 36);
     if (action === "pan-down") renderer.panBy(0, -36);
     if (action === "open") renderer.open();
+    if (action === "return-live") historyScrubber?.showLive();
+    if (action === "share") sceneShare?.share();
   });
   const reduced = prefersReducedMotion();
   renderer.reducedMotion = reduced;
@@ -1091,6 +1209,177 @@ function installGraphControls(graphRoot, renderer, layout) {
   arrangementPicker.addEventListener("change", () => {
     renderer.morphTo(arrangementPicker.value);
   });
+  historyScrubber = installHistoryScrubber(graphRoot, renderer, authority, history);
+  const sceneShare = installSceneShare(graphRoot, renderer, historyScrubber);
+  return sceneShare?.restore() ?? null;
+}
+
+function installHistoryScrubber(graphRoot, renderer, authority, history) {
+  const controls = graphRoot.querySelector("[data-graph-history-controls]");
+  if (!controls || !history) {
+    return null;
+  }
+  const snapshots = history.checkpoints.filter(
+    ({ availability }) => availability === "available",
+  );
+  if (snapshots.length === 0) {
+    return null;
+  }
+  const range = controls.querySelector("[data-graph-history]");
+  const status = controls.querySelector("[data-graph-history-status]");
+  const liveValue = snapshots.length;
+  const unavailable = history.checkpoints.length - snapshots.length;
+  let currentValue = liveValue;
+  controls.hidden = false;
+  range.max = String(liveValue);
+  range.value = String(liveValue);
+
+  const describe = (value) => {
+    if (value === liveValue) {
+      return unavailable > 0
+        ? `Live authority · ${unavailable} earlier commits lack an authority graph`
+        : "Live authority";
+    }
+    const cursor = snapshots[value].cursor;
+    return `Committed ${formatGraphDate(cursor.committed_at.slice(0, 10))} · ${cursor.source}`;
+  };
+  const apply = (value) => {
+    if (!Number.isInteger(value) || value < 0 || value > liveValue) {
+      return;
+    }
+    range.value = String(value);
+    status.textContent = describe(value);
+    range.setAttribute("aria-valuetext", status.textContent);
+    if (value === currentValue) {
+      return;
+    }
+    currentValue = value;
+    const source = value === liveValue ? authority : snapshots[value].graph;
+    const layout = JSON.parse(layoutGraph(JSON.stringify(source)));
+    validateProjection(source, layout);
+    renderer.replaceLayout(layout);
+    announce(
+      graphRoot,
+      value === liveValue
+        ? "Returned to the live repository authority."
+        : `${status.textContent}. The current arrangement and selected repository are preserved where available.`,
+    );
+  };
+
+  range.addEventListener("input", () => apply(Number(range.value)));
+  range.addEventListener("keydown", (event) => {
+    const value = Number(range.value);
+    const next = {
+      Home: 0,
+      End: liveValue,
+      ArrowLeft: Math.max(0, value - 1),
+      ArrowDown: Math.max(0, value - 1),
+      ArrowRight: Math.min(liveValue, value + 1),
+      ArrowUp: Math.min(liveValue, value + 1),
+    }[event.key];
+    if (next === undefined) {
+      return;
+    }
+    event.preventDefault();
+    apply(next);
+  });
+  apply(liveValue);
+  return {
+    showLive: () => apply(liveValue),
+    current: () =>
+      currentValue === liveValue
+        ? { kind: "live" }
+        : { kind: "cursor", cursor: snapshots[currentValue].cursor },
+    showCursor: (cursor) => {
+      const index = snapshots.findIndex(
+        ({ cursor: available }) =>
+          available.source === cursor.source && available.commit === cursor.commit,
+      );
+      if (index < 0) {
+        return false;
+      }
+      apply(index);
+      return true;
+    },
+  };
+}
+
+function installSceneShare(graphRoot, renderer, historyScrubber) {
+  const sceneFromFragment = () => {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    if (!params.has(SHARED_SCENE_KEY)) {
+      return null;
+    }
+    if (params.get(SHARED_SCENE_KEY) !== SHARED_SCENE_VERSION) {
+      return { error: "This repository scene link uses an unsupported version." };
+    }
+    const arrangement = params.get("arrangement");
+    const selected = params.get("selected");
+    const source = params.get("source");
+    const commit = params.get("commit");
+    if (!arrangement || !selected || Boolean(source) !== Boolean(commit)) {
+      return { error: "This repository scene link is incomplete." };
+    }
+    if (source && (!isPublicSceneValue(source) || !isPublicSceneValue(commit))) {
+      return { error: "This repository scene link has an invalid public source cursor." };
+    }
+    return { arrangement, selected, source, commit };
+  };
+
+  const restore = () => {
+    const scene = sceneFromFragment();
+    if (!scene) {
+      return null;
+    }
+    if (scene.error) {
+      return scene.error;
+    }
+    if (scene.source && !historyScrubber?.showCursor(scene)) {
+      return "The requested repository source cursor is unavailable in this public artifact.";
+    }
+    if (!renderer.arrangements.has(scene.arrangement)) {
+      return "The requested repository arrangement is unavailable.";
+    }
+    if (!renderer.nodeButtons.has(scene.selected)) {
+      return "The requested repository selection is unavailable at this source cursor.";
+    }
+    renderer.morphTo(scene.arrangement);
+    renderer.select(scene.selected, false);
+    return "Shared repository scene restored from its public source cursor.";
+  };
+
+  const share = async () => {
+    const scene = {
+      arrangement: renderer.currentArrangement,
+      selected: renderer.selectedId,
+      ...(historyScrubber?.current() ?? { kind: "live" }),
+    };
+    const params = new URLSearchParams([[SHARED_SCENE_KEY, SHARED_SCENE_VERSION]]);
+    params.set("arrangement", scene.arrangement);
+    params.set("selected", scene.selected);
+    if (scene.kind === "cursor") {
+      params.set("source", scene.cursor.source);
+      params.set("commit", scene.cursor.commit);
+    }
+    const url = new URL(window.location.href);
+    url.hash = params.toString();
+    window.history.replaceState(null, "", url);
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("clipboard unavailable");
+      }
+      await navigator.clipboard.writeText(url.toString());
+      announce(graphRoot, "Shareable repository scene link copied to the clipboard.");
+    } catch {
+      announce(graphRoot, "Shareable repository scene link is ready in the address bar.");
+    }
+  };
+
+  return { restore, share };
+}
+
+function isPublicSceneValue(value) {
+  return /^[a-z0-9][a-z0-9._/-]*$/i.test(value);
 }
 
 function createVertexBuffer(device, data, label) {

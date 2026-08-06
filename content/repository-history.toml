@@ -1,0 +1,172 @@
+schema = "mer3ly.repository-history-source/v1"
+
+# Reduced public observations from immutable public source commits. This file
+# is the build authority for older projects that predate Mer3ly itself. It
+# carries no checkout paths, credentials, or GitHub API data.
+
+# Mere README at this source commit begins "# graphshell" and describes the
+# standalone graph browser before it was folded into the Mere workspace.
+[[checkpoint]]
+source = "merely-made/mere"
+commit = "5fcdf02e23a3aff9f1018db92bbf7572e6c2bd48"
+committed_at = "2026-02-21T13:32:51-05:00"
+
+[[checkpoint.node]]
+id = "graphshell"
+name = "Graphshell"
+class = "product"
+status = "archived"
+pushed_at = "2026-02-21T13:32:51-05:00"
+
+# The Genet source transition documents the Netrender workspace as the former
+# WebRender-wgpu fork. This retains that public lineage at its own source.
+[[checkpoint]]
+source = "merely-made/genet"
+commit = "58940696a00a998ac20a2fafae4bd28fb12d2511"
+committed_at = "2026-05-05T21:08:29-04:00"
+
+[[checkpoint.node]]
+id = "graphshell"
+name = "Graphshell"
+class = "product"
+status = "archived"
+pushed_at = "2026-02-21T13:32:51-05:00"
+
+[[checkpoint.node]]
+id = "webrender-wgpu"
+name = "WebRender wgpu"
+class = "maintained-fork"
+status = "archived"
+pushed_at = "2026-05-05T21:08:29-04:00"
+
+# Mere begins its workspace era while the Netrender fork becomes explicit.
+[[checkpoint]]
+source = "merely-made/mere"
+commit = "dee147b48b674ad34030d1971d254badf00f17c4"
+committed_at = "2026-05-06T00:16:02-04:00"
+
+[[checkpoint.node]]
+id = "graphshell"
+name = "Graphshell"
+class = "product"
+status = "archived"
+pushed_at = "2026-02-21T13:32:51-05:00"
+
+[[checkpoint.node]]
+id = "mere"
+name = "Mere"
+class = "foundation"
+status = "active"
+pushed_at = "2026-05-06T00:16:02-04:00"
+
+[[checkpoint.node]]
+id = "webrender-wgpu"
+name = "WebRender wgpu"
+class = "maintained-fork"
+status = "archived"
+pushed_at = "2026-05-05T21:08:29-04:00"
+
+[[checkpoint.node]]
+id = "netrender"
+name = "Netrender"
+class = "maintained-fork"
+status = "active"
+pushed_at = "2026-05-06T00:20:12-04:00"
+
+[[checkpoint.edge]]
+id = "netrender-fork-of-webrender-wgpu"
+source = "netrender"
+target = "webrender-wgpu"
+kind = "fork_of"
+provenance = "curated"
+
+# Genet becomes the engine name. Its public relationship to Netrender is
+# retained, while the older WebRender-wgpu name has become historical lineage.
+[[checkpoint]]
+source = "merely-made/genet"
+commit = "3a82d43133a32d5dd0379ab7962ad48cfee66351"
+committed_at = "2026-07-13T15:45:50-04:00"
+
+[[checkpoint.node]]
+id = "graphshell"
+name = "Graphshell"
+class = "product"
+status = "archived"
+pushed_at = "2026-02-21T13:32:51-05:00"
+
+[[checkpoint.node]]
+id = "mere"
+name = "Mere"
+class = "foundation"
+status = "active"
+pushed_at = "2026-05-06T00:16:02-04:00"
+
+[[checkpoint.node]]
+id = "netrender"
+name = "Netrender"
+class = "maintained-fork"
+status = "active"
+pushed_at = "2026-05-06T00:20:12-04:00"
+
+[[checkpoint.node]]
+id = "genet"
+name = "Genet"
+class = "platform"
+status = "active"
+pushed_at = "2026-07-13T15:45:50-04:00"
+
+[[checkpoint.edge]]
+id = "mere-renders-with-genet"
+source = "mere"
+target = "genet"
+kind = "renders_with"
+provenance = "curated"
+
+[[checkpoint.edge]]
+id = "genet-renders-with-netrender"
+source = "genet"
+target = "netrender"
+kind = "renders_with"
+provenance = "curated"
+
+# The Mere subtree commit records Graphshell's family under the workspace.
+# The public projection therefore closes the standalone Graphshell node here.
+[[checkpoint]]
+source = "merely-made/mere"
+commit = "020170dcc9d526edddbfe5ea3788975498f27281"
+committed_at = "2026-07-23T22:19:04-04:00"
+
+[[checkpoint.node]]
+id = "mere"
+name = "Mere"
+class = "foundation"
+status = "active"
+pushed_at = "2026-07-23T22:19:04-04:00"
+
+[[checkpoint.node]]
+id = "netrender"
+name = "Netrender"
+class = "maintained-fork"
+status = "active"
+pushed_at = "2026-05-06T00:20:12-04:00"
+
+[[checkpoint.node]]
+id = "genet"
+name = "Genet"
+class = "platform"
+status = "active"
+pushed_at = "2026-07-13T15:45:50-04:00"
+
+[[checkpoint.edge]]
+id = "mere-renders-with-genet"
+source = "mere"
+target = "genet"
+kind = "renders_with"
+provenance = "curated"
+
+[[checkpoint.edge]]
+id = "genet-renders-with-netrender"
+source = "genet"
+target = "netrender"
+kind = "renders_with"
+provenance = "curated"

@@ -545,7 +545,7 @@ h1 {
 }
 
 .repository-graph-arrangement-picker {
-  min-height: 34px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -556,7 +556,7 @@ h1 {
 }
 
 .repository-graph-arrangement-picker select {
-  min-height: 34px;
+  min-height: 44px;
   padding: 7px 30px 7px 9px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -571,6 +571,38 @@ h1 {
   outline-offset: 2px;
 }
 
+.repository-graph-history-picker {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--faint);
+  font: 500 0.58rem/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-graph-history-picker[hidden] {
+  display: none;
+}
+
+.repository-graph-history-picker input {
+  width: min(20vw, 160px);
+  min-width: 76px;
+  min-height: 44px;
+  accent-color: var(--ember);
+}
+
+.repository-graph-history-picker output {
+  flex: 1 1 150px;
+  min-width: 86px;
+  color: var(--muted);
+  font: italic 0.7rem/1 var(--font-serif);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .repository-graph-scene-caption {
   flex: 1 1 260px;
   color: var(--muted);
@@ -579,7 +611,7 @@ h1 {
 
 .repository-graph-control {
   min-width: 36px;
-  min-height: 34px;
+  min-height: 44px;
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 4px;
@@ -2278,6 +2310,15 @@ tbody tr:last-child td {
   .repository-graph-arrangement-picker select {
     flex: 1 1 auto;
     min-width: 0;
+  }
+
+  .repository-graph-history-picker {
+    width: 100%;
+  }
+
+  .repository-graph-history-picker input {
+    flex: 1 1 auto;
+    width: auto;
   }
 
   .repository-graph-scene-caption {

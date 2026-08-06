@@ -19,6 +19,33 @@ struct GraphAuthority {
     schema: String,
     nodes: Vec<GraphNode>,
     edges: Vec<GraphEdge>,
+    history: Option<GraphHistory>,
+}
+
+#[derive(Deserialize)]
+struct GraphHistory {
+    schema: String,
+    checkpoints: Vec<GraphHistoryCheckpoint>,
+}
+
+#[derive(Deserialize)]
+struct GraphHistoryCheckpoint {
+    availability: String,
+    cursor: GraphHistoryCursor,
+    graph: Option<GraphHistoryGraph>,
+}
+
+#[derive(Deserialize)]
+struct GraphHistoryCursor {
+    source: String,
+    commit: String,
+    committed_at: String,
+}
+
+#[derive(Deserialize)]
+struct GraphHistoryGraph {
+    nodes: Vec<GraphNode>,
+    edges: Vec<GraphEdge>,
 }
 
 #[derive(Deserialize)]
@@ -92,6 +119,83 @@ fn graph_and_semantic_index_share_exact_public_ids() {
         assert!(document.contains(&format!("id=\"repo-{}\"", repository.id)));
         assert!(document.contains(&format!("data-repository-id=\"{}\"", repository.id)));
     }
+    assert!(document.contains("Copy shareable repository scene link"));
+
+    let history = graph
+        .history
+        .as_ref()
+        .expect("repository page includes a Git authority history projection");
+    assert_eq!(history.schema, "mer3ly.repository-git-history/v1");
+    assert!(!history.checkpoints.is_empty());
+    assert!(
+        history
+            .checkpoints
+            .iter()
+            .any(|checkpoint| checkpoint.availability == "available"),
+        "history retains at least one usable committed authority checkpoint"
+    );
+    assert!(
+        history.checkpoints.iter().all(|checkpoint| {
+            checkpoint.availability == "available" || checkpoint.availability == "unavailable"
+        }),
+        "history only exposes explicit checkpoint availability"
+    );
+    let available_history = history
+        .checkpoints
+        .iter()
+        .filter(|checkpoint| checkpoint.availability == "available")
+        .collect::<Vec<_>>();
+    assert!(
+        available_history.len() >= 6,
+        "history retains public source eras"
+    );
+    assert_eq!(
+        available_history[0].cursor.source, "merely-made/mere",
+        "the earliest historical snapshot identifies its public source"
+    );
+    assert!(
+        available_history[0]
+            .graph
+            .as_ref()
+            .expect("available checkpoint includes a graph")
+            .nodes
+            .iter()
+            .any(|node| node.id == "graphshell")
+    );
+    assert!(available_history.iter().any(|checkpoint| {
+        checkpoint
+            .graph
+            .as_ref()
+            .expect("available checkpoint includes a graph")
+            .nodes
+            .iter()
+            .any(|node| node.id == "webrender-wgpu")
+    }));
+    assert!(available_history.iter().any(|checkpoint| {
+        checkpoint.cursor.commit == "020170dcc9d526edddbfe5ea3788975498f27281"
+            && checkpoint
+                .graph
+                .as_ref()
+                .expect("available checkpoint includes a graph")
+                .nodes
+                .iter()
+                .all(|node| node.id != "graphshell")
+    }));
+    let latest = available_history
+        .last()
+        .expect("live historical checkpoint");
+    assert!(!latest.cursor.committed_at.is_empty());
+    let latest_graph = latest.graph.as_ref().expect("live graph");
+    assert_eq!(
+        latest_graph
+            .nodes
+            .iter()
+            .map(|node| node.id.as_str())
+            .collect::<BTreeSet<_>>(),
+        node_ids,
+        "the final history snapshot is fresh current authority"
+    );
+    assert!(latest_graph.edges.len() >= graph.edges.len());
 }
 
 #[test]
@@ -136,6 +240,13 @@ fn graph_runtime_covers_interaction_and_failure_contracts() {
         "dataset.graphMorphing",
         "dataset.graphNodeForm",
         "dataset.graphScaffold",
+        "validateHistory",
+        "replaceLayout",
+        "[data-graph-history]",
+        "return-live",
+        "repository-scene",
+        "requested repository source cursor is unavailable",
+        "Live authority",
         "updateSceneScaffold",
         "repository-graph-kanban-lane",
         "repository-graph-timeline-rail",
@@ -147,7 +258,9 @@ fn graph_runtime_covers_interaction_and_failure_contracts() {
         "Morphing into the",
         "prefers-reduced-motion: reduce",
         "aria-pressed",
+        "ArrowLeft",
         "ArrowRight",
+        "End",
         "Home",
         "Enter",
         "pointerdown",
@@ -166,7 +279,6 @@ fn graph_runtime_covers_interaction_and_failure_contracts() {
     }
 
     for forbidden in [
-        "Graphshell",
         "Personae",
         "browser history",
         "resident host",
@@ -202,6 +314,7 @@ fn graph_assets_and_responsive_styles_are_bounded() {
         ".repository-graph-node.is-selected",
         "touch-action: manipulation",
         ".repository-graph-arrangement-picker",
+        ".repository-graph-history-picker",
         ".repository-graph-scene-caption",
         "[data-graph-node-form=\"card\"]",
         "[data-graph-node-form=\"flag\"]",

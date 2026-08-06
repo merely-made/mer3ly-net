@@ -5,8 +5,11 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 
 use crate::repositories::{
-    AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationKind, RelationProvenance,
-    RelationRecord, RepositoryClass, RepositoryRecord, RepositoryStatus,
+    AuthorityError, PublicRepositoryMetadata, PublicSiteData, RelationRecord, RepositoryClass,
+    RepositoryRecord,
+};
+use crate::repository_history::{
+    GitAuthorityHistoryProjection, RepositoryGraph, public_history_projection,
 };
 use crate::site::{
     ActivePage, PageMetadata, SiteView, element, external_link, link, render_with_body_end,
@@ -22,14 +25,30 @@ pub const METADATA: PageMetadata = PageMetadata {
 const REPO_GRAPH_LOADER: &[u8] = include_bytes!("../../assets/repo-graph.js");
 const REPO_GRAPH_WASM_GLUE: &[u8] = include_bytes!("../../assets/mer3ly_repo_graph.js");
 const REPO_GRAPH_WASM: &[u8] = include_bytes!("../../assets/mer3ly_repo_graph_bg.wasm");
+const HISTORY_POINT_LIMIT: usize = 24;
 
 pub fn document(root: &Path) -> Result<String, AuthorityError> {
     let data = PublicSiteData::load(root)?;
-    Ok(document_for(&data))
+    let graph = RepositoryGraph::from_parts(
+        &data.authority.repositories,
+        &data.authority.relations,
+        &data.metadata,
+    )
+    .map_err(AuthorityError::from_message)?;
+    let history = public_history_projection(root, graph, HISTORY_POINT_LIMIT)
+        .map_err(AuthorityError::from_message)?;
+    Ok(document_with_history(&data, Some(&history)))
 }
 
 pub fn document_for(data: &PublicSiteData) -> String {
-    let bootstrap = graph_bootstrap(data);
+    document_with_history(data, None)
+}
+
+fn document_with_history(
+    data: &PublicSiteData,
+    history: Option<&GitAuthorityHistoryProjection>,
+) -> String {
+    let bootstrap = graph_bootstrap(data, history);
     render_with_body_end(&METADATA, move || view(data), &bootstrap)
 }
 
@@ -219,6 +238,39 @@ fn graph_toolbar() -> SiteView {
                     ),
                 ],
             ),
+            element(
+                "div",
+                &[
+                    ("class", "repository-graph-history-picker"),
+                    ("data-graph-history-controls", ""),
+                    ("role", "group"),
+                    ("aria-label", "Repository graph source history"),
+                    ("hidden", "hidden"),
+                ],
+                vec![
+                    element("span", &[], vec![txt("Source time")]),
+                    element(
+                        "input",
+                        &[
+                            ("type", "range"),
+                            ("min", "0"),
+                            ("max", "0"),
+                            ("value", "0"),
+                            ("step", "1"),
+                            ("data-graph-history", ""),
+                            ("aria-label", "Repository graph source time"),
+                        ],
+                        vec![],
+                    ),
+                    element(
+                        "output",
+                        &[("data-graph-history-status", "")],
+                        vec![txt("Live authority")],
+                    ),
+                    graph_button("return-live", "Return to live authority", "live"),
+                ],
+            ),
+            graph_button("share", "Copy shareable repository scene link", "share"),
             element(
                 "p",
                 &[
@@ -894,71 +946,28 @@ fn source_note(data: &PublicSiteData) -> SiteView {
 }
 
 #[derive(Serialize)]
-struct GraphAuthority<'a> {
-    schema: &'static str,
-    nodes: Vec<GraphAuthorityNode<'a>>,
-    edges: Vec<GraphAuthorityEdge<'a>>,
+struct GraphBootstrap<'a> {
+    #[serde(flatten)]
+    graph: &'a RepositoryGraph,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    history: Option<&'a GitAuthorityHistoryProjection>,
 }
 
-#[derive(Serialize)]
-struct GraphAuthorityNode<'a> {
-    id: &'a str,
-    name: &'a str,
-    class: RepositoryClass,
-    status: RepositoryStatus,
-    pushed_at: &'a str,
-}
-
-#[derive(Serialize)]
-struct GraphAuthorityEdge<'a> {
-    id: &'a str,
-    source: &'a str,
-    target: &'a str,
-    kind: RelationKind,
-    provenance: RelationProvenance,
-}
-
-fn graph_bootstrap(data: &PublicSiteData) -> String {
-    let metadata_by_id = data
-        .metadata
-        .repository
-        .iter()
-        .map(|metadata| (metadata.id.as_str(), metadata))
-        .collect::<std::collections::HashMap<_, _>>();
-    let authority = GraphAuthority {
-        schema: "mer3ly.repo-graph/v1",
-        nodes: data
-            .authority
-            .repositories
-            .repository
-            .iter()
-            .filter(|repository| repository.public)
-            .map(|repository| GraphAuthorityNode {
-                pushed_at: &metadata_by_id
-                    .get(repository.id.as_str())
-                    .expect("validated metadata covers every public repository")
-                    .pushed_at,
-                id: &repository.id,
-                name: &repository.name,
-                class: repository.class,
-                status: repository.status,
-            })
-            .collect(),
-        edges: data
-            .authority
-            .relations
-            .relation
-            .iter()
-            .map(|relation| GraphAuthorityEdge {
-                id: &relation.id,
-                source: &relation.source,
-                target: &relation.target,
-                kind: relation.kind,
-                provenance: relation.provenance,
-            })
-            .collect(),
+fn graph_bootstrap(
+    data: &PublicSiteData,
+    history: Option<&GitAuthorityHistoryProjection>,
+) -> String {
+    let authority = RepositoryGraph::from_parts(
+        &data.authority.repositories,
+        &data.authority.relations,
+        &data.metadata,
+    )
+    .expect("validated public site data projects a repository graph");
+    let bootstrap = GraphBootstrap {
+        graph: &authority,
+        history,
     };
-    let json = serde_json::to_string(&authority)
+    let json = serde_json::to_string(&bootstrap)
         .expect("repository graph authority contains serializable records")
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")

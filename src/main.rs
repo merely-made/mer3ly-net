@@ -51,7 +51,7 @@ fn build_site(output: &Path) -> std::io::Result<()> {
     fs::write(output.join("radio.html"), radio::document())?;
     fs::write(
         output.join("repos").join("index.html"),
-        repositories::document_for(&data),
+        repositories::document(root).map_err(std::io::Error::other)?,
     )?;
     for (repository_id, document) in projects::documents(&data) {
         let project_directory = output.join("projects").join(repository_id);
