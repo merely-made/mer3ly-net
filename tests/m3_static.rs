@@ -1,6 +1,7 @@
 use genet_scripted_dom::ScriptedDom;
 use layout_dom_api::LayoutDom;
-use mer3ly_site::pages::{home, radio};
+use mer3ly_site::pages::{devices, home, radio};
+use mer3ly_site::repositories::PublicSiteData;
 use mer3ly_site::site::SITE_CSS;
 use std::path::{Path, PathBuf};
 
@@ -22,12 +23,14 @@ fn workspace_root() -> PathBuf {
 #[test]
 fn pages_are_static_genet_documents() {
     let root = workspace_root();
+    let data = PublicSiteData::load(&root).expect("load public site data");
     for (name, document) in [
         (
             "home",
             home::document(&root).expect("render authority-backed home page"),
         ),
         ("radio", radio::document()),
+        ("devices", devices::index_document_for(&data.devices)),
     ] {
         assert!(
             document.starts_with("<!doctype html>"),
@@ -62,6 +65,14 @@ fn pages_are_static_genet_documents() {
             document.contains("href=\"/site.css?v="),
             "{name} cache-busts the shared stylesheet"
         );
+        assert!(
+            document.contains("<body class=\"site-body\">\n  <a href=\"#main\""),
+            "{name} emits a readable, indented body"
+        );
+        assert!(
+            document.lines().count() > 40,
+            "{name} does not collapse its body into one source line"
+        );
 
         for marker in FORBIDDEN_PUBLIC_MARKERS {
             assert!(
@@ -86,10 +97,12 @@ fn pages_are_static_genet_documents() {
 #[test]
 fn static_baseline_stays_below_the_m3_budget() {
     let root = workspace_root();
+    let data = PublicSiteData::load(&root).expect("load public site data");
     let bytes = home::document(&root)
         .expect("render authority-backed home page")
         .len()
         + radio::document().len()
+        + devices::index_document_for(&data.devices).len()
         + SITE_CSS.len();
     assert!(
         bytes < 200 * 1024,

@@ -115,6 +115,7 @@ fn run() -> Result<(), String> {
                 &data.authority,
                 &data.metadata,
                 &data.showcases,
+                &data.devices,
                 &metadata_path,
             )
             .map_err(|errors| {

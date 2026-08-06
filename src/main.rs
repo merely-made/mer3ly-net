@@ -3,9 +3,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use mer3ly_site::discovery::{ROBOTS_TXT, sitemap};
-use mer3ly_site::pages::{home, projects, radio, repositories};
+use mer3ly_site::pages::{devices, home, projects, radio, repositories};
 use mer3ly_site::repositories::PublicSiteData;
-use mer3ly_site::site::SITE_CSS;
+use mer3ly_site::site::{DEVICE_CSS, SITE_CSS};
 
 const FAVICON: &[u8] = include_bytes!("../assets/favicon.svg");
 const OG_IMAGE: &[u8] = include_bytes!("../assets/og.jpg");
@@ -47,12 +47,22 @@ fn build_site(output: &Path) -> std::io::Result<()> {
     fs::create_dir_all(output)?;
     fs::create_dir_all(output.join("repos"))?;
     fs::create_dir_all(output.join("projects"))?;
+    fs::create_dir_all(output.join("devices"))?;
     fs::write(output.join("index.html"), home::document_for(&data))?;
     fs::write(output.join("radio.html"), radio::document())?;
     fs::write(
         output.join("repos").join("index.html"),
         repositories::document(root).map_err(std::io::Error::other)?,
     )?;
+    fs::write(
+        output.join("devices").join("index.html"),
+        devices::index_document_for(&data.devices),
+    )?;
+    for (device_id, document) in devices::documents(&data) {
+        let device_directory = output.join("devices").join(device_id);
+        fs::create_dir_all(&device_directory)?;
+        fs::write(device_directory.join("index.html"), document)?;
+    }
     for (repository_id, document) in projects::documents(&data) {
         let project_directory = output.join("projects").join(repository_id);
         fs::create_dir_all(&project_directory)?;
@@ -67,6 +77,7 @@ fn build_site(output: &Path) -> std::io::Result<()> {
         fs::copy(source, destination)?;
     }
     fs::write(output.join("site.css"), SITE_CSS)?;
+    fs::write(output.join("devices.css"), DEVICE_CSS)?;
     fs::write(output.join("repo-graph.js"), REPO_GRAPH_LOADER)?;
     fs::write(output.join("mer3ly_repo_graph.js"), REPO_GRAPH_WASM_GLUE)?;
     fs::write(output.join("mer3ly_repo_graph_bg.wasm"), REPO_GRAPH_WASM)?;

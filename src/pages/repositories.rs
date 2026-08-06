@@ -967,8 +967,12 @@ fn graph_bootstrap(
         graph: &authority,
         history,
     };
-    let json = serde_json::to_string(&bootstrap)
+    let json = serde_json::to_string_pretty(&bootstrap)
         .expect("repository graph authority contains serializable records")
+        .lines()
+        .map(str::trim_start)
+        .collect::<Vec<_>>()
+        .join("\n")
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")
         .replace('&', "\\u0026");

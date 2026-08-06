@@ -2019,6 +2019,18 @@ tbody tr:last-child td {
   text-underline-offset: 0.12em;
 }
 
+.feature-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
+.section-intro {
+  max-width: 68ch;
+  color: var(--muted);
+  font-size: 1.08rem;
+}
+
 .site-footer {
   width: var(--page);
   margin: auto auto 0;
@@ -2053,7 +2065,7 @@ tbody tr:last-child td {
   }
 
   .nav-list {
-    max-width: 230px;
+    max-width: 300px;
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 12px 18px;
@@ -2192,7 +2204,7 @@ tbody tr:last-child td {
   }
 
   .nav-list {
-    max-width: 230px;
+    max-width: 255px;
     gap: 10px 12px;
   }
 

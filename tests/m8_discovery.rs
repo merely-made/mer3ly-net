@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use mer3ly_site::discovery::{ROBOTS_TXT, canonical_urls, sitemap};
-use mer3ly_site::pages::{home, projects, radio, repositories};
+use mer3ly_site::pages::{devices, home, projects, radio, repositories};
 use mer3ly_site::repositories::PublicSiteData;
 use mer3ly_site::site::{
     DEFAULT_SOCIAL_IMAGE_ALT, DEFAULT_SOCIAL_IMAGE_URL, ORGANIZATION_ID, WEBSITE_ID,
@@ -41,7 +41,7 @@ fn sitemap_projects_exact_canonical_authority_without_fake_freshness() {
         .filter_map(|line| line.strip_suffix("</loc></url>"))
         .collect::<Vec<_>>();
 
-    assert_eq!(expected.len(), 22);
+    assert_eq!(expected.len(), 25);
     assert_eq!(actual, expected);
     assert_eq!(actual.iter().collect::<BTreeSet<_>>().len(), actual.len());
     assert!(
@@ -69,14 +69,20 @@ fn every_html_document_links_the_discovery_identity() {
         home::document_for(&data),
         repositories::document_for(&data),
         radio::document(),
+        devices::index_document_for(&data.devices),
     ];
     documents.extend(
         projects::documents(&data)
             .into_iter()
             .map(|(_, document)| document),
     );
+    documents.extend(
+        devices::documents(&data)
+            .into_iter()
+            .map(|(_, document)| document),
+    );
 
-    assert_eq!(documents.len(), 22);
+    assert_eq!(documents.len(), 25);
     for document in documents {
         assert_eq!(
             document

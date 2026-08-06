@@ -115,9 +115,12 @@ fn mesh() -> SiteView {
                     element(
                         "p",
                         &[],
-                        vec![txt(
-                            "Each unit costs about as much as a tank of gas and can run on battery, solar, or wall power. The network remains useful as long as working radios retain a path between them.",
-                        )],
+                        vec![txt(concat!(
+                            "Each unit costs about as much as a tank of gas. ",
+                            "Nodes can run from USB-C, battery, or solar power; the pilot will ",
+                            "measure off-grid runtime under local conditions. The network remains ",
+                            "useful as long as working radios retain a path between them.",
+                        ))],
                     ),
                 ],
             ),
@@ -509,9 +512,11 @@ fn partnership() -> SiteView {
                     element(
                         "p",
                         &[],
-                        vec![txt(
-                            "Retinue is the open-source radio stack. It supports the major mesh networking standards today while we work toward a simple, secure way to manage your own radios.",
-                        )],
+                        vec![txt(concat!(
+                            "Retinue is our open-source Rust implementation of Reticulum. ",
+                            "Stock Reticulum applications recognize our radios today, and the ",
+                            "same radio family interoperates with Meshtastic and MeshCore.",
+                        ))],
                     ),
                     external_link(
                         "https://github.com/merely-made/retinue",

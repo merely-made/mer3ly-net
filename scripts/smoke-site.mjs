@@ -99,8 +99,8 @@ try {
   const sitemapUrls = [...sitemapText.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
     (match) => match[1],
   );
-  assert.equal(sitemapUrls.length, 22);
-  assert.equal(new Set(sitemapUrls).size, 22);
+  assert.equal(sitemapUrls.length, 25);
+  assert.equal(new Set(sitemapUrls).size, 25);
   assert.equal(
     sitemapUrls.every((url) => url.startsWith("https://mer3ly.net/")),
     true,
@@ -136,6 +136,9 @@ try {
   for (const route of [
     "/",
     "/radio.html",
+    "/devices/",
+    "/devices/v4-desktop-radio/",
+    "/devices/t114-field-radio/",
     "/projects/mere/",
     "/projects/mesocosm/",
   ]) {

@@ -1,3 +1,4 @@
+pub mod devices;
 pub mod home;
 pub mod projects;
 pub mod radio;

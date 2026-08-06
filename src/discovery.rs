@@ -3,14 +3,18 @@ use crate::repositories::{Authority, PublicSiteData};
 pub const ROBOTS_TXT: &str = "User-agent: *\nAllow: /\nSitemap: https://mer3ly.net/sitemap.xml\n";
 
 pub fn canonical_urls(data: &PublicSiteData) -> Vec<String> {
-    canonical_urls_from_authority(&data.authority)
+    canonical_urls_from_authority_and_devices(&data.authority, &data.devices)
 }
 
-pub fn canonical_urls_from_authority(authority: &Authority) -> Vec<String> {
+pub fn canonical_urls_from_authority_and_devices(
+    authority: &Authority,
+    devices: &crate::devices::DeviceCatalog,
+) -> Vec<String> {
     let mut urls = vec![
         "https://mer3ly.net/".to_owned(),
         "https://mer3ly.net/repos/".to_owned(),
         "https://mer3ly.net/radio.html".to_owned(),
+        "https://mer3ly.net/devices/".to_owned(),
     ];
     urls.extend(
         authority
@@ -19,6 +23,12 @@ pub fn canonical_urls_from_authority(authority: &Authority) -> Vec<String> {
             .iter()
             .filter(|repository| repository.public)
             .map(|repository| format!("https://mer3ly.net/projects/{}/", repository.id)),
+    );
+    urls.extend(
+        devices
+            .ordered()
+            .into_iter()
+            .map(|device| format!("https://mer3ly.net/devices/{}/", device.id)),
     );
     urls
 }

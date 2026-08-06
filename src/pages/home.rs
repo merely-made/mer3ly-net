@@ -118,7 +118,14 @@ fn radio_feature() -> SiteView {
                                     "Small LoRa radios relay encrypted messages device to device without cell towers, internet service, or a monthly bill. Three units are exchanging data on the workbench today. The next field target is a ten-site FIVCO pilot.",
                                 )],
                             ),
-                            link("/radio.html", "Read the pilot brief", "text-link"),
+                            element(
+                                "div",
+                                &[("class", "feature-links")],
+                                vec![
+                                    link("/radio.html", "Read the pilot brief", "text-link"),
+                                    link("/devices/", "Explore the hardware catalog", "text-link"),
+                                ],
+                            ),
                         ],
                     ),
                     element(

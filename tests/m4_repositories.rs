@@ -67,7 +67,7 @@ fn repository_page_is_static_semantic_and_filterable() {
     assert!(document.contains("href=\"mailto:markik@mer3ly.net\""));
     assert!(document.contains(">Merely organization profile</a></h2>"));
     assert!(document.contains("data-project-href=\"/projects/mere/\""));
-    assert!(!document.contains("Merely Made"));
+    assert!(!document.contains(">Merely Made organization profile</a></h2>"));
 
     for forbidden in [
         "x-dc",
@@ -98,8 +98,11 @@ fn public_metadata_cache_is_reduced_and_bounded() {
         serde_json::to_string(&data.metadata).expect("serialize validated public metadata cache");
     let bytes = document.len() + SITE_CSS.len() + cache.len();
 
+    // Generated HTML is intentionally readable source. The graph data uses one
+    // compact line per JSON structure, while the surrounding document keeps
+    // two-space indentation.
     assert!(
-        bytes < 200 * 1024,
+        bytes < 240 * 1024,
         "repository HTML, CSS, and public metadata use {bytes} bytes"
     );
     assert_eq!(

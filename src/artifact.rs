@@ -9,7 +9,8 @@ use serde::Serialize;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-use crate::discovery::{ROBOTS_TXT, canonical_urls_from_authority};
+use crate::devices::{DeviceCatalog, DeviceRecord, DeviceStatus};
+use crate::discovery::{ROBOTS_TXT, canonical_urls_from_authority_and_devices};
 use crate::repositories::{Authority, PublicMetadataCache, RepositoryRecord, ShowcaseManifest};
 use crate::site::{
     DEFAULT_SOCIAL_IMAGE_ALT, DEFAULT_SOCIAL_IMAGE_URL, ORGANIZATION_ID, WEBSITE_ID,
@@ -20,7 +21,9 @@ const GRAPH_SCHEMA: &str = "mer3ly.repo-graph/v1";
 const APPROVED_CONTACT_EMAIL: &str = "markik@mer3ly.net";
 const BASE_FILES: &[&str] = &[
     "CNAME",
+    "devices.css",
     "favicon.svg",
+    "devices/index.html",
     "index.html",
     "mer3ly_repo_graph.js",
     "mer3ly_repo_graph_bg.wasm",
@@ -49,6 +52,9 @@ pub struct ArtifactReceipt {
     sitemap_urls: usize,
     project_social_previews: usize,
     project_structured_records: usize,
+    device_profiles: usize,
+    device_structured_records: usize,
+    sellable_devices: usize,
     metadata_generated_at_utc: String,
     metadata_sha256: String,
 }
@@ -92,6 +98,7 @@ pub fn validate_public_artifact(
     authority: &Authority,
     metadata: &PublicMetadataCache,
     showcases: &ShowcaseManifest,
+    devices: &DeviceCatalog,
     metadata_path: &Path,
 ) -> Result<ArtifactReceipt, Vec<String>> {
     let mut errors = Vec::new();
@@ -116,6 +123,9 @@ pub fn validate_public_artifact(
         .filter(|repository| repository.public)
     {
         expected_paths.insert(format!("projects/{}/index.html", repository.id));
+    }
+    for device in devices.ordered() {
+        expected_paths.insert(format!("devices/{}/index.html", device.id));
     }
     for showcase in &showcases.showcase {
         expected_paths.insert(showcase.image.clone());
@@ -170,10 +180,19 @@ pub fn validate_public_artifact(
         "favicon",
         &mut errors,
     );
+    validate_copied_asset(
+        artifact_root,
+        source_root,
+        "devices.css",
+        "assets/devices.css",
+        "device stylesheet",
+        &mut errors,
+    );
 
     let home = read_text(artifact_root, "index.html", &mut errors);
     let radio = read_text(artifact_root, "radio.html", &mut errors);
     let repositories = read_text(artifact_root, "repos/index.html", &mut errors);
+    let device_index = read_text(artifact_root, "devices/index.html", &mut errors);
     let robots = read_text(artifact_root, "robots.txt", &mut errors);
     let sitemap = read_text(artifact_root, "sitemap.xml", &mut errors);
     if !home.starts_with("<!doctype html>") || !radio.starts_with("<!doctype html>") {
@@ -203,10 +222,24 @@ pub fn validate_public_artifact(
         DEFAULT_SOCIAL_IMAGE_ALT,
         &mut errors,
     );
+    validate_fixed_metadata(
+        &device_index,
+        "https://mer3ly.net/devices/",
+        DEFAULT_SOCIAL_IMAGE_URL,
+        "image/jpeg",
+        DEFAULT_SOCIAL_IMAGE_ALT,
+        &mut errors,
+    );
+    if !device_index.contains("href=\"/devices.css?v=") {
+        errors.push("device index is missing its content-addressed stylesheet".to_owned());
+    }
+    if !home.contains("href=\"/devices/\"") {
+        errors.push("home page is missing the hardware catalog link".to_owned());
+    }
     if robots != ROBOTS_TXT {
         errors.push("robots policy differs from the approved public policy".to_owned());
     }
-    let expected_sitemap_urls = canonical_urls_from_authority(authority);
+    let expected_sitemap_urls = canonical_urls_from_authority_and_devices(authority, devices);
     let sitemap_urls = validate_sitemap(&sitemap, &expected_sitemap_urls, &mut errors);
 
     let repository_ids = attribute_values(&repositories, "data-repository-id");
@@ -295,6 +328,91 @@ pub fn validate_public_artifact(
     }
     validate_project_authority(&project_ids, &project_relation_ids, authority, &mut errors);
 
+    let mut device_ids = Vec::new();
+    let mut device_structured_records = 0;
+    let mut sellable_devices = 0;
+    for device in devices.ordered() {
+        let relative = format!("devices/{}/index.html", device.id);
+        let document = read_text(artifact_root, &relative, &mut errors);
+        if !document.starts_with("<!doctype html>") {
+            errors.push(format!(
+                "device profile {} is not a complete HTML document",
+                device.id
+            ));
+        }
+        if !document.contains("href=\"/devices.css?v=") {
+            errors.push(format!(
+                "device profile {} is missing its content-addressed stylesheet",
+                device.id
+            ));
+        }
+        let ids = attribute_values(&document, "data-device-id");
+        if ids != [device.id.clone()] {
+            errors.push(format!(
+                "device profile {} does not project its exact authority id",
+                device.id
+            ));
+        }
+        device_ids.extend(ids);
+        let canonical = format!("https://mer3ly.net/devices/{}/", device.id);
+        let expected_social = ExpectedSocialMetadata {
+            canonical: &canonical,
+            image_url: DEFAULT_SOCIAL_IMAGE_URL,
+            image_type: "image/jpeg",
+            image_alt: DEFAULT_SOCIAL_IMAGE_ALT,
+        };
+        if validate_device_metadata(&document, device, &expected_social, &mut errors) {
+            device_structured_records += 1;
+        }
+        if !device_index.contains(&format!("data-device-id=\"{}\"", device.id)) {
+            errors.push(format!(
+                "device index is missing catalog record {}",
+                device.id
+            ));
+        }
+        let source_url = format!(
+            "{}/blob/main/{}",
+            device.source_repository, device.source_document
+        );
+        if !document.contains(&source_url) {
+            errors.push(format!(
+                "device profile {} is missing its public evidence link",
+                device.id
+            ));
+        }
+        match (&device.status, &device.sale.purchase_url) {
+            (DeviceStatus::Sellable, Some(url)) => {
+                sellable_devices += 1;
+                if !document.contains(&format!("href=\"{url}\""))
+                    || !document.contains("class=\"button button-primary purchase-link\"")
+                {
+                    errors.push(format!(
+                        "sellable device profile {} is missing its final purchase link",
+                        device.id
+                    ));
+                }
+            }
+            _ => {
+                if !document.contains("data-purchase-status=\"unavailable\"")
+                    || document.contains("class=\"button button-primary purchase-link\"")
+                {
+                    errors.push(format!(
+                        "non-sellable device profile {} has an invalid purchase control",
+                        device.id
+                    ));
+                }
+            }
+        }
+    }
+    let expected_device_ids = devices
+        .ordered()
+        .into_iter()
+        .map(|device| device.id.clone())
+        .collect::<Vec<_>>();
+    if device_ids != expected_device_ids {
+        errors.push("device profile ids differ from catalog authority".to_owned());
+    }
+
     for showcase in &showcases.showcase {
         let artifact_image = artifact_root.join(&showcase.image);
         let source_image = source_root.join("assets").join(&showcase.image);
@@ -358,6 +476,9 @@ pub fn validate_public_artifact(
             sitemap_urls,
             project_social_previews,
             project_structured_records,
+            device_profiles: device_ids.len(),
+            device_structured_records,
+            sellable_devices,
             metadata_generated_at_utc: metadata.generated_at_utc.clone(),
             metadata_sha256: sha256(&metadata_bytes),
         })
@@ -696,6 +817,61 @@ fn validate_project_metadata(
     }
 
     (social_valid, errors.len() == structured_start)
+}
+
+fn validate_device_metadata(
+    document: &str,
+    device: &DeviceRecord,
+    expected: &ExpectedSocialMetadata<'_>,
+    errors: &mut Vec<String>,
+) -> bool {
+    let start = errors.len();
+    let label = format!("device profile {}", device.id);
+    validate_social_head(document, &label, expected, errors);
+    let Some(value) = parse_json_ld(document, &label, errors) else {
+        return false;
+    };
+    let Some(graph) = schema_graph(&value, &label, errors) else {
+        return false;
+    };
+    validate_base_schema(graph, &label, errors);
+
+    let article_id = format!("{}#recipe", expected.canonical);
+    let page = graph
+        .iter()
+        .find(|node| node.get("@id").and_then(Value::as_str) == Some(expected.canonical));
+    if page.is_none_or(|page| {
+        page.get("@type").and_then(Value::as_str) != Some("WebPage")
+            || page.pointer("/about/@id").and_then(Value::as_str) != Some(article_id.as_str())
+            || page.pointer("/isPartOf/@id").and_then(Value::as_str) != Some(WEBSITE_ID)
+    }) {
+        errors.push(format!("{label} has invalid WebPage structured data"));
+    }
+
+    let evidence_url = format!(
+        "{}/blob/main/{}",
+        device.source_repository, device.source_document
+    );
+    let article = graph
+        .iter()
+        .find(|node| node.get("@id").and_then(Value::as_str) == Some(article_id.as_str()));
+    if article.is_none_or(|article| {
+        article.get("@type").and_then(Value::as_str) != Some("TechArticle")
+            || article.get("url").and_then(Value::as_str) != Some(expected.canonical)
+            || article.pointer("/publisher/@id").and_then(Value::as_str) != Some(ORGANIZATION_ID)
+            || article.get("isBasedOn").and_then(Value::as_str) != Some(evidence_url.as_str())
+    }) {
+        errors.push(format!("{label} has invalid TechArticle structured data"));
+    }
+    if device.status != DeviceStatus::Sellable
+        && graph.iter().any(|node| node.get("offers").is_some())
+    {
+        errors.push(format!(
+            "{label} publishes an Offer for a non-sellable device"
+        ));
+    }
+
+    errors.len() == start
 }
 
 fn validate_social_head(

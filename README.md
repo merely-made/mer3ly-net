@@ -38,8 +38,8 @@ The script compiles the nested client crate against a pinned Mere revision,
 runs `wasm-bindgen`, copies the deployable module into `assets/`, and removes
 its temporary Cargo target.
 
-Generate the static home, community-radio, repository map, and project profiles
-with:
+Generate the static home, community-radio, device catalog, repository map, and
+project profiles with:
 
 ```powershell
 cargo run --locked --bin site
@@ -65,19 +65,21 @@ npm run smoke
 ```
 
 The browser smoke serves generated `html/` locally and checks discovery files,
-project social metadata and structured data, the home and community-radio
-pages, and desktop, mobile, reduced-motion, and WebGPU-fallback paths. Set
+project social metadata and structured data, the home, community-radio, and
+device pages, and desktop, mobile, reduced-motion, and WebGPU-fallback paths. Set
 `MER3LY_SITE_DIR` to check another generated site directory.
 
 `authority validate-artifact` accepts a Pages artifact root after the
 repository root. It enforces the exact public file set, public authority and
-graph counts, canonical sitemap coverage, project social and structured
-metadata, favicon identity, displayed metadata timestamp, Wasm header, reduced
-GitHub links, and the absence of secrets, personal data patterns, local paths,
-and private network addresses. The artifact is a conventional, self-contained
-site root: `index.html`, `repos/index.html`, `projects/<id>/index.html`,
-`radio.html`, `sitemap.xml`, `robots.txt`, their approved showcase images and
-runtime assets, and `CNAME` all live directly beneath the supplied directory.
+graph counts, canonical sitemap coverage, project and device structured
+metadata, device purchase state, favicon identity, displayed metadata timestamp,
+Wasm header, reduced GitHub links, and the absence of secrets, personal data
+patterns, local paths, and private network addresses. The artifact is a
+conventional, self-contained site root: `index.html`, `repos/index.html`,
+`projects/<id>/index.html`, `devices/index.html`,
+`devices/<id>/index.html`, `radio.html`, `sitemap.xml`, `robots.txt`, their
+approved styles, showcase images and runtime assets, and `CNAME` all live
+directly beneath the supplied directory.
 The exact public contact
 `markik@mer3ly.net` is allowed; other contact addresses are rejected. The
 command emits a JSON receipt with SHA-256 hashes:
@@ -103,6 +105,7 @@ custom domain for DNS, TLS, and HSTS, but does not serve a second site bundle.
 ## Plans
 
 - [Live repository graph and Merely organization migration](docs/2026-07-29_live_repos_graph_and_org_migration_plan.md)
+- [Open radio device catalog](docs/2026-08-06_device_catalog_plan.md)
 - [Merely project showcase](docs/2026-07-30_project_showcase_plan.md)
 - [Discovery and sharing](docs/2026-07-30_discovery_and_sharing_plan.md)
 - [Authority reconciliation](docs/2026-07-31_authority_reconciliation_plan.md)

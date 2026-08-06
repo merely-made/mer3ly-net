@@ -9,6 +9,7 @@ use sha2::{Digest, Sha256};
 pub type SiteView = Box<dyn AnyView<(), (), GenetCtx, GenetElement>>;
 
 pub const SITE_CSS: &str = include_str!("../assets/site.css");
+pub const DEVICE_CSS: &str = include_str!("../assets/devices.css");
 
 pub const ORGANIZATION_ID: &str = "https://mer3ly.net/#organization";
 pub const WEBSITE_ID: &str = "https://mer3ly.net/#website";
@@ -19,6 +20,7 @@ pub const DEFAULT_SOCIAL_IMAGE_ALT: &str =
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ActivePage {
     Home,
+    Devices,
     Radio,
     Repositories,
 }
@@ -77,7 +79,7 @@ pub fn site_json_ld() -> String {
 }
 
 pub fn json_ld_for_script(value: &Value) -> String {
-    serde_json::to_string(value)
+    serde_json::to_string_pretty(value)
         .expect("site structured data is serializable")
         .replace('&', "\\u0026")
         .replace('<', "\\u003c")
@@ -142,6 +144,15 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
     } else {
         vec![("href", "/radio.html"), ("class", "nav-link")]
     };
+    let devices_attrs = if active == ActivePage::Devices {
+        vec![
+            ("href", "/devices/"),
+            ("aria-current", "page"),
+            ("class", "nav-link is-current"),
+        ]
+    } else {
+        vec![("href", "/devices/"), ("class", "nav-link")]
+    };
     let repositories_attrs = if active == ActivePage::Repositories {
         vec![
             ("href", "/repos/"),
@@ -184,6 +195,11 @@ pub fn shell(active: ActivePage, main: SiteView) -> SiteView {
                             "li",
                             &[],
                             vec![element("a", &repositories_attrs, vec![txt("repositories")])],
+                        ),
+                        element(
+                            "li",
+                            &[],
+                            vec![element("a", &devices_attrs, vec![txt("devices")])],
                         ),
                         element(
                             "li",
@@ -269,8 +285,38 @@ pub fn render_with(metadata: &PageMetadata, view: impl Fn() -> SiteView) -> Stri
     render_with_body_end(metadata, view, "")
 }
 
+pub fn render_with_stylesheet(
+    metadata: &PageMetadata,
+    view: impl Fn() -> SiteView,
+    href: &str,
+    stylesheet: &str,
+) -> String {
+    let json_ld = site_json_ld();
+    let metadata = DocumentMetadata {
+        title: metadata.title,
+        description: metadata.description,
+        canonical_url: metadata.canonical_url,
+        social_image: SocialImage {
+            url: DEFAULT_SOCIAL_IMAGE_URL,
+            mime_type: "image/jpeg",
+            alt: DEFAULT_SOCIAL_IMAGE_ALT,
+        },
+        json_ld: &json_ld,
+    };
+    render_body(&metadata, view, "", Some((href, stylesheet)))
+}
+
 pub fn render_with_dynamic(metadata: &DocumentMetadata<'_>, view: impl Fn() -> SiteView) -> String {
-    render_body(metadata, view, "")
+    render_body(metadata, view, "", None)
+}
+
+pub fn render_with_dynamic_stylesheet(
+    metadata: &DocumentMetadata<'_>,
+    view: impl Fn() -> SiteView,
+    href: &str,
+    stylesheet: &str,
+) -> String {
+    render_body(metadata, view, "", Some((href, stylesheet)))
 }
 
 pub fn render_with_body_end(
@@ -290,27 +336,233 @@ pub fn render_with_body_end(
         },
         json_ld: &json_ld,
     };
-    render_body(&metadata, view, body_end)
+    render_body(&metadata, view, body_end, None)
 }
 
 fn render_body(
     metadata: &DocumentMetadata<'_>,
     view: impl Fn() -> SiteView,
     body_end: &str,
+    page_stylesheet: Option<(&str, &str)>,
 ) -> String {
     let dom = Rc::new(RefCell::new(ScriptedDom::new()));
     let runner = GenetAppRunner::<_, _, _, ()>::new(dom, move |_: &()| view(), ());
-    let body_markup = runner.dom().borrow().outer_html(runner.root());
+    let body_markup = format_html_fragment(&runner.dom().borrow().outer_html(runner.root()));
     let body_markup = if body_end.is_empty() {
         body_markup
     } else {
-        body_markup.replacen("</body>", &format!("{body_end}\n</body>"), 1)
+        let body_end = indent_lines(body_end, 1);
+        body_markup.replacen("</body>\n", &format!("{body_end}\n</body>\n"), 1)
     };
-    render_shell(metadata, &body_markup)
+    render_shell(metadata, &body_markup, page_stylesheet)
 }
 
-fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
+fn format_html_fragment(markup: &str) -> String {
+    let mut output = String::with_capacity(markup.len() + markup.len() / 8);
+    let mut depth = 0usize;
+    let mut cursor = 0usize;
+
+    while cursor < markup.len() {
+        let Some(relative_tag_start) = markup[cursor..].find('<') else {
+            write_text(&mut output, &markup[cursor..], depth);
+            break;
+        };
+        let tag_start = cursor + relative_tag_start;
+        write_text(&mut output, &markup[cursor..tag_start], depth);
+
+        let Some(relative_tag_end) = markup[tag_start..].find('>') else {
+            write_text(&mut output, &markup[tag_start..], depth);
+            break;
+        };
+        let tag_end = tag_start + relative_tag_end + 1;
+        let token = &markup[tag_start..tag_end];
+        let tag = html_tag_name(token);
+        let closing = token.starts_with("</");
+        let block = is_block_tag(tag);
+        let container = is_container_tag(tag);
+        let void = is_void_tag(tag) || token.ends_with("/>");
+
+        if block && closing {
+            depth = depth.saturating_sub(1);
+            if output.ends_with('\n') {
+                write_indent(&mut output, depth);
+            }
+            output.push_str(token);
+            output.push('\n');
+        } else if block {
+            if !output.is_empty() && !output.ends_with('\n') {
+                output.push('\n');
+            }
+            write_indent(&mut output, depth);
+            output.push_str(token);
+            if !void {
+                depth += 1;
+            }
+            if container || void {
+                output.push('\n');
+            }
+        } else {
+            if output.ends_with('\n') {
+                write_indent(&mut output, depth);
+            }
+            output.push_str(token);
+        }
+
+        cursor = tag_end;
+    }
+
+    output
+}
+
+fn write_text(output: &mut String, text: &str, depth: usize) {
+    if text.is_empty() {
+        return;
+    }
+    if output.ends_with('\n') {
+        write_indent(output, depth);
+    }
+    output.push_str(text);
+}
+
+fn write_indent(output: &mut String, depth: usize) {
+    for _ in 0..depth {
+        output.push_str("  ");
+    }
+}
+
+fn indent_lines(value: &str, depth: usize) -> String {
+    let indent = "  ".repeat(depth);
+    value
+        .lines()
+        .map(|line| format!("{indent}{line}"))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn html_tag_name(token: &str) -> &str {
+    token
+        .trim_start_matches('<')
+        .trim_start_matches('/')
+        .split(|character: char| character.is_ascii_whitespace() || matches!(character, '/' | '>'))
+        .next()
+        .unwrap_or_default()
+}
+
+fn is_block_tag(tag: &str) -> bool {
+    matches!(
+        tag,
+        "address"
+            | "article"
+            | "aside"
+            | "blockquote"
+            | "body"
+            | "canvas"
+            | "caption"
+            | "circle"
+            | "dd"
+            | "desc"
+            | "div"
+            | "dl"
+            | "dt"
+            | "fieldset"
+            | "figcaption"
+            | "figure"
+            | "footer"
+            | "g"
+            | "h1"
+            | "h2"
+            | "h3"
+            | "h4"
+            | "h5"
+            | "h6"
+            | "header"
+            | "hr"
+            | "img"
+            | "input"
+            | "li"
+            | "line"
+            | "main"
+            | "nav"
+            | "ol"
+            | "p"
+            | "path"
+            | "polygon"
+            | "polyline"
+            | "rect"
+            | "section"
+            | "svg"
+            | "table"
+            | "tbody"
+            | "td"
+            | "text"
+            | "tfoot"
+            | "th"
+            | "thead"
+            | "title"
+            | "tr"
+            | "ul"
+    )
+}
+
+fn is_container_tag(tag: &str) -> bool {
+    matches!(
+        tag,
+        "article"
+            | "aside"
+            | "body"
+            | "div"
+            | "dl"
+            | "fieldset"
+            | "figure"
+            | "footer"
+            | "g"
+            | "header"
+            | "main"
+            | "nav"
+            | "ol"
+            | "section"
+            | "svg"
+            | "table"
+            | "tbody"
+            | "tfoot"
+            | "thead"
+            | "tr"
+            | "ul"
+    )
+}
+
+fn is_void_tag(tag: &str) -> bool {
+    matches!(
+        tag,
+        "area"
+            | "base"
+            | "br"
+            | "col"
+            | "embed"
+            | "hr"
+            | "img"
+            | "input"
+            | "link"
+            | "meta"
+            | "param"
+            | "source"
+            | "track"
+            | "wbr"
+    )
+}
+
+fn render_shell(
+    metadata: &DocumentMetadata<'_>,
+    body_markup: &str,
+    page_stylesheet: Option<(&str, &str)>,
+) -> String {
     let stylesheet_href = stylesheet_href();
+    let page_stylesheet_link = page_stylesheet.map_or_else(String::new, |(href, stylesheet)| {
+        format!(
+            "  <link rel=\"stylesheet\" href=\"{}\">\n",
+            escape_attr(&content_addressed_href(href, stylesheet))
+        )
+    });
     format!(
         "<!doctype html>\n\
 <html lang=\"en\">\n\
@@ -340,6 +592,7 @@ fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
   <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n\
   <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Young+Serif&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap\">\n\
   <link rel=\"stylesheet\" href=\"{stylesheet_href}\">\n\
+{page_stylesheet_link}\
   <script type=\"application/ld+json\">{json_ld}</script>\n\
 </head>\n\
 {body}\n\
@@ -351,14 +604,19 @@ fn render_shell(metadata: &DocumentMetadata<'_>, body_markup: &str) -> String {
         image_type = escape_attr(metadata.social_image.mime_type),
         image_alt = escape_attr(metadata.social_image.alt),
         stylesheet_href = escape_attr(&stylesheet_href),
+        page_stylesheet_link = page_stylesheet_link,
         json_ld = metadata.json_ld,
         body = body_markup,
     )
 }
 
 fn stylesheet_href() -> String {
-    let digest = format!("{:x}", Sha256::digest(SITE_CSS.as_bytes()));
-    format!("/site.css?v={}", &digest[..12])
+    content_addressed_href("/site.css", SITE_CSS)
+}
+
+fn content_addressed_href(path: &str, content: &str) -> String {
+    let digest = format!("{:x}", Sha256::digest(content.as_bytes()));
+    format!("{path}?v={}", &digest[..12])
 }
 
 fn escape_text(value: &str) -> String {
@@ -395,5 +653,31 @@ mod tests {
         let href = stylesheet_href();
         assert!(href.starts_with("/site.css?v="));
         assert_eq!(href.len(), "/site.css?v=".len() + 12);
+    }
+
+    #[test]
+    fn html_formatter_puts_structural_elements_on_indented_lines() {
+        let source = concat!(
+            "<body class=\"site-body\"><div class=\"page-shell\">",
+            "<p>Hello <a href=\"/\">reader</a>.</p>",
+            "<svg><line x1=\"0\" x2=\"1\"></line><text>label</text></svg>",
+            "</div></body>",
+        );
+        let formatted = format_html_fragment(source);
+
+        assert_eq!(
+            formatted,
+            concat!(
+                "<body class=\"site-body\">\n",
+                "  <div class=\"page-shell\">\n",
+                "    <p>Hello <a href=\"/\">reader</a>.</p>\n",
+                "    <svg>\n",
+                "      <line x1=\"0\" x2=\"1\"></line>\n",
+                "      <text>label</text>\n",
+                "    </svg>\n",
+                "  </div>\n",
+                "</body>\n",
+            )
+        );
     }
 }

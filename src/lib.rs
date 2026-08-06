@@ -1,4 +1,5 @@
 pub mod artifact;
+pub mod devices;
 pub mod discovery;
 pub mod pages;
 pub mod repositories;

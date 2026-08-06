@@ -1,0 +1,193 @@
+schema = "mer3ly.device-catalog/v2"
+
+[[device]]
+id = "v4-desktop-radio"
+order = 1
+name = "V4 desktop radio"
+role = "A desk radio with its own status face"
+summary = "A Heltec V4.2 board-level specimen with a proven local display, physical control, Reticulum carriage, and a stock-compatible RNode channel."
+status = "development-specimen"
+form = "desktop radio"
+board = "Heltec WiFi LoRa 32 V4.2"
+processor = "ESP32-S3"
+radio = "SX1262"
+interaction = "Built-in 128 x 64 OLED, one user button, and status LED"
+power = "USB bench power was used for the receipts; battery and off-grid runtime are not qualified"
+antenna = "A complete antenna recipe and placement receipt are still open"
+enclosure = "No Merely enclosure file or mechanical receipt is approved"
+recipe_state = "Board-level development specimen. The Retinue radio image can be built and flashed, but this is not yet a complete assembly or public installation recipe."
+source_repository = "https://github.com/merely-made/retinue"
+source_document = "design_docs/2026-07-31_retinue_small_plan.md"
+
+[device.authorization]
+state = "open"
+device = "The exact equipment grant, grantee record, and conditions for this board revision have not yet been accepted into the catalog."
+antenna = "The authorized antenna set, connector path, placement, and labeling conditions remain to be documented."
+operating_envelope = "Retinue enforces selected regional frequency and power limits; each alternate firmware image must carry limits appropriate to this exact hardware."
+note = "Protocol support and software licensing do not replace equipment authorization. The authorization record must be reviewed before sale."
+
+[device.sale]
+state = "not-offered"
+note = "This development specimen has no purchase link. Sale waits for a complete recipe, assembled-product testing, and a reviewed authorization record."
+
+[[device.network_support]]
+name = "Reticulum"
+state = "demonstrated"
+note = "Real RNS 1.4.0 configures and powers the V4 RNode channel, while reference Reticulum and the Rust stack validate one another over real RF."
+
+[[device.network_support]]
+name = "Meshtastic"
+state = "demonstrated"
+note = "Sennet text transmitted through V4 direct-PHY firmware was accepted, decrypted, and rebroadcast by a stock Meshtastic node."
+
+[[device.network_support]]
+name = "MeshCore"
+state = "demonstrated"
+note = "Tucket exchanged authenticated adverts, encrypted text, acknowledgements, and reciprocal routes with official MeshCore companion firmware."
+
+[[device.flash_recipe]]
+name = "Retinue radio image"
+state = "partial"
+note = "The developer build and flash path works, and the image includes its RNode channel. A public installer, Bluetooth path, and recovery guide remain open."
+
+[[device.flash_recipe]]
+name = "Meshtastic"
+state = "upstream"
+note = "Upstream publishes owner-flashable firmware for supported board revisions. Selection and recovery through the Merely app remain open."
+
+[[device.flash_recipe]]
+name = "MeshCore"
+state = "upstream"
+note = "Upstream publishes owner-flashable firmware for supported hardware. Selection and recovery through the Merely app remain open."
+
+[[device.flash_recipe]]
+name = "RNode"
+state = "upstream"
+note = "The RNode project publishes owner-flashable firmware for supported boards. Retinue also carries a demonstrated RNode-compatible channel in its own image."
+
+[[device.evidence]]
+label = "On-device status face"
+state = "proven"
+note = "The fitted OLED, short press, long press, menu, display-off path, and consumed wake press passed physical acceptance."
+
+[[device.evidence]]
+label = "Bidirectional Reticulum carriage"
+state = "proven"
+note = "The image exchanged a byte-exact 4 KiB Reticulum Resource in both directions against the T114 while the UI remained active."
+
+[[device.evidence]]
+label = "Owner installation"
+state = "partial"
+note = "A reproducible developer build and flash command is recorded. A safe public flashing flow and recovery guide are not yet accepted."
+
+[[device.open_requirement]]
+label = "Printed enclosure"
+note = "Publish the source file, print settings, fasteners, port clearances, thermal observations, and an assembly receipt."
+
+[[device.open_requirement]]
+label = "Power assembly"
+note = "Select and test the battery, protection, charging path, connector, runtime, and replacement instructions."
+
+[[device.open_requirement]]
+label = "Antenna assembly"
+note = "Name the exact antenna and connector path, then record placement, strain relief, and RF acceptance."
+
+[[device.open_requirement]]
+label = "Sale readiness"
+note = "Complete the authorization record, labeling, instructions, supplier traceability, product safety work, and assembled-product review before enabling purchase."
+
+[[device]]
+id = "t114-field-radio"
+order = 2
+name = "T114 field radio"
+role = "A field radio with a larger local status face"
+summary = "A Heltec T114 board-level specimen with a native Retinue node, fitted color display, physical control, and a stock-compatible RNode channel."
+status = "development-specimen"
+form = "handheld field radio"
+board = "Heltec Mesh Node T114 Rev. 2.1"
+processor = "nRF52840"
+radio = "SX1262"
+interaction = "Optional 240 x 135 color display, user switch, and activity LED"
+power = "USB bench power was used for the receipts; battery and off-grid runtime are not qualified"
+antenna = "A complete antenna recipe and placement receipt are still open"
+enclosure = "No Merely handheld enclosure file or mechanical receipt is approved"
+recipe_state = "Board-level development specimen. Retinue binary, serial DFU, and UF2 paths are recorded, but this is not yet a complete handheld assembly or public installation recipe."
+source_repository = "https://github.com/merely-made/retinue"
+source_document = "design_docs/2026-07-31_retinue_small_plan.md"
+
+[device.authorization]
+state = "open"
+device = "The exact equipment grant, grantee record, and conditions for this board revision have not yet been accepted into the catalog."
+antenna = "The authorized antenna set, connector path, placement, and labeling conditions remain to be documented."
+operating_envelope = "Retinue enforces selected regional frequency and power limits; each alternate firmware image must carry limits appropriate to this exact hardware."
+note = "Protocol support and software licensing do not replace equipment authorization. The authorization record must be reviewed before sale."
+
+[device.sale]
+state = "not-offered"
+note = "This development specimen has no purchase link. Sale waits for a complete recipe, assembled-product testing, and a reviewed authorization record."
+
+[[device.network_support]]
+name = "Reticulum"
+state = "demonstrated"
+note = "The T114 runs a native Retinue node without a host, and stock RNS and MeshChatX drive its RNode-compatible channel."
+
+[[device.network_support]]
+name = "Meshtastic"
+state = "demonstrated"
+note = "Sennet exchanged encrypted LongFast text in both directions between independent T114 and V4 direct-PHY firmware."
+
+[[device.network_support]]
+name = "MeshCore"
+state = "demonstrated"
+note = "Official MeshCore repeater firmware on the T114 carried encrypted Tucket and stock-companion text and acknowledgements in both directions."
+
+[[device.flash_recipe]]
+name = "Retinue radio image"
+state = "partial"
+note = "Binary, serial DFU, and UF2 installation paths work, and the image includes native-node and RNode channels. A public app and Bluetooth recovery flow remain open."
+
+[[device.flash_recipe]]
+name = "Meshtastic"
+state = "upstream"
+note = "Upstream publishes owner-flashable firmware for supported board revisions. Selection and recovery through the Merely app remain open."
+
+[[device.flash_recipe]]
+name = "MeshCore"
+state = "upstream"
+note = "Upstream publishes owner-flashable companion and repeater firmware. Selection and recovery through the Merely app remain open."
+
+[[device.flash_recipe]]
+name = "RNode"
+state = "upstream"
+note = "The RNode project publishes owner-flashable firmware for supported boards. Retinue also carries a demonstrated RNode-compatible channel in its own image."
+
+[[device.evidence]]
+label = "Native Retinue node"
+state = "proven"
+note = "The board persists its identity, announces, links, exchanges byte-exact data with loss recovery, and continues radio work when the host disconnects."
+
+[[device.evidence]]
+label = "On-device status face"
+state = "proven"
+note = "The fitted display rendered board-local status, the fitted button traversed its pages and menu, and the activity LED responded to real traffic."
+
+[[device.evidence]]
+label = "Owner installation"
+state = "partial"
+note = "Binary, serial DFU, and UF2 packaging paths are recorded. A safe public flashing flow and recovery guide are not yet accepted."
+
+[[device.open_requirement]]
+label = "Printed enclosure"
+note = "Publish the source file, print settings, fasteners, display protection, port clearances, thermal observations, and an assembly receipt."
+
+[[device.open_requirement]]
+label = "Power assembly"
+note = "Select and test the battery, protection, charging path, connector, runtime, and replacement instructions."
+
+[[device.open_requirement]]
+label = "Antenna assembly"
+note = "Name the exact antenna and connector path, then record placement, strain relief, and RF acceptance."
+
+[[device.open_requirement]]
+label = "Sale readiness"
+note = "Complete the authorization record, labeling, instructions, supplier traceability, product safety work, and assembled-product review before enabling purchase."
