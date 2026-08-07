@@ -945,14 +945,6 @@ fn source_note(data: &PublicSiteData) -> SiteView {
     )
 }
 
-#[derive(Serialize)]
-struct GraphBootstrap<'a> {
-    #[serde(flatten)]
-    graph: &'a RepositoryGraph,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    history: Option<&'a GitAuthorityHistoryProjection>,
-}
-
 fn graph_bootstrap(
     data: &PublicSiteData,
     history: Option<&GitAuthorityHistoryProjection>,
@@ -963,16 +955,22 @@ fn graph_bootstrap(
         &data.metadata,
     )
     .expect("validated public site data projects a repository graph");
-    let bootstrap = GraphBootstrap {
-        graph: &authority,
-        history,
-    };
-    let json = serde_json::to_string_pretty(&bootstrap)
-        .expect("repository graph authority contains serializable records")
-        .lines()
-        .map(str::trim_start)
-        .collect::<Vec<_>>()
-        .join("\n")
+    let schema =
+        serde_json::to_string(&authority.schema).expect("repository graph schema is serializable");
+    let nodes = serialize_json_records(&authority.nodes);
+    let edges = serialize_json_records(&authority.edges);
+    let mut json =
+        format!("{{\n\"schema\":{schema},\n\"nodes\":[\n{nodes}\n],\n\"edges\":[\n{edges}\n]");
+    if let Some(history) = history {
+        let history_schema = serde_json::to_string(&history.schema)
+            .expect("repository history schema is serializable");
+        let checkpoints = serialize_json_records(&history.checkpoints);
+        json.push_str(&format!(
+            ",\n\"history\":{{\n\"schema\":{history_schema},\n\"checkpoints\":[\n{checkpoints}\n]\n}}"
+        ));
+    }
+    json.push_str("\n}");
+    let json = json
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")
         .replace('&', "\\u0026");
@@ -981,6 +979,17 @@ fn graph_bootstrap(
         "<script id=\"repository-graph-data\" type=\"application/json\">{json}</script>\n\
 <script type=\"module\" src=\"{graph_runtime_href}\"></script>"
     )
+}
+
+fn serialize_json_records<T: Serialize>(records: &[T]) -> String {
+    records
+        .iter()
+        .map(|record| {
+            serde_json::to_string(record)
+                .expect("repository graph authority contains serializable records")
+        })
+        .collect::<Vec<_>>()
+        .join(",\n")
 }
 
 fn graph_runtime_href() -> String {

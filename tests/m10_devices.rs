@@ -101,11 +101,55 @@ fn catalog_layout_has_phone_specific_single_column_ledgers() {
         ".catalog-choice-grid",
         ".authorization-grid",
         ".purchase-unavailable",
+        ".radio-bench-grid",
+        ".radio-oled",
+        ".radio-control-button",
         "@media (max-width: 440px)",
+        "@media (prefers-reduced-motion: reduce)",
     ] {
         assert!(
             DEVICE_CSS.contains(contract),
             "site CSS is missing {contract}"
         );
     }
+}
+
+#[test]
+fn v4_profile_embeds_the_truth_bounded_radio_bench() {
+    let data = PublicSiteData::load(workspace_root()).expect("public site data");
+    let v4 = data
+        .devices
+        .by_id("v4-desktop-radio")
+        .expect("V4 catalog record");
+    let document = devices::document_for(v4);
+
+    for contract in [
+        "data-radio-simulator",
+        "Try the V4 radio face.",
+        "deterministic controller model",
+        "V4 fitted button",
+        "Two-button enclosure",
+        "A+B hold",
+        "Local radio",
+        "Attached host",
+        "Radio fault",
+        "Retinue",
+        "RNode",
+        "Meshtastic",
+        "MeshCore",
+        "src=\"/radio-simulator.js?v=",
+    ] {
+        assert!(
+            document.contains(contract),
+            "V4 bench is missing {contract}"
+        );
+    }
+
+    let t114 = data
+        .devices
+        .by_id("t114-field-radio")
+        .expect("T114 catalog record");
+    let t114_document = devices::document_for(t114);
+    assert!(!t114_document.contains("data-radio-simulator"));
+    assert!(!t114_document.contains("radio-simulator.js"));
 }

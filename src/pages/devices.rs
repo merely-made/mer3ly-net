@@ -1,15 +1,18 @@
 use std::path::Path;
 
 use serde_json::json;
+use sha2::{Digest, Sha256};
 
 use crate::devices::{DeviceCatalog, DeviceRecord, DeviceStatus};
 use crate::repositories::{AuthorityError, PublicSiteData};
 use crate::site::{
     ActivePage, DEFAULT_SOCIAL_IMAGE_ALT, DEFAULT_SOCIAL_IMAGE_URL, DEVICE_CSS, DocumentMetadata,
     ORGANIZATION_ID, PageMetadata, SiteView, SocialImage, WEBSITE_ID, base_schema_graph, element,
-    external_link, json_ld_for_script, link, render_with_dynamic_stylesheet,
+    external_link, json_ld_for_script, link, render_with_dynamic_stylesheet_and_body_end,
     render_with_stylesheet, section_heading, shell, txt,
 };
+
+const RADIO_SIMULATOR: &[u8] = include_bytes!("../../assets/radio-simulator.js");
 
 pub const INDEX_METADATA: PageMetadata = PageMetadata {
     title: "Radio hardware catalog | Merely",
@@ -62,11 +65,25 @@ pub fn document_for(device: &DeviceRecord) -> String {
         },
         json_ld: &json_ld,
     };
-    render_with_dynamic_stylesheet(
+    let body_end = if device.id == "v4-desktop-radio" {
+        radio_simulator_bootstrap()
+    } else {
+        String::new()
+    };
+    render_with_dynamic_stylesheet_and_body_end(
         &metadata,
         || device_view(device),
         "/devices.css",
         DEVICE_CSS,
+        &body_end,
+    )
+}
+
+fn radio_simulator_bootstrap() -> String {
+    let digest = format!("{:x}", Sha256::digest(RADIO_SIMULATOR));
+    format!(
+        "<script type=\"module\" src=\"/radio-simulator.js?v={}\"></script>",
+        &digest[..12]
     )
 }
 
@@ -332,26 +349,292 @@ fn device_hero(device: &DeviceRecord) -> SiteView {
 }
 
 fn recipe_section(device: &DeviceRecord) -> SiteView {
+    let mut contents = vec![
+        section_heading("01", "exact recipe state"),
+        element(
+            "dl",
+            &[("class", "device-spec-grid")],
+            vec![
+                spec("Board", &device.board),
+                spec("Processor", &device.processor),
+                spec("Radio", &device.radio),
+                spec("Controls", &device.interaction),
+                spec("Power", &device.power),
+                spec("Antenna", &device.antenna),
+                spec("Enclosure", &device.enclosure),
+                spec("Form", &device.form),
+            ],
+        ),
+    ];
+    if device.id == "v4-desktop-radio" {
+        contents.push(radio_simulator());
+    }
     element(
         "section",
         &[("class", "content-section device-profile-section")],
+        contents,
+    )
+}
+
+fn radio_simulator() -> SiteView {
+    element(
+        "div",
+        &[
+            ("class", "radio-bench"),
+            ("data-radio-simulator", ""),
+            ("data-ready", "false"),
+            ("data-input-face", "one"),
+            ("data-firmware-owner", "retinue"),
+        ],
         vec![
-            section_heading("01", "exact recipe state"),
             element(
-                "dl",
-                &[("class", "device-spec-grid")],
+                "div",
+                &[("class", "radio-bench-heading")],
                 vec![
-                    spec("Board", &device.board),
-                    spec("Processor", &device.processor),
-                    spec("Radio", &device.radio),
-                    spec("Controls", &device.interaction),
-                    spec("Power", &device.power),
-                    spec("Antenna", &device.antenna),
-                    spec("Enclosure", &device.enclosure),
-                    spec("Form", &device.form),
+                    element(
+                        "p",
+                        &[("class", "eyebrow")],
+                        vec![txt("deterministic controller model")],
+                    ),
+                    element("h3", &[], vec![txt("Try the V4 radio face.")]),
+                    element(
+                        "p",
+                        &[],
+                        vec![txt(concat!(
+                            "This is a simulation of Retinue's current 128 × 64 PANEL × LEDGER contract, ",
+                            "using fixed example state. It is not connected to a radio."
+                        ))],
+                    ),
+                ],
+            ),
+            element(
+                "div",
+                &[("class", "radio-bench-grid")],
+                vec![radio_hardware(), radio_controls()],
+            ),
+            element(
+                "p",
+                &[
+                    ("class", "radio-bench-fallback"),
+                    ("data-radio-fallback", ""),
+                ],
+                vec![txt(
+                    "Enable JavaScript to operate the controls. The displayed STATUS page remains an accurate static example.",
+                )],
+            ),
+        ],
+    )
+}
+
+fn radio_hardware() -> SiteView {
+    element(
+        "div",
+        &[("class", "radio-hardware")],
+        vec![
+            element("span", &[("class", "radio-hardware-antenna")], vec![]),
+            element(
+                "div",
+                &[("class", "radio-hardware-shell")],
+                vec![
+                    element(
+                        "div",
+                        &[
+                            ("class", "radio-oled"),
+                            ("data-radio-screen", ""),
+                            ("data-screen-mode", "page"),
+                            ("role", "status"),
+                            ("aria-live", "polite"),
+                            (
+                                "aria-label",
+                                "PHY OK. Board Heltec V4. Firmware Retinue. Host unavailable. Radio SX1262 ready. Local modem ready.",
+                            ),
+                        ],
+                        vec![
+                            element(
+                                "div",
+                                &[("class", "radio-oled-header")],
+                                vec![
+                                    element(
+                                        "strong",
+                                        &[("data-screen-header", "")],
+                                        vec![txt("PHY · OK")],
+                                    ),
+                                    element(
+                                        "span",
+                                        &[("data-screen-counter", "")],
+                                        vec![txt("1/4")],
+                                    ),
+                                ],
+                            ),
+                            element(
+                                "div",
+                                &[("class", "radio-oled-body")],
+                                vec![
+                                    screen_row("BOARD  HELTEC V4"),
+                                    screen_row("FW     RETINUE"),
+                                    screen_row("HOST   —"),
+                                    screen_row("RADIO  SX1262 READY"),
+                                ],
+                            ),
+                            element(
+                                "div",
+                                &[("class", "radio-oled-ticker"), ("data-screen-ticker", "")],
+                                vec![txt("LOCAL · MODEM READY")],
+                            ),
+                        ],
+                    ),
+                    element(
+                        "div",
+                        &[("class", "radio-hardware-status")],
+                        vec![
+                            element(
+                                "span",
+                                &[
+                                    ("class", "radio-led"),
+                                    ("data-radio-led", ""),
+                                    ("data-led-state", "idle"),
+                                    ("aria-hidden", "true"),
+                                ],
+                                vec![],
+                            ),
+                            element("span", &[], vec![txt("128 × 64 OLED · status LED")]),
+                        ],
+                    ),
                 ],
             ),
         ],
+    )
+}
+
+fn screen_row(label: &str) -> SiteView {
+    element(
+        "div",
+        &[("class", "radio-oled-row"), ("data-screen-row", "")],
+        vec![txt(label)],
+    )
+}
+
+fn radio_controls() -> SiteView {
+    element(
+        "div",
+        &[("class", "radio-bench-controls")],
+        vec![
+            simulator_select(
+                "Installed image",
+                "radio-firmware",
+                "data-radio-firmware",
+                &[
+                    ("retinue", "Retinue", true),
+                    ("rnode", "RNode", false),
+                    ("meshtastic", "Meshtastic", false),
+                    ("meshcore", "MeshCore", false),
+                ],
+            ),
+            simulator_select(
+                "Scenario",
+                "radio-scenario",
+                "data-radio-scenario",
+                &[
+                    ("local", "Local radio", true),
+                    ("host", "Attached host", false),
+                    ("fault", "Radio fault", false),
+                ],
+            ),
+            simulator_select(
+                "Input face",
+                "radio-input",
+                "data-radio-input",
+                &[
+                    ("one", "V4 fitted button", true),
+                    ("two", "Two-button enclosure", false),
+                ],
+            ),
+            element(
+                "p",
+                &[("class", "radio-control-help"), ("data-radio-help", "")],
+                vec![txt(
+                    "Tap the fitted V4 button to step forward. Hold it for the menu; tap to move and hold to select.",
+                )],
+            ),
+            element(
+                "div",
+                &[
+                    ("class", "radio-control-pad"),
+                    ("aria-label", "Simulated radio controls"),
+                ],
+                vec![
+                    radio_button("a-short", "A tap", false),
+                    radio_button("a-long", "A hold", false),
+                    radio_button("b-short", "B tap", true),
+                    radio_button("b-long", "B hold", true),
+                    radio_button("chord", "A+B hold", true),
+                ],
+            ),
+            element(
+                "p",
+                &[
+                    ("class", "radio-truth-boundary"),
+                    ("data-radio-boundary", ""),
+                ],
+                vec![txt(
+                    "Local-radio mode exposes only board, power, radio, traffic, and fault facts the firmware owns.",
+                )],
+            ),
+            element(
+                "p",
+                &[("class", "radio-input-note")],
+                vec![txt(
+                    "The catalog V4 has one fitted button. The two-button face is a simulated enclosure using the same controller grammar.",
+                )],
+            ),
+        ],
+    )
+}
+
+fn simulator_select(
+    label: &str,
+    id: &str,
+    data_attribute: &str,
+    options: &[(&str, &str, bool)],
+) -> SiteView {
+    element(
+        "label",
+        &[("class", "radio-control-field"), ("for", id)],
+        vec![
+            element("span", &[], vec![txt(label)]),
+            element(
+                "select",
+                &[("id", id), (data_attribute, "")],
+                options
+                    .iter()
+                    .map(|(value, label, selected)| {
+                        if *selected {
+                            element(
+                                "option",
+                                &[("value", *value), ("selected", "selected")],
+                                vec![txt(*label)],
+                            )
+                        } else {
+                            element("option", &[("value", *value)], vec![txt(*label)])
+                        }
+                    })
+                    .collect(),
+            ),
+        ],
+    )
+}
+
+fn radio_button(action: &str, label: &str, requires_two: bool) -> SiteView {
+    let requires_two = if requires_two { "true" } else { "false" };
+    element(
+        "button",
+        &[
+            ("type", "button"),
+            ("class", "radio-control-button"),
+            ("data-radio-action", action),
+            ("data-requires-two", requires_two),
+        ],
+        vec![txt(label)],
     )
 }
 

@@ -29,6 +29,7 @@ const BASE_FILES: &[&str] = &[
     "mer3ly_repo_graph_bg.wasm",
     "og.jpg",
     "radio.html",
+    "radio-simulator.js",
     "repo-graph.js",
     "repos/index.html",
     "robots.txt",
@@ -188,6 +189,14 @@ pub fn validate_public_artifact(
         "device stylesheet",
         &mut errors,
     );
+    validate_copied_asset(
+        artifact_root,
+        source_root,
+        "radio-simulator.js",
+        "assets/radio-simulator.js",
+        "radio simulator",
+        &mut errors,
+    );
 
     let home = read_text(artifact_root, "index.html", &mut errors);
     let radio = read_text(artifact_root, "radio.html", &mut errors);
@@ -343,6 +352,17 @@ pub fn validate_public_artifact(
         if !document.contains("href=\"/devices.css?v=") {
             errors.push(format!(
                 "device profile {} is missing its content-addressed stylesheet",
+                device.id
+            ));
+        }
+        if device.id == "v4-desktop-radio"
+            && !document.contains("<script type=\"module\" src=\"/radio-simulator.js?v=")
+        {
+            errors.push("V4 device profile is missing its radio simulator module".to_owned());
+        }
+        if device.id != "v4-desktop-radio" && document.contains("data-radio-simulator") {
+            errors.push(format!(
+                "device profile {} unexpectedly includes the V4 radio simulator",
                 device.id
             ));
         }

@@ -263,6 +263,296 @@
   line-height: 1.48;
 }
 
+.radio-bench {
+  margin-top: 34px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.radio-bench-heading {
+  padding: 30px 34px 27px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.radio-bench-heading h3 {
+  margin-top: 7px;
+  color: var(--oxblood);
+  font: 400 clamp(1.8rem, 4vw, 2.45rem)/1.08 var(--font-wordmark);
+}
+
+.radio-bench-heading > p:last-child {
+  max-width: 69ch;
+  margin-top: 10px;
+  color: var(--muted);
+}
+
+.radio-bench-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
+}
+
+.radio-hardware {
+  position: relative;
+  min-width: 0;
+  padding: 70px 42px 42px;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid var(--line-soft);
+  background:
+    linear-gradient(var(--line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
+    var(--cream);
+  background-size: 28px 28px;
+}
+
+.radio-hardware-antenna {
+  position: absolute;
+  top: 23px;
+  right: 16%;
+  width: 7px;
+  height: 67px;
+  border-radius: 6px 6px 0 0;
+  background: var(--shell);
+}
+
+.radio-hardware-shell {
+  position: relative;
+  width: min(100%, 680px);
+  padding: clamp(20px, 4vw, 34px);
+  border: 2px solid var(--shell);
+  border-radius: 18px;
+  background: #ece8dc;
+  box-shadow: 11px 11px 0 #cfd9bf;
+}
+
+.radio-oled {
+  aspect-ratio: 2 / 1;
+  min-height: 0;
+  padding: clamp(10px, 2vw, 18px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  border: 5px solid #3b382f;
+  border-radius: 7px;
+  background: #03070b;
+  color: #eaf2ff;
+  box-shadow:
+    inset 0 0 24px rgb(111 168 219 / 12%),
+    0 0 0 1px #faf8ef;
+  font: 500 clamp(0.62rem, 1.3vw, 0.92rem)/1.08 var(--font-mono);
+  letter-spacing: 0.035em;
+  text-shadow: 0 0 8px rgb(190 221 255 / 38%);
+}
+
+.radio-oled-header,
+.radio-oled-ticker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.radio-oled-header {
+  padding-bottom: 6px;
+  border-bottom: 2px solid currentColor;
+}
+
+.radio-oled-header span {
+  opacity: 0.72;
+}
+
+.radio-oled-body {
+  min-height: 0;
+  padding: clamp(5px, 1vw, 9px) 0;
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  align-items: center;
+}
+
+.radio-oled-row {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.radio-oled-row.is-selected {
+  background: #eaf2ff;
+  color: #03070b;
+  text-shadow: none;
+}
+
+.radio-oled-ticker {
+  padding-top: 5px;
+  border-top: 1px solid rgb(234 242 255 / 45%);
+  opacity: 0.78;
+  font-size: 0.78em;
+  white-space: nowrap;
+}
+
+.radio-oled[data-screen-mode="fault"] .radio-oled-row:first-child {
+  padding: 2px 4px;
+  background: #eaf2ff;
+  color: #03070b;
+  text-shadow: none;
+}
+
+.radio-oled[data-screen-mode="off"] {
+  color: #68727c;
+  text-shadow: none;
+}
+
+.radio-oled[data-screen-mode="off"] .radio-oled-header,
+.radio-oled[data-screen-mode="off"] .radio-oled-ticker {
+  border-color: transparent;
+}
+
+.radio-hardware-status {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  color: var(--muted);
+  font: 500 0.59rem/1.3 var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.radio-led {
+  width: 11px;
+  height: 11px;
+  flex: none;
+  border: 1px solid #934d1d;
+  border-radius: 50%;
+  background: #4c2d1e;
+}
+
+.radio-led[data-led-state="activity"] {
+  animation: radio-led-double 0.65s steps(1) 1;
+}
+
+.radio-led[data-led-state="operation"] {
+  animation: radio-led-slow 1.3s steps(1) infinite;
+}
+
+.radio-led[data-led-state="fault"] {
+  animation: radio-led-fault 1.2s steps(1) infinite;
+}
+
+@keyframes radio-led-double {
+  0%, 20%, 40%, 100% { background: #4c2d1e; box-shadow: none; }
+  10%, 30% { background: #f0a24a; box-shadow: 0 0 9px #f0a24a; }
+}
+
+@keyframes radio-led-slow {
+  0%, 45%, 100% { background: #4c2d1e; box-shadow: none; }
+  50%, 90% { background: #f0a24a; box-shadow: 0 0 9px #f0a24a; }
+}
+
+@keyframes radio-led-fault {
+  0%, 12%, 24%, 36%, 100% { background: #4c2d1e; box-shadow: none; }
+  6%, 18%, 30% { background: #f0a24a; box-shadow: 0 0 9px #f0a24a; }
+}
+
+.radio-bench-controls {
+  min-width: 0;
+  padding: 31px 28px;
+  background: var(--paper);
+}
+
+.radio-control-field {
+  display: block;
+}
+
+.radio-control-field + .radio-control-field {
+  margin-top: 16px;
+}
+
+.radio-control-field > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--oxblood);
+  font: 500 0.59rem/1.35 var(--font-mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.radio-control-field select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 34px 8px 10px;
+  border: 1px solid var(--lake-edge);
+  border-radius: 3px;
+  background: var(--cream);
+  color: var(--shell);
+  font: 500 0.72rem/1.3 var(--font-mono);
+}
+
+.radio-control-help,
+.radio-truth-boundary,
+.radio-input-note,
+.radio-bench-fallback {
+  color: var(--muted);
+  font: 0.68rem/1.55 var(--font-mono);
+}
+
+.radio-control-help {
+  min-height: 3.2em;
+  margin-top: 18px;
+}
+
+.radio-control-pad {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.radio-control-button {
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--oxblood);
+  border-radius: 4px;
+  background: var(--cream);
+  color: var(--oxblood);
+  cursor: pointer;
+  font: 600 0.66rem/1.2 var(--font-mono);
+}
+
+.radio-control-button:hover:not(:disabled) {
+  background: var(--oxblood);
+  color: var(--paper);
+}
+
+.radio-control-button:disabled {
+  border-color: var(--line);
+  color: #aaa498;
+  cursor: not-allowed;
+}
+
+.radio-control-button[hidden] {
+  display: none;
+}
+
+.radio-truth-boundary {
+  margin-top: 19px;
+  padding: 13px 14px;
+  border-left: 3px solid var(--ember);
+  background: var(--cream);
+}
+
+.radio-input-note {
+  margin-top: 14px;
+  font-size: 0.59rem;
+}
+
+.radio-bench-fallback {
+  padding: 14px 34px;
+  border-top: 1px solid var(--line-soft);
+}
+
 .requirement-list,
 .evidence-ledger,
 .catalog-choice-grid {
@@ -375,6 +665,15 @@
     border-right: 0;
     border-bottom: 1px solid var(--line-soft);
   }
+
+  .radio-bench-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .radio-hardware {
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
 }
 
 @media (max-width: 440px) {
@@ -410,5 +709,48 @@
 
   .purchase-unavailable {
     padding: 24px 22px;
+  }
+
+  .radio-bench-heading,
+  .radio-bench-controls {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .radio-hardware {
+    padding: 54px 13px 28px;
+  }
+
+  .radio-hardware-antenna {
+    top: 12px;
+    height: 55px;
+  }
+
+  .radio-hardware-shell {
+    padding: 13px;
+    border-radius: 12px;
+    box-shadow: 7px 7px 0 #cfd9bf;
+  }
+
+  .radio-oled {
+    padding: 9px;
+    border-width: 4px;
+    font-size: clamp(0.52rem, 2.55vw, 0.68rem);
+  }
+
+  .radio-control-pad {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radio-led[data-led-state] {
+    animation: none;
+  }
+
+  .radio-led[data-led-state="activity"],
+  .radio-led[data-led-state="operation"],
+  .radio-led[data-led-state="fault"] {
+    background: #f0a24a;
   }
 }

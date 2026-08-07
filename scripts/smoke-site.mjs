@@ -84,6 +84,7 @@ const receipt = {
   reduced_motion: {},
   fallback: {},
   showcase: {},
+  radio_bench: {},
   projects: {},
   discovery: {},
 };
@@ -241,6 +242,90 @@ try {
     horizontal_overflow: 0,
   };
   await showcaseMobile.close();
+
+  const radioBenchDesktop = await browser.newPage({
+    viewport: { width: 1440, height: 1000 },
+  });
+  const radioBenchDesktopDiagnostics = collectDiagnostics(radioBenchDesktop);
+  await radioBenchDesktop.goto(`${baseUrl}/devices/v4-desktop-radio/`, {
+    waitUntil: "networkidle",
+  });
+  const radioBench = radioBenchDesktop.locator("[data-radio-simulator]");
+  await radioBenchDesktop.waitForFunction(
+    () => document.querySelector("[data-radio-simulator]")?.dataset.ready === "true",
+  );
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "PHY · OK");
+  await radioBench.locator('[data-radio-action="a-short"]').click();
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "PHY · POWER");
+
+  await radioBench.locator("[data-radio-scenario]").selectOption("host");
+  await radioBench.locator('[data-radio-action="a-long"]').click();
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "MENU");
+  await radioBench.locator('[data-radio-action="a-short"]').click();
+  await radioBench.locator('[data-radio-action="a-long"]').click();
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "VERIFY · HOST");
+
+  await radioBench.locator("[data-radio-input]").selectOption("two");
+  await radioBench.locator('[data-radio-action="a-short"]').click();
+  await radioBench.locator('[data-radio-action="chord"]').click();
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "MENU");
+  assert.equal(await radioBench.locator('[data-radio-action="chord"]').isVisible(), true);
+
+  await radioBench.locator("[data-radio-firmware]").selectOption("meshtastic");
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "MST · HANDOFF");
+  assert.match(await radioBench.locator("[data-radio-boundary]").textContent(), /does not counterfeit/);
+  assert.equal(await radioBench.locator('[data-radio-action="a-short"]').isDisabled(), true);
+
+  await radioBench.locator("[data-radio-firmware]").selectOption("retinue");
+  await radioBench.locator("[data-radio-scenario]").selectOption("fault");
+  assert.equal(await radioBench.locator("[data-screen-header]").textContent(), "PHY · FAULT");
+  assert.equal(await horizontalOverflow(radioBenchDesktop), 0);
+  assert.deepEqual(
+    radioBenchDesktopDiagnostics,
+    [],
+    "desktop radio bench emitted browser errors",
+  );
+  await radioBench.screenshot({
+    path: path.join(receiptRoot, "radio-bench-desktop.png"),
+  });
+  receipt.radio_bench.desktop = {
+    scenarios: 3,
+    firmware_images: 4,
+    input_faces: 2,
+    a_plus_b: "operable-on-two-button-face",
+    horizontal_overflow: 0,
+  };
+  await radioBenchDesktop.close();
+
+  const radioBenchMobile = await browser.newPage({
+    viewport: { width: 375, height: 812 },
+  });
+  const radioBenchMobileDiagnostics = collectDiagnostics(radioBenchMobile);
+  await radioBenchMobile.goto(`${baseUrl}/devices/v4-desktop-radio/`, {
+    waitUntil: "networkidle",
+  });
+  const mobileBench = radioBenchMobile.locator("[data-radio-simulator]");
+  await radioBenchMobile.waitForFunction(
+    () => document.querySelector("[data-radio-simulator]")?.dataset.ready === "true",
+  );
+  await mobileBench.locator("[data-radio-input]").selectOption("two");
+  await mobileBench.locator('[data-radio-action="chord"]').click();
+  assert.equal(await mobileBench.locator("[data-screen-header]").textContent(), "MENU");
+  assert.equal(await horizontalOverflow(radioBenchMobile), 0);
+  assert.deepEqual(
+    radioBenchMobileDiagnostics,
+    [],
+    "mobile radio bench emitted browser errors",
+  );
+  await mobileBench.screenshot({
+    path: path.join(receiptRoot, "radio-bench-mobile.png"),
+  });
+  receipt.radio_bench.mobile = {
+    width: 375,
+    a_plus_b: "operable",
+    horizontal_overflow: 0,
+  };
+  await radioBenchMobile.close();
 
   const visualProject = await browser.newPage({
     viewport: { width: 1200, height: 900 },

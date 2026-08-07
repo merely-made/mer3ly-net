@@ -319,6 +319,16 @@ pub fn render_with_dynamic_stylesheet(
     render_body(metadata, view, "", Some((href, stylesheet)))
 }
 
+pub fn render_with_dynamic_stylesheet_and_body_end(
+    metadata: &DocumentMetadata<'_>,
+    view: impl Fn() -> SiteView,
+    href: &str,
+    stylesheet: &str,
+    body_end: &str,
+) -> String {
+    render_body(metadata, view, body_end, Some((href, stylesheet)))
+}
+
 pub fn render_with_body_end(
     metadata: &PageMetadata,
     view: impl Fn() -> SiteView,
