@@ -1,7 +1,11 @@
+use sha2::{Digest, Sha256};
+
 use crate::site::{
-    ActivePage, PageMetadata, SiteView, element, external_link, render_with, section_heading,
-    shell, txt,
+    ActivePage, PageMetadata, SiteView, element, external_link, render_with_body_end,
+    section_heading, shell, txt,
 };
+
+const MESSAGE_PATH_LAB: &[u8] = include_bytes!("../../assets/message-path-lab.js");
 
 pub const METADATA: PageMetadata = PageMetadata {
     title: "Community radio | Merely",
@@ -10,7 +14,12 @@ pub const METADATA: PageMetadata = PageMetadata {
 };
 
 pub fn document() -> String {
-    render_with(&METADATA, view)
+    let digest = format!("{:x}", Sha256::digest(MESSAGE_PATH_LAB));
+    let bootstrap = format!(
+        "<script type=\"module\" src=\"/message-path-lab.js?v={}\"></script>",
+        &digest[..12]
+    );
+    render_with_body_end(&METADATA, view, &bootstrap)
 }
 
 pub fn view() -> SiteView {
@@ -101,10 +110,21 @@ fn mesh() -> SiteView {
             section_heading("03", "how the mesh works"),
             element(
                 "figure",
-                &[("class", "mesh-card")],
+                &[
+                    ("class", "mesh-card message-path-lab"),
+                    ("data-message-path-lab", ""),
+                    ("data-ready", "false"),
+                    ("data-blocked", "true"),
+                    ("data-step", "5"),
+                ],
                 vec![
-                    mesh_diagram(),
-                    mesh_diagram_mobile(),
+                    message_path_header(),
+                    message_path_controls(),
+                    element(
+                        "div",
+                        &[("class", "message-path-workbench")],
+                        vec![message_path_topology(), message_path_projections()],
+                    ),
                     element(
                         "figcaption",
                         &[],
@@ -128,103 +148,396 @@ fn mesh() -> SiteView {
     )
 }
 
-fn mesh_diagram() -> SiteView {
+fn message_path_header() -> SiteView {
     element(
-        "svg",
-        &[
-            ("class", "mesh-diagram mesh-diagram-desktop"),
-            ("viewBox", "0 0 800 240"),
-            ("role", "img"),
-            (
-                "aria-labelledby",
-                "mesh-diagram-title mesh-diagram-description",
-            ),
-        ],
+        "header",
+        &[("class", "message-path-header")],
         vec![
             element(
-                "title",
-                &[("id", "mesh-diagram-title")],
-                vec![txt("A message relayed around a blocked direct path")],
+                "div",
+                &[],
+                vec![
+                    element("p", &[("class", "eyebrow")], vec![txt("message path lab")]),
+                    element(
+                        "h3",
+                        &[("id", "message-path-title")],
+                        vec![txt("Pull the mesh. Follow the message.")],
+                    ),
+                    element(
+                        "p",
+                        &[("id", "message-path-description")],
+                        vec![txt(
+                            "Move any radio, change the direct path, then send or scrub through the exchange.",
+                        )],
+                    ),
+                ],
             ),
             element(
-                "desc",
-                &[("id", "mesh-diagram-description")],
+                "p",
+                &[("class", "message-path-boundary")],
                 vec![txt(
-                    "Five radios at a fire station, church steeple, water tower, ridgeline, and county garage form alternate routes through the mesh.",
+                    "Deterministic model · not a live traffic or radio-range receipt",
                 )],
-            ),
-            svg_line("110", "170", "270", "80", "mesh-link"),
-            svg_line("270", "80", "450", "140", "mesh-link"),
-            svg_line("450", "140", "620", "70", "mesh-link"),
-            svg_line("450", "140", "690", "180", "mesh-link"),
-            svg_line("110", "170", "450", "140", "mesh-link mesh-link-blocked"),
-            svg_circle("110", "170", "10", "mesh-site"),
-            svg_circle("270", "80", "10", "mesh-site"),
-            svg_circle("450", "140", "10", "mesh-site"),
-            svg_circle("620", "70", "10", "mesh-site"),
-            svg_circle("690", "180", "10", "mesh-site"),
-            svg_text("110", "200", "mesh-label", "fire station"),
-            svg_text("270", "60", "mesh-label", "church steeple"),
-            svg_text("450", "170", "mesh-label", "water tower"),
-            svg_text("620", "50", "mesh-label", "ridgeline"),
-            svg_text("690", "210", "mesh-label", "county garage"),
-            element(
-                "text",
-                &[("x", "278"), ("y", "132"), ("class", "mesh-note")],
-                vec![txt("direct path blocked, message hops around")],
             ),
         ],
     )
 }
 
-fn mesh_diagram_mobile() -> SiteView {
+fn message_path_controls() -> SiteView {
     element(
-        "svg",
+        "div",
         &[
-            ("class", "mesh-diagram mesh-diagram-mobile"),
-            ("viewBox", "0 0 300 480"),
-            ("role", "img"),
+            ("class", "message-path-controls"),
+            ("aria-label", "Message path controls"),
+        ],
+        vec![
+            element(
+                "button",
+                &[
+                    ("class", "button button-primary"),
+                    ("type", "button"),
+                    ("data-path-action", "send"),
+                ],
+                vec![txt("Send message")],
+            ),
+            element(
+                "button",
+                &[
+                    ("class", "button button-quiet"),
+                    ("type", "button"),
+                    ("data-path-action", "previous"),
+                    ("aria-label", "Previous exchange step"),
+                ],
+                vec![txt("Previous")],
+            ),
+            element(
+                "button",
+                &[
+                    ("class", "button button-quiet"),
+                    ("type", "button"),
+                    ("data-path-action", "next"),
+                    ("aria-label", "Next exchange step"),
+                ],
+                vec![txt("Next")],
+            ),
+            element(
+                "label",
+                &[("class", "message-path-scrubber")],
+                vec![
+                    element(
+                        "span",
+                        &[],
+                        vec![
+                            txt("Exchange step "),
+                            element(
+                                "output",
+                                &[("data-path-step-output", "")],
+                                vec![txt("6 of 6")],
+                            ),
+                        ],
+                    ),
+                    element(
+                        "input",
+                        &[
+                            ("type", "range"),
+                            ("min", "0"),
+                            ("max", "5"),
+                            ("step", "1"),
+                            ("value", "5"),
+                            ("data-path-step", ""),
+                        ],
+                        vec![],
+                    ),
+                ],
+            ),
+            element(
+                "label",
+                &[("class", "message-path-toggle")],
+                vec![
+                    element(
+                        "input",
+                        &[
+                            ("type", "checkbox"),
+                            ("checked", "checked"),
+                            ("data-path-blocked", ""),
+                        ],
+                        vec![],
+                    ),
+                    element("span", &[], vec![txt("Direct path blocked")]),
+                ],
+            ),
+            element(
+                "button",
+                &[
+                    ("class", "button button-quiet"),
+                    ("type", "button"),
+                    ("data-path-action", "share"),
+                ],
+                vec![txt("Share scene")],
+            ),
+            element(
+                "span",
+                &[
+                    ("class", "message-path-status"),
+                    ("data-path-status", ""),
+                    ("role", "status"),
+                    ("aria-live", "polite"),
+                ],
+                vec![txt("Message delivered by three relays.")],
+            ),
+        ],
+    )
+}
+
+fn message_path_topology() -> SiteView {
+    element(
+        "section",
+        &[
+            ("class", "message-path-topology"),
             (
                 "aria-labelledby",
-                "mesh-mobile-title mesh-mobile-description",
+                "message-path-title message-path-description",
             ),
         ],
         vec![
             element(
-                "title",
-                &[("id", "mesh-mobile-title")],
-                vec![txt("A message relayed around a blocked direct path")],
+                "div",
+                &[("class", "message-path-topology-header")],
+                vec![
+                    element("p", &[("class", "eyebrow")], vec![txt("topology")]),
+                    element(
+                        "p",
+                        &[("data-path-route", "")],
+                        vec![txt("Reroute · fire → church → water → garage")],
+                    ),
+                ],
             ),
             element(
-                "desc",
-                &[("id", "mesh-mobile-description")],
+                "div",
+                &[("class", "message-path-stage"), ("data-path-stage", "")],
+                vec![
+                    element(
+                        "svg",
+                        &[
+                            ("class", "message-path-links"),
+                            ("aria-hidden", "true"),
+                            ("data-path-links", ""),
+                        ],
+                        vec![
+                            message_path_edge("fire-church", "fire", "church", true, false),
+                            message_path_edge("church-water", "church", "water", true, false),
+                            message_path_edge("water-ridge", "water", "ridge", false, false),
+                            message_path_edge("water-garage", "water", "garage", true, false),
+                            message_path_edge("fire-water", "fire", "water", false, true),
+                            element(
+                                "circle",
+                                &[
+                                    ("class", "message-path-packet"),
+                                    ("r", "6"),
+                                    ("data-path-packet", ""),
+                                    ("hidden", "hidden"),
+                                ],
+                                vec![],
+                            ),
+                        ],
+                    ),
+                    message_path_node("fire", "Fire station", "17", "72"),
+                    message_path_node("church", "Church steeple", "34", "24"),
+                    message_path_node("water", "Water tower", "57", "55"),
+                    message_path_node("ridge", "Ridgeline", "78", "20"),
+                    message_path_node("garage", "County garage", "83", "76"),
+                ],
+            ),
+            element(
+                "p",
+                &[("class", "message-path-help")],
                 vec![txt(
-                    "Five radios form a zigzag relay path from a fire station through a church and water tower, then branch to a ridgeline and county garage.",
+                    "Drag a radio, or focus it and use the arrow keys. Every edge follows.",
                 )],
             ),
-            svg_line("55", "420", "215", "350", "mesh-link"),
-            svg_line("215", "350", "90", "250", "mesh-link"),
-            svg_line("90", "250", "220", "140", "mesh-link"),
-            svg_line("90", "250", "230", "300", "mesh-link"),
-            svg_line("55", "420", "90", "250", "mesh-link mesh-link-blocked"),
-            svg_circle("55", "420", "10", "mesh-site mesh-site-mobile"),
-            svg_circle("215", "350", "10", "mesh-site mesh-site-mobile"),
-            svg_circle("90", "250", "10", "mesh-site mesh-site-mobile"),
-            svg_circle("220", "140", "10", "mesh-site mesh-site-mobile"),
-            svg_circle("230", "300", "10", "mesh-site mesh-site-mobile"),
-            svg_text("55", "450", "mesh-label", "fire station"),
-            svg_text("215", "380", "mesh-label", "church steeple"),
-            svg_text("90", "225", "mesh-label", "water tower"),
-            svg_text("220", "115", "mesh-label", "ridgeline"),
-            svg_text("230", "330", "mesh-label", "county garage"),
             element(
-                "text",
-                &[
-                    ("x", "18"),
-                    ("y", "335"),
-                    ("class", "mesh-note mesh-note-mobile"),
+                "p",
+                &[("class", "message-path-fallback")],
+                vec![txt(
+                    "Static route: fire station → church steeple → water tower → county garage. The direct fire-to-water path is blocked.",
+                )],
+            ),
+        ],
+    )
+}
+
+fn message_path_edge(id: &str, from: &str, to: &str, on_route: bool, blocked: bool) -> SiteView {
+    let class = match (on_route, blocked) {
+        (true, false) => "message-path-edge is-route",
+        (false, true) => "message-path-edge is-blocked",
+        _ => "message-path-edge",
+    };
+    element(
+        "line",
+        &[
+            ("class", class),
+            ("data-lab-edge", id),
+            ("data-from", from),
+            ("data-to", to),
+        ],
+        vec![],
+    )
+}
+
+fn message_path_node(id: &str, label: &str, x: &str, y: &str) -> SiteView {
+    let style = format!("left:{x}%;top:{y}%");
+    let attrs = [
+        ("class", "message-path-node"),
+        ("type", "button"),
+        ("data-lab-node", id),
+        ("data-x", x),
+        ("data-y", y),
+        ("style", style.as_str()),
+        ("aria-label", label),
+    ];
+    element(
+        "button",
+        &attrs,
+        vec![
+            element("span", &[("class", "message-path-node-mark")], vec![]),
+            element(
+                "span",
+                &[("class", "message-path-node-label")],
+                vec![txt(label)],
+            ),
+        ],
+    )
+}
+
+fn message_path_projections() -> SiteView {
+    element(
+        "aside",
+        &[
+            ("class", "message-path-projections"),
+            ("aria-label", "Synchronized message views"),
+        ],
+        vec![message_path_radio(), message_path_ledger()],
+    )
+}
+
+fn message_path_radio() -> SiteView {
+    element(
+        "section",
+        &[("class", "message-path-radio")],
+        vec![
+            element(
+                "div",
+                &[("class", "message-path-panel-heading")],
+                vec![
+                    element(
+                        "p",
+                        &[("class", "eyebrow")],
+                        vec![txt("attached-host radio view")],
+                    ),
+                    element("p", &[("class", "message-path-led")], vec![txt("TX")]),
                 ],
-                vec![txt("direct path blocked")],
+            ),
+            element(
+                "div",
+                &[
+                    ("class", "message-path-oled"),
+                    ("aria-label", "Attached host radio screen"),
+                ],
+                vec![
+                    element(
+                        "div",
+                        &[("class", "message-path-oled-header")],
+                        vec![
+                            element(
+                                "span",
+                                &[("data-path-screen-header", "")],
+                                vec![txt("RET · DELIVERED")],
+                            ),
+                            element("span", &[("data-path-screen-count", "")], vec![txt("6/6")]),
+                        ],
+                    ),
+                    message_path_screen_row("STATE", "RX FRAME", "state"),
+                    message_path_screen_row("HOP", "GARAGE", "hop"),
+                    message_path_screen_row("SEQ", "05", "sequence"),
+                    message_path_screen_row("HOST", "ATTACHED", "host"),
+                ],
+            ),
+            element(
+                "p",
+                &[("class", "message-path-radio-note")],
+                vec![txt(
+                    "The host supplies route context; the radio reports frame traffic.",
+                )],
+            ),
+        ],
+    )
+}
+
+fn message_path_screen_row(label: &str, value: &str, id: &str) -> SiteView {
+    element(
+        "p",
+        &[("class", "message-path-screen-row")],
+        vec![
+            element("span", &[], vec![txt(label)]),
+            element("strong", &[("data-path-screen-row", id)], vec![txt(value)]),
+        ],
+    )
+}
+
+fn message_path_ledger() -> SiteView {
+    let events = [
+        "Route selected through church and water",
+        "Fire station queues the message",
+        "Church steeple receives the frame",
+        "Water tower receives the relay",
+        "Water tower forwards to the garage",
+        "County garage confirms delivery",
+    ];
+    element(
+        "section",
+        &[("class", "message-path-ledger")],
+        vec![
+            element(
+                "div",
+                &[("class", "message-path-panel-heading")],
+                vec![
+                    element("p", &[("class", "eyebrow")], vec![txt("event ledger")]),
+                    element(
+                        "p",
+                        &[("data-path-ledger-count", "")],
+                        vec![txt("06 events")],
+                    ),
+                ],
+            ),
+            element(
+                "ol",
+                &[],
+                events
+                    .iter()
+                    .enumerate()
+                    .map(|(index, event)| {
+                        let index_text = format!("{index:02}");
+                        let data_index = index.to_string();
+                        let class = if index == 5 {
+                            "message-path-event is-current"
+                        } else {
+                            "message-path-event is-complete"
+                        };
+                        let attrs = [("class", class), ("data-lab-event", data_index.as_str())];
+                        element(
+                            "li",
+                            &attrs,
+                            vec![
+                                element(
+                                    "span",
+                                    &[("class", "message-path-event-index")],
+                                    vec![txt(index_text)],
+                                ),
+                                element("span", &[("data-path-event-copy", "")], vec![txt(*event)]),
+                            ],
+                        )
+                    })
+                    .collect(),
             ),
         ],
     )

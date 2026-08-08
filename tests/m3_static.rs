@@ -127,16 +127,20 @@ fn stylesheet_has_responsive_and_accessibility_contracts() {
 }
 
 #[test]
-fn radio_diagrams_preserve_the_mesh_and_pilot_topology() {
+fn radio_lab_preserves_the_mesh_and_pilot_topology() {
     let document = radio::document();
 
-    assert_eq!(document.matches("class=\"mesh-site\"").count(), 5);
-    assert_eq!(document.matches("mesh-site-mobile").count(), 5);
+    assert_eq!(document.matches("data-lab-node=").count(), 5);
+    assert_eq!(document.matches("data-lab-edge=").count(), 5);
+    assert_eq!(document.matches("data-lab-event=").count(), 6);
     assert_eq!(document.matches("class=\"county-shape").count(), 5);
     assert_eq!(document.matches("class=\"county-site\"").count(), 10);
-    assert!(document.contains("direct path blocked, message hops around"));
+    assert!(document.contains("data-message-path-lab"));
+    assert!(document.contains("message-path-edge is-blocked"));
+    assert!(document.contains("Static route: fire station"));
+    assert!(document.contains("not a live traffic or radio-range receipt"));
+    assert!(document.contains("<script type=\"module\" src=\"/message-path-lab.js?v="));
     assert!(document.contains("ten proposed sites · stylized, not to scale"));
-    assert!(document.contains("aria-labelledby=\"mesh-diagram-title mesh-diagram-description\""));
-    assert!(document.contains("aria-labelledby=\"mesh-mobile-title mesh-mobile-description\""));
+    assert!(document.contains("aria-labelledby=\"message-path-title message-path-description\""));
     assert!(document.contains("aria-labelledby=\"county-map-title county-map-description\""));
 }

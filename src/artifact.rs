@@ -25,6 +25,7 @@ const BASE_FILES: &[&str] = &[
     "favicon.svg",
     "devices/index.html",
     "index.html",
+    "message-path-lab.js",
     "mer3ly_repo_graph.js",
     "mer3ly_repo_graph_bg.wasm",
     "og.jpg",
@@ -192,6 +193,14 @@ pub fn validate_public_artifact(
     validate_copied_asset(
         artifact_root,
         source_root,
+        "message-path-lab.js",
+        "assets/message-path-lab.js",
+        "message path lab",
+        &mut errors,
+    );
+    validate_copied_asset(
+        artifact_root,
+        source_root,
         "radio-simulator.js",
         "assets/radio-simulator.js",
         "radio simulator",
@@ -223,6 +232,12 @@ pub fn validate_public_artifact(
         DEFAULT_SOCIAL_IMAGE_ALT,
         &mut errors,
     );
+    if !radio.contains("<script type=\"module\" src=\"/message-path-lab.js?v=") {
+        errors.push("community-radio output is missing its message path lab module".to_owned());
+    }
+    if !radio.contains("data-message-path-lab") {
+        errors.push("community-radio output is missing its message path lab landmark".to_owned());
+    }
     validate_fixed_metadata(
         &repositories,
         "https://mer3ly.net/repos/",

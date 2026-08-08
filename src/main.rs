@@ -8,6 +8,7 @@ use mer3ly_site::repositories::PublicSiteData;
 use mer3ly_site::site::{DEVICE_CSS, SITE_CSS};
 
 const FAVICON: &[u8] = include_bytes!("../assets/favicon.svg");
+const MESSAGE_PATH_LAB: &[u8] = include_bytes!("../assets/message-path-lab.js");
 const OG_IMAGE: &[u8] = include_bytes!("../assets/og.jpg");
 const RADIO_SIMULATOR: &[u8] = include_bytes!("../assets/radio-simulator.js");
 const REPO_GRAPH_LOADER: &[u8] = include_bytes!("../assets/repo-graph.js");
@@ -79,6 +80,7 @@ fn build_site(output: &Path) -> std::io::Result<()> {
     }
     fs::write(output.join("site.css"), SITE_CSS)?;
     fs::write(output.join("devices.css"), DEVICE_CSS)?;
+    fs::write(output.join("message-path-lab.js"), MESSAGE_PATH_LAB)?;
     fs::write(output.join("radio-simulator.js"), RADIO_SIMULATOR)?;
     fs::write(output.join("repo-graph.js"), REPO_GRAPH_LOADER)?;
     fs::write(output.join("mer3ly_repo_graph.js"), REPO_GRAPH_WASM_GLUE)?;

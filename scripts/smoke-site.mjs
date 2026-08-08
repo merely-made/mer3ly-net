@@ -84,6 +84,7 @@ const receipt = {
   reduced_motion: {},
   fallback: {},
   showcase: {},
+  message_path_lab: {},
   radio_bench: {},
   projects: {},
   discovery: {},
@@ -242,6 +243,208 @@ try {
     horizontal_overflow: 0,
   };
   await showcaseMobile.close();
+
+  const messagePathDesktop = await browser.newPage({
+    viewport: { width: 1440, height: 1000 },
+  });
+  const messagePathDesktopDiagnostics = collectDiagnostics(messagePathDesktop);
+  await messagePathDesktop.goto(`${baseUrl}/radio.html`, {
+    waitUntil: "networkidle",
+  });
+  await messagePathDesktop.waitForFunction(
+    () =>
+      document.querySelector("[data-message-path-lab]")?.dataset.ready ===
+      "true",
+  );
+  const pathLab = messagePathDesktop.locator("[data-message-path-lab]");
+  const pathStep = pathLab.locator("[data-path-step]");
+  assert.equal(await pathLab.locator("[data-lab-node]").count(), 5);
+  assert.equal(await pathLab.locator("[data-lab-edge]").count(), 5);
+  assert.equal(await pathLab.locator("[data-lab-event]").count(), 6);
+  assert.equal(await pathLab.getAttribute("data-blocked"), "true");
+
+  await pathLab.locator("[data-path-blocked]").uncheck();
+  assert.equal(await pathLab.getAttribute("data-blocked"), "false");
+  assert.match(await pathLab.locator("[data-path-route]").textContent(), /^Direct/);
+  await pathStep.press("End");
+  assert.equal(await pathLab.getAttribute("data-step"), "5");
+  assert.match(
+    await pathLab.locator("[data-path-status]").textContent(),
+    /direct route/,
+  );
+
+  await pathLab.locator("[data-path-blocked]").check();
+  await pathLab.locator('[data-path-action="send"]').click();
+  assert.equal(await pathLab.getAttribute("data-playing"), "true");
+  await messagePathDesktop.waitForFunction(
+    () => Number(document.querySelector("[data-message-path-lab]").dataset.step) >= 1,
+  );
+  await pathStep.press("End");
+  assert.equal(await pathLab.getAttribute("data-playing"), "false");
+  assert.match(await pathLab.locator("[data-path-route]").textContent(), /^Reroute/);
+
+  const church = pathLab.locator('[data-lab-node="church"]');
+  const churchBefore = {
+    x: Number(await church.getAttribute("data-x")),
+    y: Number(await church.getAttribute("data-y")),
+  };
+  const churchBox = await church.boundingBox();
+  assert.ok(churchBox, "church radio needs a draggable box");
+  await messagePathDesktop.mouse.move(
+    churchBox.x + churchBox.width / 2,
+    churchBox.y + churchBox.height / 2,
+  );
+  await messagePathDesktop.mouse.down();
+  await messagePathDesktop.mouse.move(
+    churchBox.x + churchBox.width / 2 + 54,
+    churchBox.y + churchBox.height / 2 + 34,
+    { steps: 5 },
+  );
+  await messagePathDesktop.mouse.up();
+  const churchAfter = {
+    x: Number(await church.getAttribute("data-x")),
+    y: Number(await church.getAttribute("data-y")),
+  };
+  assert.ok(
+    Math.hypot(churchAfter.x - churchBefore.x, churchAfter.y - churchBefore.y) > 3,
+    "dragging did not move the church radio",
+  );
+
+  await pathLab.locator('[data-path-action="share"]').click();
+  const sharedMessagePathUrl = new URL(messagePathDesktop.url());
+  const sharedMessagePathParams = new URLSearchParams(
+    sharedMessagePathUrl.hash.slice(1),
+  );
+  assert.equal(sharedMessagePathParams.get("message-path"), "v1");
+  assert.equal(sharedMessagePathParams.get("blocked"), "1");
+  assert.equal(sharedMessagePathParams.get("step"), "5");
+  assert.match(sharedMessagePathParams.get("positions") ?? "", /church,/);
+
+  const sharedMessagePath = await browser.newPage({
+    viewport: { width: 1000, height: 900 },
+  });
+  const sharedMessagePathDiagnostics = collectDiagnostics(sharedMessagePath);
+  await sharedMessagePath.goto(sharedMessagePathUrl.toString(), {
+    waitUntil: "networkidle",
+  });
+  await sharedMessagePath.waitForFunction(
+    () =>
+      document.querySelector("[data-message-path-lab]")?.dataset.ready ===
+      "true",
+  );
+  assert.equal(
+    await sharedMessagePath
+      .locator('[data-lab-node="church"]')
+      .getAttribute("data-x"),
+    churchAfter.x.toFixed(1),
+  );
+  assert.equal(await horizontalOverflow(sharedMessagePath), 0);
+  assert.deepEqual(
+    sharedMessagePathDiagnostics,
+    [],
+    "shared message path scene emitted browser errors",
+  );
+  await sharedMessagePath.close();
+
+  assert.equal(await horizontalOverflow(messagePathDesktop), 0);
+  assert.deepEqual(
+    messagePathDesktopDiagnostics,
+    [],
+    "desktop message path lab emitted browser errors",
+  );
+  await pathLab.screenshot({
+    path: path.join(receiptRoot, "message-path-lab-desktop.png"),
+  });
+  receipt.message_path_lab.desktop = {
+    nodes: 5,
+    edges: 5,
+    steps: 6,
+    draggable: true,
+    shared_scene: true,
+    horizontal_overflow: 0,
+  };
+  await messagePathDesktop.close();
+
+  const messagePathMobile = await browser.newPage({
+    viewport: { width: 375, height: 812 },
+  });
+  const messagePathMobileDiagnostics = collectDiagnostics(messagePathMobile);
+  await messagePathMobile.goto(`${baseUrl}/radio.html`, {
+    waitUntil: "networkidle",
+  });
+  await messagePathMobile.waitForFunction(
+    () =>
+      document.querySelector("[data-message-path-lab]")?.dataset.ready ===
+      "true",
+  );
+  const mobilePathLab = messagePathMobile.locator("[data-message-path-lab]");
+  const mobileNodeBoxes = await mobilePathLab.locator("[data-lab-node]").evaluateAll(
+    (nodes) =>
+      nodes.map((node) => {
+        const rect = node.getBoundingClientRect();
+        return {
+          width: rect.width,
+          height: rect.height,
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+      }),
+  );
+  assert.equal(
+    mobileNodeBoxes.every(({ width, height }) => width >= 44 && height >= 44),
+    true,
+    "mobile radios need 44px targets",
+  );
+  const mobileXSpan =
+    Math.max(...mobileNodeBoxes.map(({ x }) => x)) -
+    Math.min(...mobileNodeBoxes.map(({ x }) => x));
+  const mobileYSpan =
+    Math.max(...mobileNodeBoxes.map(({ y }) => y)) -
+    Math.min(...mobileNodeBoxes.map(({ y }) => y));
+  assert.ok(mobileXSpan > 140, "mobile topology collapsed into a vertical line");
+  assert.ok(mobileYSpan > 160, "mobile topology collapsed into a horizontal line");
+  assert.equal(await horizontalOverflow(messagePathMobile), 0);
+  assert.deepEqual(
+    messagePathMobileDiagnostics,
+    [],
+    "mobile message path lab emitted browser errors",
+  );
+  await mobilePathLab.screenshot({
+    path: path.join(receiptRoot, "message-path-lab-mobile.png"),
+  });
+  receipt.message_path_lab.mobile = {
+    width: 375,
+    minimum_node_target: 44,
+    x_span: Math.round(mobileXSpan),
+    y_span: Math.round(mobileYSpan),
+    horizontal_overflow: 0,
+  };
+  await messagePathMobile.close();
+
+  const messagePathReduced = await browser.newPage({
+    viewport: { width: 900, height: 900 },
+  });
+  const messagePathReducedDiagnostics = collectDiagnostics(messagePathReduced);
+  await messagePathReduced.emulateMedia({ reducedMotion: "reduce" });
+  await messagePathReduced.goto(`${baseUrl}/radio.html`, {
+    waitUntil: "networkidle",
+  });
+  await messagePathReduced.waitForFunction(
+    () =>
+      document.querySelector("[data-message-path-lab]")?.dataset.ready ===
+      "true",
+  );
+  const reducedPathLab = messagePathReduced.locator("[data-message-path-lab]");
+  await reducedPathLab.locator('[data-path-action="send"]').click();
+  assert.equal(await reducedPathLab.getAttribute("data-step"), "5");
+  assert.equal(await reducedPathLab.getAttribute("data-playing"), "false");
+  assert.deepEqual(
+    messagePathReducedDiagnostics,
+    [],
+    "reduced-motion message path lab emitted browser errors",
+  );
+  receipt.message_path_lab.reduced_motion = "jumps-to-complete-state";
+  await messagePathReduced.close();
 
   const radioBenchDesktop = await browser.newPage({
     viewport: { width: 1440, height: 1000 },
